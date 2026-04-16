@@ -41,10 +41,13 @@ const BRANDS = [
 ];
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen]   = useState(false);
-  const [discOpen, setDiscOpen]   = useState(false);
-  const [equipOpen, setEquipOpen] = useState(false);
-  const [brandOpen, setBrandOpen] = useState(false);
+  const [menuOpen, setMenuOpen]     = useState(false);
+  const [discOpen, setDiscOpen]     = useState(false);
+  const [equipOpen, setEquipOpen]   = useState(false);
+  const [brandOpen, setBrandOpen]   = useState(false);
+  const [mDiscOpen, setMDiscOpen]   = useState(false);
+  const [mEquipOpen, setMEquipOpen] = useState(false);
+  const [mBrandOpen, setMBrandOpen] = useState(false);
   const [q, setQ] = useState("");
   const navRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -259,59 +262,88 @@ export default function Navbar() {
             Publicar un equipo
           </Link>
 
-          <div>
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider px-1 mb-2">Disciplinas</p>
-            <div className="grid grid-cols-2 gap-1">
-              {DISCIPLINES.map((d) => (
-                <Link
-                  key={d.slug}
-                  href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-[#374151] hover:bg-[#F9FAFB] rounded-lg"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {d.name}
-                </Link>
-              ))}
-            </div>
+          {/* Disciplinas */}
+          <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
+            <button
+              onClick={() => setMDiscOpen(!mDiscOpen)}
+              className="flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB]"
+            >
+              Disciplinas
+              <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform ${mDiscOpen ? "rotate-180" : ""}`} />
+            </button>
+            {mDiscOpen && (
+              <div className="border-t border-[#F3F4F6] grid grid-cols-2">
+                {DISCIPLINES.map((d) => (
+                  <Link
+                    key={d.slug}
+                    href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
+                    className="px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {d.name}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider px-1 mb-2">Por equipo</p>
-            {EQUIPMENT.map((eq) => (
-              <Link
-                key={eq.value}
-                href={`/equipos?tipo=${eq.value}`}
-                className="block px-3 py-2 text-sm text-[#374151] hover:bg-[#F9FAFB] rounded-md"
-                onClick={() => setMenuOpen(false)}
-              >
-                {eq.label}
-              </Link>
-            ))}
+          {/* Por equipo */}
+          <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
+            <button
+              onClick={() => setMEquipOpen(!mEquipOpen)}
+              className="flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB]"
+            >
+              Por equipo
+              <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform ${mEquipOpen ? "rotate-180" : ""}`} />
+            </button>
+            {mEquipOpen && (
+              <div className="border-t border-[#F3F4F6]">
+                {EQUIPMENT.map((eq) => (
+                  <Link
+                    key={eq.value}
+                    href={`/equipos?tipo=${eq.value}`}
+                    className="block px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {eq.label}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider px-1 mb-2">Por marcas</p>
-            <div className="grid grid-cols-2 gap-1">
-              {BRANDS.map((b) => (
+          {/* Por marcas */}
+          <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
+            <button
+              onClick={() => setMBrandOpen(!mBrandOpen)}
+              className="flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB]"
+            >
+              Por marcas
+              <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform ${mBrandOpen ? "rotate-180" : ""}`} />
+            </button>
+            {mBrandOpen && (
+              <div className="border-t border-[#F3F4F6]">
+                <div className="grid grid-cols-2">
+                  {BRANDS.map((b) => (
+                    <Link
+                      key={b.slug}
+                      href={`/equipos?marca=${b.slug}`}
+                      className="px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {b.name}
+                    </Link>
+                  ))}
+                </div>
                 <Link
-                  key={b.slug}
-                  href={`/equipos?marca=${b.slug}`}
-                  className="block px-3 py-2 text-sm text-[#374151] hover:bg-[#F9FAFB] rounded-md"
+                  href="/equipos"
+                  className="block px-4 py-2.5 text-sm text-[#3B82F6] font-medium hover:bg-[#F9FAFB] border-t border-[#F3F4F6]"
                   onClick={() => setMenuOpen(false)}
                 >
-                  {b.name}
+                  Ver todas las marcas →
                 </Link>
-              ))}
-            </div>
-            <div className="pt-2">
-              <Link
-                href="/equipos"
-                className="block px-3 py-2 text-sm text-[#3B82F6] font-medium hover:bg-[#F9FAFB] rounded-md"
-                onClick={() => setMenuOpen(false)}
-              >
-                Ver todas las marcas &rarr;
-              </Link>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
