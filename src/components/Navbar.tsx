@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, ShoppingBag, Menu, X, ChevronDown, Wind } from "lucide-react";
+import { Search, Bell, ShoppingBag, Menu, X, ChevronDown, Wind, User, MessageCircle, Heart, LogOut } from "lucide-react";
 import NavbarUser from "@/components/NavbarUser";
+import { useSession, signOut } from "next-auth/react";
 
 const DISCIPLINES = [
   { name: "Kitesurf",   slug: "kitesurf" },
@@ -41,6 +42,7 @@ const BRANDS = [
 ];
 
 export default function Navbar() {
+  const { data: session } = useSession();
   const [menuOpen, setMenuOpen]     = useState(false);
   const [discOpen, setDiscOpen]     = useState(false);
   const [equipOpen, setEquipOpen]   = useState(false);
@@ -343,6 +345,52 @@ export default function Navbar() {
                   Ver todas las marcas →
                 </Link>
               </div>
+            )}
+          </div>
+
+          {/* Perfil / Sesión */}
+          <div className="border-t border-[#E5E7EB] pt-4">
+            {session ? (
+              <div className="space-y-1">
+                <div className="flex items-center gap-3 px-2 pb-3">
+                  {session.user.image
+                    ? <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover" />
+                    : <div className="w-9 h-9 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-bold text-sm">{session.user.name?.[0]}</div>
+                  }
+                  <div>
+                    <p className="text-sm font-semibold text-[#111827]">{session.user.name}</p>
+                    <p className="text-xs text-[#9CA3AF]">{session.user.email}</p>
+                  </div>
+                </div>
+                {[
+                  { label: "Mis anuncios",  href: "/cuenta/anuncios",  Icon: ShoppingBag },
+                  { label: "Mensajes",      href: "/mensajes",         Icon: MessageCircle },
+                  { label: "Favoritos",     href: "/cuenta/favoritos", Icon: Heart },
+                ].map(({ label, href, Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] rounded-xl"
+                  >
+                    <Icon className="w-4 h-4 text-[#9CA3AF]" /> {label}
+                  </Link>
+                ))}
+                <button
+                  onClick={() => { signOut({ callbackUrl: "/" }); setMenuOpen(false); }}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl"
+                >
+                  <LogOut className="w-4 h-4" /> Cerrar sesión
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center justify-center gap-2 w-full py-3 border border-[#E5E7EB] text-sm font-medium text-[#374151] rounded-xl hover:bg-[#F9FAFB]"
+              >
+                <User className="w-4 h-4" /> Iniciar sesión
+              </Link>
             )}
           </div>
         </div>
