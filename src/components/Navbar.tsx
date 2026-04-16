@@ -209,7 +209,7 @@ export default function Navbar() {
                 ))}
                 <div className="border-t border-[#F3F4F6] mt-1 pt-1">
                   <Link
-                    href="/marcas"
+                    href="/equipos"
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#3B82F6] font-medium hover:bg-[#F9FAFB] transition-colors"
                     onClick={() => setBrandOpen(false)}
                   >
@@ -306,7 +306,7 @@ export default function Navbar() {
             </div>
             <div className="pt-2">
               <Link
-                href="/marcas"
+                href="/equipos"
                 className="block px-3 py-2 text-sm text-[#3B82F6] font-medium hover:bg-[#F9FAFB] rounded-md"
                 onClick={() => setMenuOpen(false)}
               >
