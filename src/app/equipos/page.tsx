@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Search, SlidersHorizontal, MapPin, Star, Shield, Wind } from "lucide-react";
 import BrandFilterClient from "@/components/BrandFilterClient";
+import SortSelect from "@/components/SortSelect";
+import MobileFilters from "@/components/MobileFilters";
 import { auth } from "@/lib/auth";
 
 const PREDEFINED_BRANDS = [
@@ -39,12 +41,6 @@ const EQUIPMENT_TYPES = [
   { value: "COMBO",       label: "Combo" },
 ];
 
-const ORDER_OPTIONS = [
-  { value: "reciente",   label: "Más recientes" },
-  { value: "precio_asc", label: "Menor precio" },
-  { value: "precio_desc",label: "Mayor precio" },
-  { value: "vistas",     label: "Más vistos" },
-];
 
 const CONDITION_COLORS: Record<string, string> = {
   NUEVO:      "bg-emerald-50 text-emerald-700",
@@ -345,40 +341,28 @@ export default async function EquiposPage({
           <div className="flex-1 min-w-0">
 
             {/* Ordenamiento */}
-            <div className="flex items-center justify-between mb-4 min-w-0">
-              <div className="flex gap-2 overflow-x-auto pb-1 lg:hidden min-w-0 max-w-full">
-                {DISCIPLINES.map((d) => (
-                  <Link
-                    key={d.value}
-                    href={buildUrl({ disciplina: d.value })}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${
-                      disciplina === d.value
-                        ? "bg-[#111827] text-white border-[#111827]"
-                        : "bg-white text-[#374151] border-[#E5E7EB]"
-                    }`}
-                  >
-                    {d.label}
-                  </Link>
-                ))}
+            <div className="flex items-center justify-between mb-4 min-w-0 gap-2">
+              <div className="lg:hidden">
+                <MobileFilters
+                  disciplines={DISCIPLINES.map(d => ({ ...d, href: buildUrl({ disciplina: d.value, tipo: "" }) }))}
+                  equipmentTypes={EQUIPMENT_TYPES.map(t => ({ ...t, href: buildUrl({ tipo: t.value }) }))}
+                  conditions={CONDITIONS.map(c => ({ ...c, href: buildUrl({ condicion: c.value }) }))}
+                  top10Brands={top10Brands.map(b => ({ ...b, href: buildUrl({ marca: b.slug }) }))}
+                  currentDisciplina={disciplina}
+                  currentTipo={tipo}
+                  currentCondicion={condicion}
+                  currentMarca={marca}
+                  clearHref="/equipos"
+                  precioMinHref={buildUrl({})}
+                  precioMin={precioMin}
+                  precioMax={precioMax}
+                  activeCount={[disciplina, tipo, condicion, marca, precioMin, precioMax].filter(Boolean).length}
+                />
               </div>
 
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-[#9CA3AF] hidden sm:block">Ordenar:</span>
-                <div className="flex gap-1">
-                  {ORDER_OPTIONS.map((o) => (
-                    <Link
-                      key={o.value}
-                      href={buildUrl({ orden: o.value })}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                        orden === o.value
-                          ? "bg-[#111827] text-white"
-                          : "bg-white border border-[#E5E7EB] text-[#374151] hover:border-[#D1D5DB]"
-                      }`}
-                    >
-                      {o.label}
-                    </Link>
-                  ))}
-                </div>
+                <SortSelect currentOrden={orden} buildUrl={buildUrl({ orden: "" })} />
               </div>
             </div>
 
