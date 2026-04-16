@@ -393,7 +393,7 @@ export default async function EquiposPage({
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 [&>*]:max-w-sm [&>*]:mx-auto sm:[&>*]:max-w-none sm:[&>*]:mx-0 w-full">
                 {listings.map((listing) => {
                   const img = listing.images[0]?.url;
                   return (
