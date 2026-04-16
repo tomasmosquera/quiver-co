@@ -101,23 +101,23 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                   <div className="border-t border-[#F3F4F6] mt-5 pt-5 space-y-4">
                     <h3 className="font-semibold text-[#111827]">Detalles de la cometa</h3>
                     <div className="grid grid-cols-2 gap-3">
-                      {m.reference && <div className="text-sm"><span className="text-[#9CA3AF]">Modelo</span><p className="font-semibold text-[#111827]">{String(m.reference)}</p></div>}
-                      {m.year      && <div className="text-sm"><span className="text-[#9CA3AF]">Año</span><p className="font-semibold text-[#111827]">{String(m.year)}</p></div>}
-                      {m.color     && (
+                      {!!m.reference && <div className="text-sm"><span className="text-[#9CA3AF]">Modelo</span><p className="font-semibold text-[#111827]">{String(m.reference)}</p></div>}
+                      {!!m.year      && <div className="text-sm"><span className="text-[#9CA3AF]">Año</span><p className="font-semibold text-[#111827]">{String(m.year)}</p></div>}
+                      {!!m.color     && (
                         <div className="text-sm">
                           <span className="text-[#9CA3AF]">Color</span>
                           <p className="font-semibold text-[#111827]">{String(m.color)}</p>
                         </div>
                       )}
                     </div>
-                    {m.includesBar && (
+                    {!!m.includesBar && (
                       <div className="p-3 bg-blue-50 rounded-xl text-sm">
                         <p className="font-semibold text-[#3B82F6] mb-1">✓ Incluye barra y líneas</p>
-                        {(m.barBrand || m.barReference) && <p className="text-[#374151]">{[m.barBrand, m.barReference].filter(Boolean).join(" · ")}{m.barYear ? ` (${m.barYear})` : ""}</p>}
-                        {m.lineLength && <p className="text-[#6B7280]">Líneas: {String(m.lineLength)}</p>}
+                        {!!(m.barBrand || m.barReference) && <p className="text-[#374151]">{[m.barBrand, m.barReference].filter(Boolean).map(String).join(" · ")}{m.barYear ? ` (${String(m.barYear)})` : ""}</p>}
+                        {!!m.lineLength && <p className="text-[#6B7280]">Líneas: {String(m.lineLength)}</p>}
                       </div>
                     )}
-                    {m.hasRepairs && Array.isArray(m.repairs) && m.repairs.length > 0 && (
+                    {!!m.hasRepairs && Array.isArray(m.repairs) && m.repairs.length > 0 && (
                       <div className="space-y-2">
                         <p className="text-sm font-semibold text-amber-600">⚠️ Reparaciones</p>
                         {(m.repairs as Array<{description: string; imageUrl?: string}>).map((r, i) => (

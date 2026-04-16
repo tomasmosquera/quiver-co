@@ -27,7 +27,7 @@ export default async function FavoritosPage() {
   return (
     <div className="bg-[#FAFAF8] min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
-        
+
         {/* Sidebar Mi Cuenta (Igual que en anuncios) */}
         <aside className="w-full md:w-64 shrink-0 space-y-2">
           <Link href="/cuenta/anuncios" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-[#374151] hover:bg-[#F3F4F6] transition-colors">
