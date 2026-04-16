@@ -344,19 +344,18 @@ export default async function EquiposPage({
             <div className="flex items-center justify-between mb-4 min-w-0 gap-2">
               <div className="lg:hidden">
                 <MobileFilters
-                  disciplines={DISCIPLINES.map(d => ({ ...d, href: buildUrl({ disciplina: d.value, tipo: "" }) }))}
-                  equipmentTypes={EQUIPMENT_TYPES.map(t => ({ ...t, href: buildUrl({ tipo: t.value }) }))}
-                  conditions={CONDITIONS.map(c => ({ ...c, href: buildUrl({ condicion: c.value }) }))}
-                  top10Brands={top10Brands.map(b => ({ ...b, href: buildUrl({ marca: b.slug }) }))}
+                  disciplines={DISCIPLINES.map(d => ({ value: d.value, label: d.label }))}
+                  equipmentTypes={EQUIPMENT_TYPES.map(t => ({ value: t.value, label: t.label }))}
+                  conditions={CONDITIONS.map(c => ({ value: c.value, label: c.label }))}
+                  top10Brands={top10Brands.map(b => ({ name: b.name, slug: b.slug, count: b.count }))}
                   currentDisciplina={disciplina}
                   currentTipo={tipo}
                   currentCondicion={condicion}
                   currentMarca={marca}
-                  clearHref="/equipos"
-                  precioMinHref={buildUrl({})}
                   precioMin={precioMin}
                   precioMax={precioMax}
                   activeCount={[disciplina, tipo, condicion, marca, precioMin, precioMax].filter(Boolean).length}
+                  baseParams={{ ...(orden && { orden }), ...(q && { q }) }}
                 />
               </div>
 
