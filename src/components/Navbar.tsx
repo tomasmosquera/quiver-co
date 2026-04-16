@@ -7,13 +7,13 @@ import { Search, Bell, ShoppingBag, Menu, X, ChevronDown, Wind } from "lucide-re
 import NavbarUser from "@/components/NavbarUser";
 
 const DISCIPLINES = [
-  { name: "Kitesurf",   slug: "kitesurf",   emoji: "🪁" },
-  { name: "Wingfoil",   slug: "wingfoil",   emoji: "🪽" },
-  { name: "Windsurf",   slug: "windsurf",   emoji: "⛵" },
-  { name: "Foilboard",  slug: "foilboard",  emoji: "🏄" },
-  { name: "Kitefoil",   slug: "kitefoil",   emoji: "🪁" },
-  { name: "Wakeboard",  slug: "wakeboard",  emoji: "🚤" },
-  { name: "Paddle",     slug: "paddle",     emoji: "🧘" },
+  { name: "Kitesurf",   slug: "kitesurf" },
+  { name: "Wingfoil",   slug: "wingfoil" },
+  { name: "Windsurf",   slug: "windsurf" },
+  { name: "Foilboard",  slug: "foilboard" },
+  { name: "Kitefoil",   slug: "kitefoil" },
+  { name: "Wakeboard",  slug: "wakeboard" },
+  { name: "Paddle",     slug: "paddle" },
 ];
 
 const EQUIPMENT = [
@@ -146,7 +146,6 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] hover:text-[#111827] transition-colors"
                     onClick={() => setDiscOpen(false)}
                   >
-                    <span className="text-base">{d.emoji}</span>
                     {d.name}
                   </Link>
                 ))}
@@ -270,7 +269,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 px-3 py-2 text-sm text-[#374151] hover:bg-[#F9FAFB] rounded-lg"
                   onClick={() => setMenuOpen(false)}
                 >
-                  <span>{d.emoji}</span> {d.name}
+                  {d.name}
                 </Link>
               ))}
             </div>

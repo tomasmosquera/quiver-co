@@ -219,7 +219,6 @@ export default function EditForm({ listingId, initial }: Props) {
                       : "border-[#E5E7EB] hover:border-[#D1D5DB]"
                   }`}
                 >
-                  <span className="text-2xl">{d.emoji}</span>
                   <span className={`text-xs font-semibold ${form.discipline === d.value ? "text-[#3B82F6]" : "text-[#374151]"}`}>
                     {d.label}
                   </span>

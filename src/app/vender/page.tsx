@@ -238,7 +238,6 @@ export default function VenderPage() {
                         : "border-[#E5E7EB] hover:border-[#D1D5DB]"
                     }`}
                   >
-                    <span className="text-3xl">{d.emoji}</span>
                     <span className={`text-sm font-semibold ${form.discipline === d.value ? "text-[#3B82F6]" : "text-[#374151]"}`}>
                       {d.label}
                     </span>

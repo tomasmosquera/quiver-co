@@ -190,7 +190,7 @@ export default async function HomePage() {
                   href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1F2937] border border-[#374151] hover:border-[#3B82F6] text-[#D1D5DB] hover:text-white text-xs rounded-full transition-all"
                 >
-                  <span>{d.emoji}</span> {d.name}
+                  {d.name}
                 </Link>
               ))}
             </div>
@@ -254,7 +254,6 @@ export default async function HomePage() {
               href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
               className={`group border rounded-2xl p-5 flex flex-col gap-3 transition-all hover:shadow-md ${d.color}`}
             >
-              <span className="text-4xl">{d.emoji}</span>
               <div>
                 <p className="font-bold text-[#111827] group-hover:text-[#3B82F6] transition-colors">
                   {d.name}
@@ -294,7 +293,6 @@ export default async function HomePage() {
                 href={eq.href}
                 className="flex items-center gap-2 px-4 py-2.5 bg-[#F9FAFB] border border-[#E5E7EB] hover:border-[#111827] hover:bg-white rounded-xl text-sm font-medium text-[#374151] hover:text-[#111827] transition-all whitespace-nowrap"
               >
-                <span>{eq.icon}</span>
                 {eq.name}
               </Link>
             ))}
