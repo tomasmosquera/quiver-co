@@ -1,0 +1,173 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum Discipline {
+  KITESURF
+  WINGFOIL
+  WINDSURF
+  FOILBOARD
+  KITEFOIL
+  WAKEBOARD
+  PADDLE
+}
+
+enum EquipmentType {
+  COMETA_WING
+  TABLA
+  BARRA_LINEAS
+  FOIL
+  ARNES
+  TRAJE
+  ACCESORIO
+  COMBO
+}
+
+enum Condition {
+  NUEVO
+  COMO_NUEVO
+  USADO
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  SOLD
+  PAUSED
+  REMOVED
+}
+
+// ─── User ────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  phone         String?
+  city          String?
+  bio           String?
+  verified      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // NextAuth
+  accounts      Account[]
+  sessions      Session[]
+
+  // Marketplace
+  listings      Listing[]
+  reviews       Review[]  @relation("ReviewsReceived")
+  reviewsGiven  Review[]  @relation("ReviewsGiven")
+
+  @@map("users")
+}
+
+// ─── NextAuth ────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── Listing ─────────────────────────────────────────────
+
+model Listing {
+  id            String        @id @default(cuid())
+  title         String
+  description   String        @db.Text
+  price         Int           // COP, en pesos enteros
+  discipline    Discipline
+  equipmentType EquipmentType
+  condition     Condition
+  brand         String?
+  size          String?
+  city          String
+  metadata      Json?         // Campos extra según disciplina/tipo
+  status        ListingStatus @default(ACTIVE)
+  featured      Boolean       @default(false)
+  views         Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  sellerId      String
+  seller        User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  images        ListingImage[]
+
+  @@index([discipline])
+  @@index([equipmentType])
+  @@index([status])
+  @@index([sellerId])
+  @@map("listings")
+}
+
+model ListingImage {
+  id         String   @id @default(cuid())
+  url        String
+  publicId   String?  // Cloudinary public ID para poder borrarla
+  order      Int      @default(0)
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("listing_images")
+}
+
+// ─── Reviews ─────────────────────────────────────────────
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int      // 1-5
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  reviewerId String
+  reviewer   User     @relation("ReviewsGiven",    fields: [reviewerId], references: [id])
+  subjectId  String
+  subject    User     @relation("ReviewsReceived", fields: [subjectId],  references: [id])
+
+  @@map("reviews")
+}

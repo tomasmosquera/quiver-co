@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Admin/Documents/**)",
+      "Bash(npx create-next-app@latest quiver-co --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-git)",
+      "Bash(cp -r \"c:/Users/Admin/Documents/quiver-co/.\" \"c:/Users/Admin/Documents/Quiver Co. Kitesurf/\")",
+      "Bash(rm -rf \"c:/Users/Admin/Documents/quiver-co\")",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(npx prisma *)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(python -c \"import sys,json; lines=[json.loads\\(l\\) for l in sys.stdin if l.strip\\(\\)]; [print\\(l['timestamp'], l['level'], l['message']\\) for l in lines if l['level'] in \\('ERROR','WARN'\\) and 'auth' in l['message'].lower\\(\\) or 'prisma' in l['message'].lower\\(\\) or 'database' in l['message'].lower\\(\\) or 'callback' in l['message'].lower\\(\\)]\")",
+      "Bash(python -c \"import sys,json; lines=[json.loads\\(l\\) for l in sys.stdin if l.strip\\(\\)]; [print\\(l['timestamp'], l['message'][:300]\\) for l in lines[-20:] if l['level'] == 'ERROR']\")",
+      "Bash(grep -o 'cause.*Unknown argument[^\\\\\\\\]*' .next/dev/logs/next-development.log)",
+      "Bash(taskkill /PID 19628 /F)",
+      "Bash(rm -rf .next)",
+      "Bash(npx kill-port *)",
+      "Bash(taskkill /IM node.exe /F)",
+      "Bash(cmd /c \"taskkill /PID 15452 /F\")",
+      "Bash(cmd /c \"del /f \\\\\"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\\\\.next\\\\dev\\\\server.lock\\\\\"\")",
+      "Bash(node -e \"const a = require\\('@prisma/adapter-neon'\\); console.log\\(Object.keys\\(a\\)\\)\")",
+      "Bash(node -e \"const {PrismaNeonHttp} = require\\('@prisma/adapter-neon'\\); console.log\\(PrismaNeonHttp.toString\\(\\).slice\\(0,200\\)\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{time_total}s\" \"https://ep-old-sunset-anuvy4qm.c-6.us-east-1.aws.neon.tech\")",
+      "Bash(node -e \"const dns = require\\('dns'\\); dns.resolve4\\('ep-old-sunset-anuvy4qm.c-6.us-east-1.aws.neon.tech', \\(err, addr\\) => console.log\\(err ? 'Error: ' + err.message : 'IP: ' + addr\\)\\)\")",
+      "Bash(node -e \"const dns = require\\('dns'\\); dns.resolve4\\('neon.tech', \\(err, addr\\) => console.log\\(err ? 'Error: ' + err.message : 'IP: ' + addr\\)\\)\")",
+      "Bash(node -e \"const dns = require\\('dns'\\); dns.resolve4\\('google.com', \\(err, addr\\) => console.log\\(err ? 'Error: ' + err.message : 'IP: ' + addr\\)\\)\")",
+      "Bash(node -e \"fetch\\('https://google.com'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('Error:', e.message\\)\\)\")",
+      "Bash(node -e \"fetch\\('https://ep-old-sunset-anuvy4qm.c-6.us-east-1.aws.neon.tech'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('Error:', e.cause?.message || e.message\\)\\)\")",
+      "Bash(node -e \"fetch\\('https://neon.tech'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('Error:', e.cause?.message || e.message\\)\\)\")",
+      "Bash(node -e \"fetch\\('https://console.neon.tech'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('Error:', e.cause?.message || e.message\\)\\)\")",
+      "Bash(node -e \"fetch\\('https://supabase.com'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('Error:', e.cause?.message || e.message\\)\\)\")",
+      "Bash(node -e \"fetch\\('https://aws.amazon.com'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('Error:', e.cause?.message || e.message\\)\\)\")",
+      "Bash(node -e \"fetch\\('http://localhost:5432'\\).catch\\(e => console.log\\(e.cause?.code || e.message\\)\\)\")",
+      "Bash(node -e ' *)"
+    ]
+  }
+}
