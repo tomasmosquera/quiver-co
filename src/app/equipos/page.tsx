@@ -342,7 +342,7 @@ export default async function EquiposPage({
           </aside>
 
           {/* ── Grid de listings ── */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
 
             {/* Ordenamiento */}
             <div className="flex items-center justify-between mb-4 min-w-0">
@@ -392,7 +392,7 @@ export default async function EquiposPage({
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 [&>a]:max-w-[340px] [&>a]:w-full [&>a]:mx-auto sm:[&>a]:max-w-none">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {listings.map((listing) => {
                   const img = listing.images[0]?.url;
                   return (
