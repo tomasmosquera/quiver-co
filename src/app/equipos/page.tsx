@@ -345,8 +345,8 @@ export default async function EquiposPage({
           <div className="flex-1">
 
             {/* Ordenamiento */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex gap-2 overflow-x-auto pb-1 lg:hidden">
+            <div className="flex items-center justify-between mb-4 min-w-0">
+              <div className="flex gap-2 overflow-x-auto pb-1 lg:hidden min-w-0 max-w-full">
                 {DISCIPLINES.map((d) => (
                   <Link
                     key={d.value}
