@@ -11,13 +11,13 @@ const PREDEFINED_BRANDS = [
 
 const DISCIPLINES = [
   { value: "",          label: "Todas" },
-  { value: "KITESURF",  label: "Kitesurf",  emoji: "🪁" },
-  { value: "WINGFOIL",  label: "Wingfoil",  emoji: "🪽" },
-  { value: "WINDSURF",  label: "Windsurf",  emoji: "⛵" },
-  { value: "FOILBOARD", label: "Foilboard", emoji: "🏄" },
-  { value: "KITEFOIL",  label: "Kitefoil",  emoji: "🚀" },
-  { value: "WAKEBOARD", label: "Wakeboard", emoji: "🚤" },
-  { value: "PADDLE",    label: "Paddle",    emoji: "🧘" },
+  { value: "KITESURF",  label: "Kitesurf" },
+  { value: "WINGFOIL",  label: "Wingfoil" },
+  { value: "WINDSURF",  label: "Windsurf" },
+  { value: "FOILBOARD", label: "Foilboard" },
+  { value: "KITEFOIL",  label: "Kitefoil" },
+  { value: "WAKEBOARD", label: "Wakeboard" },
+  { value: "PADDLE",    label: "Paddle" },
 ];
 
 const CONDITIONS = [
@@ -240,7 +240,6 @@ export default async function EquiposPage({
                           : "text-[#374151] hover:bg-[#F9FAFB]"
                       }`}
                     >
-                      {d.emoji && <span>{d.emoji}</span>}
                       {d.label}
                     </Link>
                   ))}
@@ -358,7 +357,7 @@ export default async function EquiposPage({
                         : "bg-white text-[#374151] border-[#E5E7EB]"
                     }`}
                   >
-                    {d.emoji} {d.label}
+                    {d.label}
                   </Link>
                 ))}
               </div>
@@ -402,7 +401,7 @@ export default async function EquiposPage({
                       href={`/equipo/${listing.id}`}
                       className="group bg-white rounded-2xl border border-[#E5E7EB] hover:border-[#3B82F6] hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col"
                     >
-                      <div className="relative aspect-[4/3] bg-[#F9FAFB] overflow-hidden">
+                      <div className="relative aspect-[16/9] sm:aspect-[4/3] bg-[#F9FAFB] overflow-hidden">
                         {img ? (
                           <img
                             src={img}
