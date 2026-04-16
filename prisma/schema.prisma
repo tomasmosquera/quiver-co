@@ -67,6 +67,7 @@ model User {
   listings      Listing[]
   reviews       Review[]  @relation("ReviewsReceived")
   reviewsGiven  Review[]  @relation("ReviewsGiven")
+  favorites     Favorite[]
 
   @@map("users")
 }
@@ -137,12 +138,29 @@ model Listing {
   seller        User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 
   images        ListingImage[]
+  favoritedBy   Favorite[]
 
   @@index([discipline])
   @@index([equipmentType])
   @@index([status])
   @@index([sellerId])
   @@map("listings")
+}
+
+// ─── Favorites ───────────────────────────────────────────
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@map("favorites")
 }
 
 model ListingImage {

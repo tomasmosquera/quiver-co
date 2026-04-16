@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import ExpandableImage from "@/components/ExpandableImage";
+import FavoriteButton from "@/components/FavoriteButton";
 
 const DISCIPLINE_LABELS: Record<string, string> = {
   KITESURF: "Kitesurf", WINGFOIL: "Wingfoil", WINDSURF: "Windsurf",
@@ -38,6 +39,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
     include: {
       images: { orderBy: { order: "asc" } },
       seller: true,
+      favoritedBy: session?.user?.id ? { where: { userId: session.user.id } } : false,
     },
   });
 
@@ -167,13 +169,29 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 </div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  <button className="w-full py-3 bg-[#3B82F6] hover:bg-blue-500 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
-                    <MessageCircle className="w-4 h-4" /> Contactar vendedor
-                  </button>
+                  {listing.seller.phone ? (
+                    <a
+                      href={`https://wa.me/57${listing.seller.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola, vengo de Quiver y me interesa tu anuncio "${listing.title}"`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3 bg-[#25D366] hover:bg-[#1DA851] text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Hablar por WhatsApp
+                    </a>
+                  ) : (
+                    <a
+                      href={`mailto:${listing.seller.email}?subject=Interés en anuncio Quiver: ${listing.title}`}
+                      className="w-full py-3 bg-[#3B82F6] hover:bg-blue-500 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Hablar por Correo
+                    </a>
+                  )}
                   <div className="flex gap-2">
-                    <button className="flex-1 py-2.5 border border-[#E5E7EB] rounded-xl hover:bg-[#F9FAFB] transition-colors flex items-center justify-center gap-1.5 text-sm text-[#374151]">
-                      <Heart className="w-4 h-4" /> Guardar
-                    </button>
+                    <FavoriteButton 
+                      listingId={listing.id} 
+                      initiallySaved={session?.user?.id ? listing.favoritedBy.length > 0 : false} 
+                      variant="button" 
+                    />
                     <button className="flex-1 py-2.5 border border-[#E5E7EB] rounded-xl hover:bg-[#F9FAFB] transition-colors flex items-center justify-center gap-1.5 text-sm text-[#374151]">
                       <Share2 className="w-4 h-4" /> Compartir
                     </button>

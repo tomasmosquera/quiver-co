@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Discipline, EquipmentType, Condition } from "@prisma/client";
 
 export async function PATCH(
   req: NextRequest,
@@ -35,9 +34,9 @@ export async function PATCH(
       title,
       description,
       price: parseInt(price),
-      discipline: discipline as Discipline,
-      equipmentType: equipmentType as EquipmentType,
-      condition: condition as Condition,
+      discipline,
+      equipmentType,
+      condition,
       brand: brand || null,
       size: size || null,
       city,

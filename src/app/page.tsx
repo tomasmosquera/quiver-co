@@ -4,6 +4,8 @@ import {
   Star, MapPin, ChevronRight, TrendingUp,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import FavoriteButton from "@/components/FavoriteButton";
+import { auth } from "@/lib/auth";
 
 /* ─── Data ─── */
 
@@ -128,6 +130,9 @@ const DISCIPLINE_LABELS: Record<string, string> = {
 /* ─── Page ─── */
 
 export default async function HomePage() {
+  const session = await auth();
+  const userId = session?.user?.id;
+
   const recentListings = await prisma.listing.findMany({
     where: { status: "ACTIVE" },
     orderBy: { createdAt: "desc" },
@@ -135,6 +140,7 @@ export default async function HomePage() {
     include: {
       images: { orderBy: { order: "asc" }, take: 1 },
       seller: { select: { name: true, image: true, verified: true } },
+      favoritedBy: userId ? { where: { userId } } : false,
     },
   });
 
@@ -336,9 +342,16 @@ export default async function HomePage() {
                     {listing.featured && (
                       <span className="absolute top-3 left-3 bg-[#3B82F6] text-white text-xs font-semibold px-2.5 py-1 rounded-full">Destacado</span>
                     )}
-                    <span className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full ${CONDITION_COLORS[listing.condition] ?? ""}`}>
-                      {CONDITION_LABELS[listing.condition] ?? listing.condition}
-                    </span>
+                    <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full shadow-sm ${CONDITION_COLORS[listing.condition] ?? ""}`}>
+                        {CONDITION_LABELS[listing.condition] ?? listing.condition}
+                      </span>
+                      <FavoriteButton 
+                        listingId={listing.id} 
+                        initiallySaved={userId && "favoritedBy" in listing ? (listing as any).favoritedBy.length > 0 : false} 
+                        variant="icon" 
+                      />
+                    </div>
                   </div>
                   <div className="p-4 flex flex-col gap-2 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">

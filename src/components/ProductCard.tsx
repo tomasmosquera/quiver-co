@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MapPin, Star, Shield } from "lucide-react";
+import FavoriteButton from "./FavoriteButton";
 
 export interface Product {
   id: string;
@@ -13,6 +14,7 @@ export interface Product {
   image: string;
   seller: { name: string; rating: number; verified: boolean };
   featured?: boolean;
+  isSaved?: boolean;
 }
 
 const DISCIPLINE_COLORS: Record<string, string> = {
@@ -51,11 +53,14 @@ export default function ProductCard({ product }: { product: Product }) {
             Destacado
           </span>
         )}
-        <span
-          className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full ${conditionColor(product.condition)}`}
-        >
-          {product.condition}
-        </span>
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+          <span
+            className={`text-xs font-medium px-2.5 py-1 rounded-full shadow-sm ${conditionColor(product.condition)}`}
+          >
+            {product.condition}
+          </span>
+          <FavoriteButton listingId={product.id} initiallySaved={Boolean(product.isSaved)} variant="icon" />
+        </div>
       </div>
 
       {/* Info */}

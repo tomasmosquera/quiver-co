@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Search, SlidersHorizontal, MapPin, Star, Shield, Wind } from "lucide-react";
 import BrandFilterClient from "@/components/BrandFilterClient";
+import { auth } from "@/lib/auth";
 
 const PREDEFINED_BRANDS = [
   "Cabrinha", "Duotone", "Ozone", "Core", "North",
@@ -76,6 +77,8 @@ export default async function EquiposPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const session = await auth();
+  const userId = session?.user?.id;
   const params = await searchParams;
   const {
     disciplina = "",
@@ -118,6 +121,7 @@ export default async function EquiposPage({
       include: {
         images:  { orderBy: { order: "asc" }, take: 1 },
         seller:  { select: { name: true, image: true, verified: true } },
+        favoritedBy: userId ? { where: { userId } } : false,
       },
       take: 24,
     }),
