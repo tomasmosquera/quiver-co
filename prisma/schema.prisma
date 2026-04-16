@@ -64,10 +64,13 @@ model User {
   sessions      Session[]
 
   // Marketplace
-  listings      Listing[]
-  reviews       Review[]  @relation("ReviewsReceived")
-  reviewsGiven  Review[]  @relation("ReviewsGiven")
-  favorites     Favorite[]
+  listings             Listing[]
+  reviews              Review[]       @relation("ReviewsReceived")
+  reviewsGiven         Review[]       @relation("ReviewsGiven")
+  favorites            Favorite[]
+  conversationsAsBuyer  Conversation[] @relation("ConversationsBuyer")
+  conversationsAsSeller Conversation[] @relation("ConversationsSeller")
+  messagesSent          Message[]      @relation("MessagesSent")
 
   @@map("users")
 }
@@ -139,6 +142,7 @@ model Listing {
 
   images        ListingImage[]
   favoritedBy   Favorite[]
+  conversations Conversation[]
 
   @@index([discipline])
   @@index([equipmentType])
@@ -172,6 +176,44 @@ model ListingImage {
   listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@map("listing_images")
+}
+
+// ─── Messaging ───────────────────────────────────────────
+
+model Conversation {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  listingId String
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  buyerId   String
+  buyer     User      @relation("ConversationsBuyer",  fields: [buyerId],  references: [id], onDelete: Cascade)
+
+  sellerId  String
+  seller    User      @relation("ConversationsSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  messages  Message[]
+
+  @@unique([listingId, buyerId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String       @db.Text
+  createdAt      DateTime     @default(now())
+  readAt         DateTime?
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId       String
+  sender         User         @relation("MessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("messages")
 }
 
 // ─── Reviews ─────────────────────────────────────────────

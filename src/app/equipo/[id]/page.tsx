@@ -3,12 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
 import {
-  MapPin, Star, Shield, ChevronLeft, MessageCircle,
+  MapPin, Star, Shield, ChevronLeft,
   Share2, Heart, Eye, Calendar,
 } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import ExpandableImage from "@/components/ExpandableImage";
 import FavoriteButton from "@/components/FavoriteButton";
+import ContactButton from "@/components/ContactButton";
 
 const DISCIPLINE_LABELS: Record<string, string> = {
   KITESURF: "Kitesurf", WINGFOIL: "Wingfoil", WINDSURF: "Windsurf",
@@ -169,23 +170,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 </div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  {listing.seller.phone ? (
-                    <a
-                      href={`https://wa.me/57${listing.seller.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola, vengo de Quiver y me interesa tu anuncio "${listing.title}"`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-3 bg-[#25D366] hover:bg-[#1DA851] text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
-                    >
-                      <MessageCircle className="w-4 h-4" /> Hablar por WhatsApp
-                    </a>
-                  ) : (
-                    <a
-                      href={`mailto:${listing.seller.email}?subject=Interés en anuncio Quiver: ${listing.title}`}
-                      className="w-full py-3 bg-[#3B82F6] hover:bg-blue-500 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
-                    >
-                      <MessageCircle className="w-4 h-4" /> Hablar por Correo
-                    </a>
-                  )}
+                  <ContactButton listingId={listing.id} isLoggedIn={!!session?.user?.id} />
                   <div className="flex gap-2">
                     <FavoriteButton 
                       listingId={listing.id} 

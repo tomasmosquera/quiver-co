@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, ShoppingBag, Heart, Settings } from "lucide-react";
+import { User, LogOut, ShoppingBag, Heart, Settings, MessageCircle } from "lucide-react";
 
 export default function NavbarUser() {
   const { data: session, status } = useSession();
@@ -62,6 +62,7 @@ export default function NavbarUser() {
           <div className="py-1">
             {[
               { label: "Mis anuncios",  href: "/cuenta/anuncios",  icon: ShoppingBag },
+              { label: "Mensajes",      href: "/mensajes",         icon: MessageCircle },
               { label: "Favoritos",     href: "/cuenta/favoritos", icon: Heart },
               { label: "Configuración", href: "/cuenta/config",    icon: Settings },
             ].map(({ label, href, icon: Icon }) => (
