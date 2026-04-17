@@ -27,6 +27,12 @@ export interface KiteMetadata {
 
 /* ─── Constantes ─── */
 
+const KITE_BRANDS = [
+  "Duotone", "Cabrinha", "North Kiteboarding", "Naish", "Slingshot",
+  "Core", "F-One", "Ozone", "Airush", "Eleveight", "Reedin",
+  "Ocean Rodeo", "Harlem Kitesurfing", "Flysurfer", "Switch Kites",
+];
+
 const KITE_SIZES = [
   "4", "5", "6", "7", "8", "9", "10", "11", "12",
   "13", "14", "15", "16", "17", "18",
@@ -211,13 +217,28 @@ export default function KiteFields({
       {/* Marca */}
       <div>
         <label className="block text-sm font-semibold text-[#374151] mb-1">Marca *</label>
-        <input
-          type="text"
-          value={brand}
-          onChange={e => onBrandChange(e.target.value)}
-          placeholder="Ej: Cabrinha, Duotone, Ozone, Core..."
+        <select
+          value={KITE_BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
+          onChange={e => {
+            if (e.target.value === "otra") onBrandChange("__otra__");
+            else onBrandChange(e.target.value);
+          }}
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-        />
+        >
+          <option value="">Seleccionar marca</option>
+          {KITE_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+          <option value="otra">Otra marca...</option>
+        </select>
+        {!KITE_BRANDS.includes(brand) && brand && (
+          <input
+            type="text"
+            value={brand === "__otra__" ? "" : brand}
+            onChange={e => onBrandChange(e.target.value)}
+            placeholder="Escribe la marca"
+            className="mt-2 w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+            autoFocus
+          />
+        )}
       </div>
 
       {/* Referencia / modelo */}
