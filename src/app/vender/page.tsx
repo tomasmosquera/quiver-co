@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
-import BoardFields, { BoardMetadata } from "@/components/BoardFields";
+import BoardFields, { BoardMetadata, BOARD_TYPES } from "@/components/BoardFields";
 import CityPicker from "@/components/CityPicker";
 
 /* ─── Constantes ─── */
@@ -122,6 +122,7 @@ export default function VenderPage() {
       ].filter(Boolean).join(" ")
     : isKiteTabla
     ? [
+        BOARD_TYPES.find(t => t.value === form.metadata.boardType)?.label,
         form.brand,
         form.metadata.reference,
         form.metadata.complement,
@@ -166,11 +167,11 @@ export default function VenderPage() {
         if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
       }
       if (isKiteTabla) {
+        if (!form.metadata.boardType)                return "Selecciona el tipo de tabla";
         if (!form.brand.trim())                      return "Escribe la marca de la tabla";
         if (!form.metadata.reference?.trim())         return "Escribe la referencia / modelo";
         if (!form.size)                              return "Selecciona el tamaño";
         if (!form.metadata.year)                     return "Selecciona el año";
-        if (form.metadata.includesBag === undefined)  return "Indica si incluye maleta";
         if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
       }
       if (!hasSpecialFields && !form.title.trim()) return "Escribe un título";

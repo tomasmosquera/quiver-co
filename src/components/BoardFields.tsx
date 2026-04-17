@@ -11,28 +11,30 @@ export interface Repair {
 }
 
 export interface BoardMetadata {
+  boardType?: string;
   reference?: string;
   complement?: string;
   year?: string;
   color?: string;
-  includesBag?: boolean;
+  twintipLength?: string;
+  twintipWidth?: string;
   hasRepairs?: boolean;
   repairs?: Repair[];
 }
 
 /* ─── Constantes ─── */
 
-const BOARD_BRANDS = [
-  "Airush", "Best", "Cabrinha", "Core", "Duotone", "Eleveight",
-  "F-One", "Fanatic", "Flysurfer", "Flexifoil", "Liquid Force",
-  "Naish", "North Kiteboarding", "Ocean Rodeo", "Ozone",
-  "Reedin", "Shinn", "Slingshot", "Stoke", "Switch Kites", "Wainman",
+export const BOARD_TYPES = [
+  { value: "twintip",    label: "Twintip" },
+  { value: "surfboard",  label: "Surfboard" },
+  { value: "foilboard",  label: "Foilboard" },
 ];
 
-const BOARD_SIZES = [
-  "128", "130", "132", "134", "135", "136", "137", "138",
-  "140", "141", "142", "143", "144", "145", "146", "148",
-  "150", "152", "154", "156", "158", "160",
+const BOARD_BRANDS = [
+  "Airush", "AXIS", "Brunotti", "Cabrinha", "Core", "CrazyFly",
+  "Duotone", "Eleveight", "F-One", "Flysurfer", "Lieuwe Boards",
+  "Liquid Force", "Naish", "Nobile", "North Kiteboarding",
+  "Ocean Rodeo", "Ozone", "Slingshot",
 ];
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -65,7 +67,7 @@ interface Props {
   onMetaChange: (m: BoardMetadata) => void;
 }
 
-/* ─── Color Picker custom ─── */
+/* ─── Color Picker ─── */
 
 function ColorDot({ hex, size = 5 }: { hex: string; size?: number }) {
   return (
@@ -139,12 +141,6 @@ function ColorPicker({
 export default function BoardFields({
   brand, size, meta, onBrandChange, onSizeChange, onMetaChange,
 }: Props) {
-  const [customSize, setCustomSize] = useState(
-    size && !BOARD_SIZES.includes(size.replace("cm", "")) ? size.replace("cm", "") : ""
-  );
-  const [useCustomSize, setUseCustomSize] = useState(
-    !!size && !BOARD_SIZES.includes(size.replace("cm", ""))
-  );
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
   const colorRef = useRef<HTMLDivElement>(null);
@@ -159,27 +155,6 @@ export default function BoardFields({
 
   function setMeta(patch: Partial<BoardMetadata>) {
     onMetaChange({ ...meta, ...patch });
-  }
-
-  function handleSizeSelect(val: string) {
-    if (val === "otro") {
-      setUseCustomSize(true);
-      onSizeChange(customSize ? `${customSize}cm` : "");
-    } else {
-      setUseCustomSize(false);
-      onSizeChange(`${val}cm`);
-    }
-  }
-
-  function handleCustomSize(val: string) {
-    setCustomSize(val);
-    onSizeChange(val ? `${val}cm` : "");
-  }
-
-  function selectedSize() {
-    if (useCustomSize) return "otro";
-    const num = size?.replace("cm", "");
-    return BOARD_SIZES.includes(num) ? num : "";
   }
 
   /* Reparaciones */
@@ -210,6 +185,21 @@ export default function BoardFields({
 
   return (
     <div className="space-y-5 pt-1">
+
+      {/* Tipo */}
+      <div>
+        <label className="block text-sm font-semibold text-[#374151] mb-1">Tipo *</label>
+        <select
+          value={meta.boardType ?? ""}
+          onChange={e => setMeta({ boardType: e.target.value || undefined })}
+          className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+        >
+          <option value="">Seleccionar tipo</option>
+          {BOARD_TYPES.map(t => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </select>
+      </div>
 
       {/* Marca */}
       <div>
@@ -245,7 +235,7 @@ export default function BoardFields({
           type="text"
           value={meta.reference ?? ""}
           onChange={e => setMeta({ reference: e.target.value })}
-          placeholder="Ej: Switchblade Board, Drifter, Triad..."
+          placeholder="Ej: Spectrum, Atmos, Falcon..."
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>
@@ -257,40 +247,69 @@ export default function BoardFields({
           type="text"
           value={meta.complement ?? ""}
           onChange={e => setMeta({ complement: e.target.value })}
-          placeholder="Ej: con pads y straps, strapless, twin-tip..."
+          placeholder="Ej: Air, Pro, V1..."
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>
 
-      {/* Tamaño */}
-      <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Tamaño *</label>
-        <select
-          value={useCustomSize ? "otro" : (selectedSize() || "")}
-          onChange={e => handleSizeSelect(e.target.value)}
-          className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-        >
-          <option value="">Seleccionar tamaño</option>
-          {BOARD_SIZES.map(s => (
-            <option key={s} value={s}>{s} cm</option>
-          ))}
-          <option value="otro">Otro tamaño...</option>
-        </select>
-        {useCustomSize && (
-          <div className="mt-2 flex items-center gap-2">
-            <input
-              type="number"
-              value={customSize}
-              onChange={e => handleCustomSize(e.target.value)}
-              placeholder="Ej: 162"
-              min={80}
-              max={200}
-              className="w-32 px-4 py-2 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-            />
-            <span className="text-sm text-[#6B7280]">cm</span>
+      {/* Tamaño — depende del tipo */}
+      {meta.boardType === "twintip" && (
+        <div>
+          <label className="block text-sm font-semibold text-[#374151] mb-1">Tamaño *</label>
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <label className="block text-xs text-[#6B7280] mb-1">Largo (cm)</label>
+              <input
+                type="number"
+                value={meta.twintipLength ?? ""}
+                onChange={e => {
+                  const l = e.target.value;
+                  const w = meta.twintipWidth ?? "";
+                  setMeta({ twintipLength: l });
+                  onSizeChange(l && w ? `${l}x${w}` : l ? `${l}cm` : "");
+                }}
+                placeholder="Ej: 138"
+                min={100}
+                max={200}
+                className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+              />
+            </div>
+            <span className="text-[#9CA3AF] mt-5 font-semibold">×</span>
+            <div className="flex-1">
+              <label className="block text-xs text-[#6B7280] mb-1">Ancho (cm)</label>
+              <input
+                type="number"
+                value={meta.twintipWidth ?? ""}
+                onChange={e => {
+                  const w = e.target.value;
+                  const l = meta.twintipLength ?? "";
+                  setMeta({ twintipWidth: w });
+                  onSizeChange(l && w ? `${l}x${w}` : w ? `${w}cm` : "");
+                }}
+                placeholder="Ej: 42"
+                min={30}
+                max={60}
+                className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+              />
+            </div>
           </div>
-        )}
-      </div>
+          <p className="text-xs text-[#9CA3AF] mt-1">En centímetros, ej: 138 × 42</p>
+        </div>
+      )}
+
+      {(meta.boardType === "surfboard" || meta.boardType === "foilboard") && (
+        <div>
+          <label className="block text-sm font-semibold text-[#374151] mb-1">Tamaño *</label>
+          <input
+            type="text"
+            value={size}
+            onChange={e => onSizeChange(e.target.value)}
+            placeholder="Ej: 5'0'', 5'4'', 6'0''..."
+            className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+          />
+          <p className="text-xs text-[#9CA3AF] mt-1">En pies y pulgadas, ej: 5'0''</p>
+        </div>
+      )}
 
       {/* Año */}
       <div>
@@ -321,17 +340,20 @@ export default function BoardFields({
 
       <div className="border-t border-[#F3F4F6] pt-5 space-y-4">
 
-        {/* ¿Incluye maleta? */}
+        {/* ¿Tiene reparaciones? */}
         <div>
-          <p className="text-sm font-semibold text-[#374151] mb-2">¿Incluye maleta? *</p>
+          <p className="text-sm font-semibold text-[#374151] mb-2">¿Tiene reparaciones? *</p>
           <div className="flex gap-2">
             {[{ label: "Sí", value: true }, { label: "No", value: false }].map(opt => (
               <button
                 key={String(opt.value)}
                 type="button"
-                onClick={() => setMeta({ includesBag: opt.value })}
+                onClick={() => setMeta({
+                  hasRepairs: opt.value,
+                  ...(opt.value ? { repairs: meta.repairs?.length ? meta.repairs : [{ description: "" }] } : { repairs: [] }),
+                })}
                 className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${
-                  meta.includesBag === opt.value
+                  meta.hasRepairs === opt.value
                     ? "border-[#3B82F6] bg-blue-50 text-[#3B82F6]"
                     : "border-[#E5E7EB] text-[#374151] hover:border-[#D1D5DB]"
                 }`}
@@ -342,21 +364,8 @@ export default function BoardFields({
           </div>
         </div>
 
-        {/* ¿Tiene reparaciones? */}
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <div
-            onClick={() => setMeta({ hasRepairs: !meta.hasRepairs, ...(!meta.hasRepairs ? { repairs: [{ description: "" }] } : { repairs: [] }) })}
-            className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-              meta.hasRepairs ? "bg-amber-500 border-amber-500" : "border-[#D1D5DB] group-hover:border-amber-400"
-            }`}
-          >
-            {meta.hasRepairs && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-          </div>
-          <span className="text-sm font-semibold text-[#374151]">¿Tiene reparaciones? *</span>
-        </label>
-
         {meta.hasRepairs && (
-          <div className="ml-8 space-y-3">
+          <div className="ml-0 space-y-3">
             {(meta.repairs ?? []).map((repair, i) => (
               <div key={i} className="p-4 bg-amber-50 border border-amber-100 rounded-xl space-y-3">
                 <div className="flex items-center justify-between">
@@ -374,7 +383,6 @@ export default function BoardFields({
                   rows={2}
                   className="w-full px-3 py-2 border border-amber-200 rounded-lg text-sm focus:outline-none focus:border-amber-400 bg-white resize-none"
                 />
-                {/* Foto de la reparación */}
                 {repair.imageUrl ? (
                   <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-amber-200">
                     <img src={repair.imageUrl} alt="Reparación" className="w-full h-full object-cover" />
