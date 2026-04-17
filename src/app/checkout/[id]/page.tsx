@@ -4,13 +4,14 @@ import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { ChevronLeft, Shield, Banknote, Smartphone, CheckCircle, Copy } from "lucide-react";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
+import CheckoutFormClient from "./CheckoutFormClient";
 
 export default async function CheckoutPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
 
   // Opcional: forzar login para comprar
-  // if (!session?.user?.id) return redirect(`/login?callbackUrl=/checkout/${id}`);
+  if (!session?.user?.id) return redirect(`/login?callbackUrl=/checkout/${id}`);
 
   const listing = await prisma.listing.findUnique({
     where: { id },
@@ -26,7 +27,6 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
 
   // Costos
   const subtotal = listing.price;
-  const adminNumber = "573000000000"; // TODO: Poner el número de Whatsapp real admin de Quiver
 
   return (
     <div className="bg-[#FAFAF8] min-h-screen py-10">
@@ -89,10 +89,10 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                     </div>
                     <div>
                       <p className="text-xs text-[#6B7280]">Bancolombia - Ahorros</p>
-                      <p className="font-bold text-[#111827]">123-456789-00</p>
+                      <p className="font-bold text-[#111827]">71622625126</p>
                     </div>
                   </div>
-                  <CopyToClipboardButton text="12345678900" />
+                  <CopyToClipboardButton text="71622625126" />
                 </div>
 
                 <div className="p-4 border border-[#E5E7EB] rounded-xl flex items-center justify-between hover:border-[#3B82F6] transition-colors group">
@@ -102,15 +102,15 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                     </div>
                     <div>
                       <p className="text-xs text-[#6B7280]">Nequi / Bre-B</p>
-                      <p className="font-bold text-[#111827]">300 000 0000</p>
+                      <p className="font-bold text-[#111827]">3164780276</p>
                     </div>
                   </div>
-                  <CopyToClipboardButton text="3000000000" />
+                  <CopyToClipboardButton text="3164780276" />
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-[#F3F4F6]">
                   <p className="text-xs text-[#6B7280]">A nombre de:</p>
-                  <p className="text-sm font-semibold text-[#111827]">Tomás Mosquera (C.C. 1.234.567.890)</p>
+                  <p className="text-sm font-semibold text-[#111827]">Tomás Mosquera (C.C. 1.144.061.268)</p>
                 </div>
               </div>
             </div>
@@ -156,25 +156,21 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                   <span className="font-medium text-[#111827]">Por acordar / Paga el comprador</span>
                 </div>
                 
-                <div className="pt-4 border-t border-[#E5E7EB] flex justify-between items-center">
+                <div className="pt-4 border-t border-[#E5E7EB] flex justify-between items-center mb-6">
                   <span className="font-bold text-[#111827]">Total a transferir</span>
                   <p className="text-2xl font-bold text-[#111827]">
                     ${subtotal.toLocaleString("es-CO")}
                     <span className="text-sm font-normal text-[#9CA3AF] ml-1">COP</span>
                   </p>
                 </div>
-
-                <a 
-                  href={`https://wa.me/${adminNumber}?text=${encodeURIComponent(`Hola Quiver! Acabo de hacer la transferencia por $${subtotal.toLocaleString("es-CO")} para comprar el artículo: "${listing.title}" (ID: ${listing.id}). Aquí adjunto mi comprobante:`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-4 mt-6 bg-[#25D366] hover:bg-[#1DA851] text-white font-bold rounded-xl transition-colors shadow-sm"
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  Ya transferí, enviar comprobante
-                </a>
-                <p className="text-center text-xs text-[#9CA3AF] mt-3">Serás redirigido a WhatsApp para enviar el pantallazo con seguridad.</p>
               </div>
+              
+              <CheckoutFormClient 
+                listingId={listing.id} 
+                listingTitle={listing.title} 
+                subtotal={subtotal} 
+                sellerId={listing.sellerId}
+              />
             </div>
           </div>
 

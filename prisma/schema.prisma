@@ -44,6 +44,14 @@ enum ListingStatus {
   REMOVED
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 // ─── User ────────────────────────────────────────────────
 
 model User {
@@ -71,6 +79,8 @@ model User {
   conversationsAsBuyer  Conversation[] @relation("ConversationsBuyer")
   conversationsAsSeller Conversation[] @relation("ConversationsSeller")
   messagesSent          Message[]      @relation("MessagesSent")
+  ordersAsBuyer         Order[]        @relation("OrdersBuyer")
+  ordersAsSeller        Order[]        @relation("OrdersSeller")
 
   @@map("users")
 }
@@ -143,6 +153,7 @@ model Listing {
   images        ListingImage[]
   favoritedBy   Favorite[]
   conversations Conversation[]
+  order         Order?
 
   @@index([discipline])
   @@index([equipmentType])
@@ -230,4 +241,32 @@ model Review {
   subject    User     @relation("ReviewsReceived", fields: [subjectId],  references: [id])
 
   @@map("reviews")
+}
+
+// ─── Orders ──────────────────────────────────────────────
+
+model Order {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  listingId     String      @unique
+  listing       Listing     @relation(fields: [listingId], references: [id])
+
+  buyerId       String
+  buyer         User        @relation("OrdersBuyer", fields: [buyerId], references: [id])
+
+  sellerId      String
+  seller        User        @relation("OrdersSeller", fields: [sellerId], references: [id])
+
+  status        OrderStatus @default(PENDING)
+  amount        Int
+
+  buyerName     String
+  buyerIdDoc    String
+  buyerPhone    String
+  buyerCity     String
+  buyerAddress  String
+
+  @@map("orders")
 }
