@@ -56,15 +56,19 @@ export default function Footer() {
               Comunidad
             </h4>
             <ul className="space-y-2.5">
-              {["Spots en Colombia", "Foro", "Eventos y clínicas", "Guías de compra", "Blog"].map(
-                (item) => (
-                  <li key={item}>
-                    <Link href="#" className="text-sm text-[#9CA3AF] hover:text-white transition-colors">
-                      {item}
-                    </Link>
-                  </li>
-                )
-              )}
+              {[
+                { label: "Spots en Colombia", href: "/spots" },
+                { label: "Foro",              href: "#" },
+                { label: "Eventos y clínicas",href: "#" },
+                { label: "Guías",             href: "/guias" },
+                { label: "Blog",              href: "#" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-sm text-[#9CA3AF] hover:text-white transition-colors">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

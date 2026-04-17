@@ -227,13 +227,18 @@ export default function Navbar() {
           {/* Separator */}
           <div className="w-px h-4 bg-[#E5E7EB] mx-1" />
 
-          {["Guías", "Spots", "Eventos", "Comunidad"].map((item) => (
+          {[
+            { label: "Guías",     href: "/guias"     },
+            { label: "Spots",     href: "/spots"     },
+            { label: "Eventos",   href: "/eventos"   },
+            { label: "Comunidad", href: "/comunidad" },
+          ].map((item) => (
             <Link
-              key={item}
-              href={`/${item.toLowerCase()}`}
+              key={item.href}
+              href={item.href}
               className="px-3 py-1.5 text-sm text-[#374151] hover:text-[#111827] hover:bg-[#F9FAFB] rounded-md transition-colors whitespace-nowrap"
             >
-              {item}
+              {item.label}
             </Link>
           ))}
         </div>
