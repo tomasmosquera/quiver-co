@@ -21,6 +21,10 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     },
   });
 
+  const buyer = await prisma.user.findUnique({
+    where: { id: session.user.id }
+  });
+
   if (!listing || listing.status !== "ACTIVE") {
     notFound();
   }
@@ -170,6 +174,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                 listingTitle={listing.title} 
                 subtotal={subtotal} 
                 sellerId={listing.sellerId}
+                buyer={buyer}
               />
             </div>
           </div>

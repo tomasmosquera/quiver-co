@@ -3,32 +3,44 @@
 import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { COLOMBIA, DEPARTMENTS } from "@/lib/colombia";
 
 export default function CheckoutFormClient({ 
   listingId, 
   listingTitle, 
   subtotal,
-  sellerId 
+  sellerId,
+  buyer
 }: { 
   listingId: string; 
   listingTitle: string; 
   subtotal: number;
   sellerId: string;
+  buyer: any;
 }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  
+  // States for dynamic dropdowns
+  const [department, setDepartment] = useState("");
+  const [city, setCity] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
+    
+    // Concatenar el barrio a la dirección
+    const fullAddress = `${formData.get("buyerAddress")} - Barrio: ${formData.get("buyerNeighborhood")}`;
+    const fullCity = `${city}, ${department}`; // ej: "Cali, Valle del Cauca"
+
     const data = {
       buyerName: formData.get("buyerName"),
       buyerIdDoc: formData.get("buyerIdDoc"),
       buyerPhone: formData.get("buyerPhone"),
-      buyerCity: formData.get("buyerCity"),
-      buyerAddress: formData.get("buyerAddress"),
+      buyerCity: fullCity,
+      buyerAddress: fullAddress,
       listingId,
       sellerId,
       amount: subtotal
@@ -51,7 +63,7 @@ export default function CheckoutFormClient({
       
       // Redirect internally
       router.push("/cuenta/compras");
-      router.refresh(); // para que se refresque el estado activo
+      router.refresh();
       
     } catch(err: any) {
       alert(err.message || "Hubo un error al procesar tu orden. Intenta nuevamente.");
@@ -67,7 +79,7 @@ export default function CheckoutFormClient({
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[#374151] mb-1">Nombre Completo</label>
-            <input required type="text" name="buyerName" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Juan Pérez" />
+            <input required type="text" name="buyerName" defaultValue={buyer?.name || ""} className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Juan Pérez" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -76,16 +88,53 @@ export default function CheckoutFormClient({
             </div>
             <div>
               <label className="block text-xs font-semibold text-[#374151] mb-1">Celular</label>
-              <input required type="text" name="buyerPhone" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="300 000 0000" />
+              <input required type="text" name="buyerPhone" defaultValue={buyer?.phone || ""} className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="300 000 0000" />
             </div>
           </div>
-          <div>
-            <label className="block text-xs font-semibold text-[#374151] mb-1">Ciudad / Municipio</label>
-            <input required type="text" name="buyerCity" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Cartagena, Bolívar" />
+          
+          {/* Departamentos y Ciudades */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#374151] mb-1">Departamento</label>
+              <select 
+                required 
+                value={department} 
+                onChange={(e) => {
+                  setDepartment(e.target.value);
+                  setCity(""); // reset city when dept changes
+                }}
+                className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none bg-white"
+              >
+                <option value="" disabled>Seleccione...</option>
+                {DEPARTMENTS.map(dep => (
+                  <option key={dep} value={dep}>{dep}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[#374151] mb-1">Ciudad / Municipio</label>
+              <select 
+                required 
+                value={city} 
+                onChange={(e) => setCity(e.target.value)}
+                disabled={!department}
+                className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none bg-white disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                <option value="" disabled>Seleccione...</option>
+                {department && COLOMBIA[department]?.sort().map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
           </div>
+
           <div>
             <label className="block text-xs font-semibold text-[#374151] mb-1">Dirección completa</label>
             <input required type="text" name="buyerAddress" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Calle 123 #45-67 Apto 801, Edificio Mar" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#374151] mb-1">Barrio</label>
+            <input required type="text" name="buyerNeighborhood" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="El Laguito" />
           </div>
         </div>
       </div>

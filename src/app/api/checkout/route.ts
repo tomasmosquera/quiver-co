@@ -59,8 +59,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, orderId: order.id });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("Checkout Error:", error);
-    return NextResponse.json({ error: "Error procesando el checkout" }, { status: 500 });
+    return NextResponse.json({ error: error?.message || "Error procesando el checkout" }, { status: 500 });
   }
 }
