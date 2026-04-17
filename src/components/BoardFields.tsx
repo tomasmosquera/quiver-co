@@ -31,7 +31,7 @@ export const BOARD_TYPES = [
 ];
 
 const BOARD_BRANDS = [
-  "Airush", "AXIS", "Brunotti", "Cabrinha", "Core", "CrazyFly",
+  "Airush", "AXIS", "Brunotti", "Cabrinha", "Cogua", "Core", "CrazyFly",
   "Duotone", "Eleveight", "F-One", "Flysurfer", "Lieuwe Boards",
   "Liquid Force", "Naish", "Nobile", "North Kiteboarding",
   "Ocean Rodeo", "Ozone", "Slingshot",
