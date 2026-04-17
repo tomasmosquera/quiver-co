@@ -10,16 +10,11 @@ export interface Repair {
   imageUrl?: string;
 }
 
-export interface KiteMetadata {
+export interface BoardMetadata {
   reference?: string;
   complement?: string;
   year?: string;
   color?: string;
-  includesBar?: boolean;
-  barBrand?: string;
-  barReference?: string;
-  barYear?: string;
-  lineLength?: string;
   includesBag?: boolean;
   hasRepairs?: boolean;
   repairs?: Repair[];
@@ -27,45 +22,47 @@ export interface KiteMetadata {
 
 /* ─── Constantes ─── */
 
-const KITE_BRANDS = [
-  "Airush", "Cabrinha", "Core", "Duotone", "Eleveight",
-  "F-One", "Flysurfer", "Harlem Kitesurfing", "Naish", "North Kiteboarding",
-  "Ocean Rodeo", "Ozone", "Reedin", "Slingshot", "Switch Kites",
+const BOARD_BRANDS = [
+  "Airush", "Best", "Cabrinha", "Core", "Duotone", "Eleveight",
+  "F-One", "Fanatic", "Flysurfer", "Flexifoil", "Liquid Force",
+  "Naish", "North Kiteboarding", "Ocean Rodeo", "Ozone",
+  "Reedin", "Shinn", "Slingshot", "Stoke", "Switch Kites", "Wainman",
 ];
 
-const KITE_SIZES = [
-  "4", "5", "6", "7", "8", "9", "10", "11", "12",
-  "13", "14", "15", "16", "17", "18",
+const BOARD_SIZES = [
+  "128", "130", "132", "134", "135", "136", "137", "138",
+  "140", "141", "142", "143", "144", "145", "146", "148",
+  "150", "152", "154", "156", "158", "160",
 ];
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 1 }, (_, i) => String(CURRENT_YEAR - i));
 
 const COLORS: { label: string; hex: string }[] = [
-  { label: "Blanco",    hex: "#FFFFFF" },
-  { label: "Negro",     hex: "#111111" },
-  { label: "Gris",      hex: "#9CA3AF" },
-  { label: "Rojo",      hex: "#EF4444" },
-  { label: "Naranja",   hex: "#F97316" },
-  { label: "Amarillo",  hex: "#EAB308" },
-  { label: "Verde",     hex: "#22C55E" },
-  { label: "Azul",      hex: "#3B82F6" },
+  { label: "Blanco",     hex: "#FFFFFF" },
+  { label: "Negro",      hex: "#111111" },
+  { label: "Gris",       hex: "#9CA3AF" },
+  { label: "Rojo",       hex: "#EF4444" },
+  { label: "Naranja",    hex: "#F97316" },
+  { label: "Amarillo",   hex: "#EAB308" },
+  { label: "Verde",      hex: "#22C55E" },
+  { label: "Azul",       hex: "#3B82F6" },
   { label: "Azul marino",hex: "#1E3A8A" },
-  { label: "Morado",    hex: "#A855F7" },
-  { label: "Rosa",      hex: "#EC4899" },
-  { label: "Turquesa",  hex: "#06B6D4" },
-  { label: "Marrón",    hex: "#92400E" },
-  { label: "Dorado",    hex: "#CA8A04" },
-  { label: "Multicolor",hex: "multicolor" },
+  { label: "Morado",     hex: "#A855F7" },
+  { label: "Rosa",       hex: "#EC4899" },
+  { label: "Turquesa",   hex: "#06B6D4" },
+  { label: "Marrón",     hex: "#92400E" },
+  { label: "Dorado",     hex: "#CA8A04" },
+  { label: "Multicolor", hex: "multicolor" },
 ];
 
 interface Props {
   brand: string;
   size: string;
-  meta: KiteMetadata;
+  meta: BoardMetadata;
   onBrandChange: (v: string) => void;
   onSizeChange: (v: string) => void;
-  onMetaChange: (m: KiteMetadata) => void;
+  onMetaChange: (m: BoardMetadata) => void;
 }
 
 /* ─── Color Picker custom ─── */
@@ -139,14 +136,14 @@ function ColorPicker({
   );
 }
 
-export default function KiteFields({
+export default function BoardFields({
   brand, size, meta, onBrandChange, onSizeChange, onMetaChange,
 }: Props) {
   const [customSize, setCustomSize] = useState(
-    size && !KITE_SIZES.includes(size) ? size : ""
+    size && !BOARD_SIZES.includes(size.replace("cm", "")) ? size.replace("cm", "") : ""
   );
   const [useCustomSize, setUseCustomSize] = useState(
-    !!size && !KITE_SIZES.includes(size)
+    !!size && !BOARD_SIZES.includes(size.replace("cm", ""))
   );
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
@@ -160,29 +157,29 @@ export default function KiteFields({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  function setMeta(patch: Partial<KiteMetadata>) {
+  function setMeta(patch: Partial<BoardMetadata>) {
     onMetaChange({ ...meta, ...patch });
   }
 
   function handleSizeSelect(val: string) {
     if (val === "otro") {
       setUseCustomSize(true);
-      onSizeChange(customSize ? `${customSize}m` : "");
+      onSizeChange(customSize ? `${customSize}cm` : "");
     } else {
       setUseCustomSize(false);
-      onSizeChange(`${val}m`);
+      onSizeChange(`${val}cm`);
     }
   }
 
   function handleCustomSize(val: string) {
     setCustomSize(val);
-    onSizeChange(val ? `${val}m` : "");
+    onSizeChange(val ? `${val}cm` : "");
   }
 
   function selectedSize() {
     if (useCustomSize) return "otro";
-    const num = size?.replace("m", "");
-    return KITE_SIZES.includes(num) ? num : "";
+    const num = size?.replace("cm", "");
+    return BOARD_SIZES.includes(num) ? num : "";
   }
 
   /* Reparaciones */
@@ -218,7 +215,7 @@ export default function KiteFields({
       <div>
         <label className="block text-sm font-semibold text-[#374151] mb-1">Marca *</label>
         <select
-          value={KITE_BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
+          value={BOARD_BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
           onChange={e => {
             if (e.target.value === "otra") onBrandChange("__otra__");
             else onBrandChange(e.target.value);
@@ -226,10 +223,10 @@ export default function KiteFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar marca</option>
-          {KITE_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+          {BOARD_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
           <option value="otra">Otra marca...</option>
         </select>
-        {!KITE_BRANDS.includes(brand) && brand && (
+        {!BOARD_BRANDS.includes(brand) && brand && (
           <input
             type="text"
             value={brand === "__otra__" ? "" : brand}
@@ -248,7 +245,7 @@ export default function KiteFields({
           type="text"
           value={meta.reference ?? ""}
           onChange={e => setMeta({ reference: e.target.value })}
-          placeholder="Ej: Switchblade, Bandit, Enduro..."
+          placeholder="Ej: Switchblade Board, Drifter, Triad..."
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>
@@ -260,7 +257,7 @@ export default function KiteFields({
           type="text"
           value={meta.complement ?? ""}
           onChange={e => setMeta({ complement: e.target.value })}
-          placeholder="Ej: V1, V2, Alula..."
+          placeholder="Ej: con pads y straps, strapless, twin-tip..."
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>
@@ -274,8 +271,8 @@ export default function KiteFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar tamaño</option>
-          {KITE_SIZES.map(s => (
-            <option key={s} value={s}>{s}m</option>
+          {BOARD_SIZES.map(s => (
+            <option key={s} value={s}>{s} cm</option>
           ))}
           <option value="otro">Otro tamaño...</option>
         </select>
@@ -285,12 +282,12 @@ export default function KiteFields({
               type="number"
               value={customSize}
               onChange={e => handleCustomSize(e.target.value)}
-              placeholder="Ej: 19"
-              min={1}
-              max={30}
+              placeholder="Ej: 162"
+              min={80}
+              max={200}
               className="w-32 px-4 py-2 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
             />
-            <span className="text-sm text-[#6B7280]">metros</span>
+            <span className="text-sm text-[#6B7280]">cm</span>
           </div>
         )}
       </div>
@@ -323,80 +320,6 @@ export default function KiteFields({
       </div>
 
       <div className="border-t border-[#F3F4F6] pt-5 space-y-4">
-
-        {/* ¿Incluye barra y líneas? */}
-        <div>
-          <p className="text-sm font-semibold text-[#374151] mb-2">¿Incluye barra y líneas? *</p>
-          <div className="flex gap-2">
-            {[{ label: "Sí", value: true }, { label: "No", value: false }].map(opt => (
-              <button
-                key={String(opt.value)}
-                type="button"
-                onClick={() => setMeta({ includesBar: opt.value, ...(!opt.value ? { barBrand: "", barReference: "", lineLength: "" } : {}) })}
-                className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${
-                  meta.includesBar === opt.value
-                    ? "border-[#3B82F6] bg-blue-50 text-[#3B82F6]"
-                    : "border-[#E5E7EB] text-[#374151] hover:border-[#D1D5DB]"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {meta.includesBar && (
-          <div className="ml-8 space-y-3 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-[#374151] mb-1">Marca de la barra <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
-                <input
-                  type="text"
-                  value={meta.barBrand ?? ""}
-                  onChange={e => setMeta({ barBrand: e.target.value })}
-                  placeholder="Ej: Cabrinha, Duotone..."
-                  className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[#374151] mb-1">Referencia / Modelo <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
-                <input
-                  type="text"
-                  value={meta.barReference ?? ""}
-                  onChange={e => setMeta({ barReference: e.target.value })}
-                  placeholder="Ej: Fireball, Click Bar..."
-                  className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-[#374151] mb-1">Año de la barra <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
-                <select
-                  value={meta.barYear ?? ""}
-                  onChange={e => setMeta({ barYear: e.target.value || undefined })}
-                  className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6] bg-white"
-                >
-                  <option value="">Seleccionar</option>
-                  {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[#374151] mb-1">Largo de las líneas <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
-                <select
-                  value={meta.lineLength ?? ""}
-                  onChange={e => setMeta({ lineLength: e.target.value })}
-                  className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6] bg-white"
-                >
-                  <option value="">Seleccionar</option>
-                  {["18m", "20m", "22m", "24m", "26m", "27m", "Mixtas", "Otro"].map(l => (
-                    <option key={l} value={l}>{l}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ¿Incluye maleta? */}
         <div>

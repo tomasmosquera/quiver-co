@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
+import BoardFields, { BoardMetadata } from "@/components/BoardFields";
 import CityPicker from "@/components/CityPicker";
 
 /* ─── Constantes ─── */
@@ -67,7 +68,7 @@ interface FormData {
   description: string;
   city: string;
   images: string[];
-  metadata: KiteMetadata;
+  metadata: KiteMetadata & BoardMetadata;
 }
 
 const EMPTY: FormData = {
@@ -103,6 +104,8 @@ export default function VenderPage() {
   }
 
   const isKiteCometa = form.discipline === "KITESURF" && form.equipmentType === "COMETA_WING";
+  const isKiteTabla  = form.discipline === "KITESURF" && form.equipmentType === "TABLA";
+  const hasSpecialFields = isKiteCometa || isKiteTabla;
   const equipmentTypes = EQUIPMENT_TYPES_BY_DISCIPLINE[form.discipline] ?? EQUIPMENT_TYPES_BY_DISCIPLINE._DEFAULT;
 
   const autoTitle = isKiteCometa
@@ -113,6 +116,17 @@ export default function VenderPage() {
         form.metadata.year,
         form.size,
         form.metadata.includesBar ? "Con barra" : "",
+        form.metadata.hasRepairs !== undefined
+          ? (form.metadata.hasRepairs ? "Con reparaciones" : "Sin reparaciones")
+          : "",
+      ].filter(Boolean).join(" ")
+    : isKiteTabla
+    ? [
+        form.brand,
+        form.metadata.reference,
+        form.metadata.complement,
+        form.metadata.year,
+        form.size,
         form.metadata.hasRepairs !== undefined
           ? (form.metadata.hasRepairs ? "Con reparaciones" : "Sin reparaciones")
           : "",
@@ -151,7 +165,15 @@ export default function VenderPage() {
         if (form.metadata.includesBag === undefined)  return "Indica si incluye maleta";
         if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
       }
-      if (!isKiteCometa && !form.title.trim()) return "Escribe un título";
+      if (isKiteTabla) {
+        if (!form.brand.trim())                      return "Escribe la marca de la tabla";
+        if (!form.metadata.reference?.trim())         return "Escribe la referencia / modelo";
+        if (!form.size)                              return "Selecciona el tamaño";
+        if (!form.metadata.year)                     return "Selecciona el año";
+        if (form.metadata.includesBag === undefined)  return "Indica si incluye maleta";
+        if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
+      }
+      if (!hasSpecialFields && !form.title.trim()) return "Escribe un título";
       if (!form.condition)     return "Selecciona el estado del equipo";
       if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) return "Escribe un precio válido";
       if (!form.description.trim()) return "Escribe una descripción";
@@ -177,8 +199,8 @@ export default function VenderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          title: isKiteCometa ? autoTitle : form.title,
-          metadata: isKiteCometa ? form.metadata : undefined,
+          title: hasSpecialFields ? autoTitle : form.title,
+          metadata: hasSpecialFields ? form.metadata : undefined,
         }),
       });
       const data = await res.json();
@@ -296,12 +318,27 @@ export default function VenderPage() {
                 </div>
               )}
 
+              {/* Campos específicos de Kite+Tabla */}
+              {isKiteTabla && (
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                  <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la tabla</p>
+                  <BoardFields
+                    brand={form.brand}
+                    size={form.size}
+                    meta={form.metadata}
+                    onBrandChange={v => set("brand", v)}
+                    onSizeChange={v => set("size", v)}
+                    onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                  />
+                </div>
+              )}
+
               {/* Título */}
               <div>
                 <label className="block text-sm font-semibold text-[#374151] mb-1">Título del anuncio</label>
-                {isKiteCometa ? (
+                {hasSpecialFields ? (
                   <div className="w-full px-4 py-2.5 border border-[#E5E7EB] rounded-xl text-sm bg-[#F9FAFB] text-[#374151] min-h-[42px]">
-                    {autoTitle || <span className="text-[#9CA3AF]">Se genera automáticamente con los datos de la cometa</span>}
+                    {autoTitle || <span className="text-[#9CA3AF]">Se genera automáticamente con los datos del equipo</span>}
                   </div>
                 ) : (
                   <>
@@ -318,8 +355,8 @@ export default function VenderPage() {
                 )}
               </div>
 
-              {/* Marca y talla (solo si NO es kite+cometa, que ya las tiene arriba) */}
-              {!isKiteCometa && (
+              {/* Marca y talla (solo si NO tiene campos especiales, que ya las tienen arriba) */}
+              {!hasSpecialFields && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-[#374151] mb-1">Marca</label>
@@ -451,7 +488,7 @@ export default function VenderPage() {
                 {[
                   ["Disciplina", DISCIPLINES.find(d => d.value === form.discipline)?.label],
                   ["Tipo",       equipmentTypes.find(t => t.value === form.equipmentType)?.label],
-                  ["Título",     isKiteCometa ? autoTitle : form.title],
+                  ["Título",     hasSpecialFields ? autoTitle : form.title],
                   ["Marca",      form.brand || "—"],
                   ["Talla",      form.size  || "—"],
                   ["Estado",     CONDITIONS.find(c => c.value === form.condition)?.label],
