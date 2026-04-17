@@ -25,10 +25,23 @@ const EQUIPMENT_LABELS: Record<string, string> = {
   FOIL: "Foil", ARNES: "Arnés", TRAJE: "Traje", ACCESORIO: "Accesorio", COMBO: "Combo",
 };
 
+const BOARD_TYPE_LABELS: Record<string, string> = {
+  twintip: "Twintip", surfboard: "Surfboard", foilboard: "Foilboard",
+};
+
 function conditionColor(c: string) {
   if (c === "NUEVO")      return "bg-emerald-50 text-emerald-700";
   if (c === "COMO_NUEVO") return "bg-blue-50 text-blue-700";
   return "bg-amber-50 text-amber-700";
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="text-sm">
+      <span className="text-[#9CA3AF] block text-xs">{label}</span>
+      <p className="font-semibold text-[#111827] mt-0.5">{value}</p>
+    </div>
+  );
 }
 
 export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
@@ -95,39 +108,75 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 </span>
               </div>
 
-              {/* Datos extra de kite cometa */}
-              {listing.metadata && listing.discipline === "KITESURF" && listing.equipmentType === "COMETA_WING" && (() => {
+              {/* Detalles técnicos del equipo */}
+              {listing.metadata && (() => {
                 const m = listing.metadata as Record<string, unknown>;
+                const isCometa = listing.discipline === "KITESURF" && listing.equipmentType === "COMETA_WING";
+                const isTabla  = listing.discipline === "KITESURF" && listing.equipmentType === "TABLA";
+                if (!isCometa && !isTabla) return null;
+
                 return (
-                  <div className="border-t border-[#F3F4F6] mt-5 pt-5 space-y-4">
-                    <h3 className="font-semibold text-[#111827]">Detalles de la cometa</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {!!m.reference && <div className="text-sm"><span className="text-[#9CA3AF]">Modelo</span><p className="font-semibold text-[#111827]">{String(m.reference)}</p></div>}
-                      {!!m.year      && <div className="text-sm"><span className="text-[#9CA3AF]">Año</span><p className="font-semibold text-[#111827]">{String(m.year)}</p></div>}
-                      {!!m.color     && (
-                        <div className="text-sm">
-                          <span className="text-[#9CA3AF]">Color</span>
-                          <p className="font-semibold text-[#111827]">{String(m.color)}</p>
-                        </div>
+                  <div className="border-t border-[#F3F4F6] mt-5 pt-5 space-y-5">
+                    <h3 className="font-semibold text-[#111827]">
+                      {isCometa ? "Detalles de la cometa" : "Detalles de la tabla"}
+                    </h3>
+
+                    {/* Grid de campos básicos */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+                      {isTabla && !!m.boardType && (
+                        <DetailRow label="Tipo" value={BOARD_TYPE_LABELS[String(m.boardType)] ?? String(m.boardType)} />
                       )}
+                      {!!listing.brand    && <DetailRow label="Marca"      value={listing.brand} />}
+                      {!!m.reference      && <DetailRow label="Modelo"     value={String(m.reference)} />}
+                      {!!m.complement     && <DetailRow label="Complemento" value={String(m.complement)} />}
+                      {!!listing.size     && <DetailRow label="Tamaño"     value={listing.size} />}
+                      {!!m.year           && <DetailRow label="Año"        value={String(m.year)} />}
+                      {!!m.color          && <DetailRow label="Color"      value={String(m.color)} />}
                     </div>
-                    {!!m.includesBar && (
-                      <div className="p-3 bg-blue-50 rounded-xl text-sm">
-                        <p className="font-semibold text-[#3B82F6] mb-1">✓ Incluye barra y líneas</p>
-                        {!!(m.barBrand || m.barReference) && <p className="text-[#374151]">{[m.barBrand, m.barReference].filter(Boolean).map(String).join(" · ")}{m.barYear ? ` (${String(m.barYear)})` : ""}</p>}
-                        {!!m.lineLength && <p className="text-[#6B7280]">Líneas: {String(m.lineLength)}</p>}
+
+                    {/* Incluye barra y líneas (solo cometa) */}
+                    {isCometa && (
+                      <div className={`p-3 rounded-xl text-sm ${m.includesBar ? "bg-blue-50" : "bg-[#F9FAFB]"}`}>
+                        <p className={`font-semibold mb-1 ${m.includesBar ? "text-[#3B82F6]" : "text-[#6B7280]"}`}>
+                          {m.includesBar ? "✓ Incluye barra y líneas" : "✗ No incluye barra y líneas"}
+                        </p>
+                        {!!m.includesBar && !!(m.barBrand || m.barReference) && (
+                          <p className="text-[#374151]">
+                            {[m.barBrand, m.barReference].filter(Boolean).map(String).join(" · ")}
+                            {m.barYear ? ` (${String(m.barYear)})` : ""}
+                          </p>
+                        )}
+                        {!!m.includesBar && !!m.lineLength && (
+                          <p className="text-[#6B7280]">Líneas: {String(m.lineLength)}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Incluye maleta (solo cometa) */}
+                    {isCometa && m.includesBag !== undefined && (
+                      <div className={`p-3 rounded-xl text-sm ${m.includesBag ? "bg-blue-50" : "bg-[#F9FAFB]"}`}>
+                        <p className={`font-semibold ${m.includesBag ? "text-[#3B82F6]" : "text-[#6B7280]"}`}>
+                          {m.includesBag ? "✓ Incluye maleta" : "✗ No incluye maleta"}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Reparaciones */}
+                    {m.hasRepairs === false && (
+                      <div className="p-3 bg-emerald-50 rounded-xl text-sm">
+                        <p className="font-semibold text-emerald-700">✓ Sin reparaciones</p>
                       </div>
                     )}
                     {!!m.hasRepairs && Array.isArray(m.repairs) && m.repairs.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-sm font-semibold text-amber-600">⚠️ Reparaciones</p>
-                        {(m.repairs as Array<{description: string; imageUrl?: string}>).map((r, i) => (
+                        <p className="text-sm font-semibold text-amber-600">⚠️ Tiene reparaciones</p>
+                        {(m.repairs as Array<{ description: string; imageUrl?: string }>).map((r, i) => (
                           <div key={i} className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-sm">
                             <p className="text-[#374151]">{r.description}</p>
                             {r.imageUrl && (
                               <ExpandableImage
                                 src={r.imageUrl}
-                                alt={`Reparación ${i+1}`}
+                                alt={`Reparación ${i + 1}`}
                                 className="mt-2 w-32 h-24 object-cover rounded-lg hover:opacity-90 transition-opacity"
                               />
                             )}
@@ -170,6 +219,9 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 </div>
               ) : (
                 <div className="mt-4 space-y-3">
+                  <button className="w-full py-3.5 bg-[#111827] hover:bg-[#374151] text-white font-bold rounded-xl transition-colors text-sm">
+                    Comprar
+                  </button>
                   <ContactButton listingId={listing.id} isLoggedIn={!!session?.user?.id} />
                   <div className="flex gap-2">
                     <FavoriteButton 

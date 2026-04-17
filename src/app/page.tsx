@@ -9,70 +9,14 @@ import { auth } from "@/lib/auth";
 
 /* ─── Data ─── */
 
-const DISCIPLINES = [
-  {
-    name: "Kitesurf",
-    slug: "kitesurf",
-    emoji: "🪁",
-    desc: "Cometas, barras, tablas y arneses",
-    listings: 78,
-    color: "bg-sky-50 border-sky-100 hover:border-sky-300",
-    badge: "text-sky-700",
-  },
-  {
-    name: "Wingfoil",
-    slug: "wingfoil",
-    emoji: "🪽",
-    desc: "Wings, foils y tablas de wingfoil",
-    listings: 41,
-    color: "bg-violet-50 border-violet-100 hover:border-violet-300",
-    badge: "text-violet-700",
-  },
-  {
-    name: "Windsurf",
-    slug: "windsurf",
-    emoji: "⛵",
-    desc: "Velas, tablas y mástiles",
-    listings: 29,
-    color: "bg-emerald-50 border-emerald-100 hover:border-emerald-300",
-    badge: "text-emerald-700",
-  },
-  {
-    name: "Foilboard",
-    slug: "foilboard",
-    emoji: "🏄",
-    desc: "Foils, fuselajes, tablas y alas",
-    listings: 22,
-    color: "bg-amber-50 border-amber-100 hover:border-amber-300",
-    badge: "text-amber-700",
-  },
-  {
-    name: "Kitefoil",
-    slug: "kitefoil",
-    emoji: "🚀",
-    desc: "Equipos específicos para foil con cometa",
-    listings: 17,
-    color: "bg-rose-50 border-rose-100 hover:border-rose-300",
-    badge: "text-rose-700",
-  },
-  {
-    name: "Wakeboard",
-    slug: "wakeboard",
-    emoji: "🚤",
-    desc: "Tablas, bindings y accesorios wake",
-    listings: 35,
-    color: "bg-orange-50 border-orange-100 hover:border-orange-300",
-    badge: "text-orange-700",
-  },
-  {
-    name: "Paddle",
-    slug: "paddle",
-    emoji: "🧘",
-    desc: "Tablas de paddle y remos",
-    listings: 14,
-    color: "bg-teal-50 border-teal-100 hover:border-teal-300",
-    badge: "text-teal-700",
-  },
+const DISCIPLINE_META = [
+  { name: "Kitesurf",  slug: "kitesurf",  desc: "Cometas, barras, tablas y arneses",            color: "bg-sky-50 border-sky-100 hover:border-sky-300",       badge: "text-sky-700"    },
+  { name: "Wingfoil",  slug: "wingfoil",  desc: "Wings, foils y tablas de wingfoil",             color: "bg-violet-50 border-violet-100 hover:border-violet-300", badge: "text-violet-700" },
+  { name: "Windsurf",  slug: "windsurf",  desc: "Velas, tablas y mástiles",                      color: "bg-emerald-50 border-emerald-100 hover:border-emerald-300", badge: "text-emerald-700" },
+  { name: "Foilboard", slug: "foilboard", desc: "Foils, fuselajes, tablas y alas",               color: "bg-amber-50 border-amber-100 hover:border-amber-300",    badge: "text-amber-700"  },
+  { name: "Kitefoil",  slug: "kitefoil",  desc: "Equipos específicos para foil con cometa",      color: "bg-rose-50 border-rose-100 hover:border-rose-300",       badge: "text-rose-700"   },
+  { name: "Wakeboard", slug: "wakeboard", desc: "Tablas, bindings y accesorios wake",             color: "bg-orange-50 border-orange-100 hover:border-orange-300", badge: "text-orange-700" },
+  { name: "Paddle",    slug: "paddle",    desc: "Tablas de paddle y remos",                       color: "bg-teal-50 border-teal-100 hover:border-teal-300",       badge: "text-teal-700"   },
 ];
 
 const EQUIPMENT_TYPES = [
@@ -133,18 +77,31 @@ export default async function HomePage() {
   const session = await auth();
   const userId = session?.user?.id;
 
-  const recentListings = await prisma.listing.findMany({
-    where: { status: "ACTIVE" },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-    include: {
-      images: { orderBy: { order: "asc" }, take: 1 },
-      seller: { select: { name: true, image: true, verified: true } },
-      favoritedBy: userId ? { where: { userId } } : false,
-    },
-  });
+  const [counts, recentListings, totalListings] = await Promise.all([
+    prisma.listing.groupBy({
+      by: ["discipline"],
+      where: { status: "ACTIVE" },
+      _count: { _all: true },
+    }),
+    prisma.listing.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      include: {
+        images: { orderBy: { order: "asc" }, take: 1 },
+        seller: { select: { name: true, image: true, verified: true } },
+        favoritedBy: userId ? { where: { userId } } : false,
+      },
+    }),
+    prisma.listing.count({ where: { status: "ACTIVE" } }),
+  ]);
 
-  const totalListings = await prisma.listing.count({ where: { status: "ACTIVE" } });
+  const countMap = Object.fromEntries(counts.map(c => [c.discipline, c._count._all]));
+
+  const DISCIPLINES = DISCIPLINE_META.map(d => ({
+    ...d,
+    listings: countMap[d.slug.toUpperCase()] ?? 0,
+  }));
 
   return (
     <div className="bg-[#FAFAF8]">
