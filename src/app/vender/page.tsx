@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
+import CityPicker from "@/components/CityPicker";
 
 /* ─── Constantes ─── */
 
@@ -50,10 +51,6 @@ const CONDITIONS = [
   { value: "USADO",     label: "Usado",      desc: "Uso normal, puede tener marcas de uso" },
 ];
 
-const CITIES = [
-  "Cartagena", "Santa Marta", "Barranquilla", "Bogotá", "Medellín",
-  "Cali", "San Andrés", "Coveñas", "Tolú", "Buenaventura", "Otra",
-];
 
 const STEPS = ["Disciplina", "Detalles", "Fotos", "Confirmar"];
 
@@ -112,8 +109,10 @@ export default function VenderPage() {
     ? [
         form.brand,
         form.metadata.reference,
+        form.metadata.complement,
         form.metadata.year,
         form.size,
+        form.metadata.includesBar ? "Con barra" : "",
         form.metadata.hasRepairs !== undefined
           ? (form.metadata.hasRepairs ? "Con reparaciones" : "Sin reparaciones")
           : "",
@@ -144,9 +143,13 @@ export default function VenderPage() {
     if (step === 1) {
       if (!form.equipmentType) return "Selecciona el tipo de equipo";
       if (isKiteCometa) {
-        if (!form.brand.trim())             return "Escribe la marca de la cometa";
-        if (!form.metadata.reference?.trim()) return "Escribe la referencia / modelo";
-        if (!form.size)                     return "Selecciona el tamaño";
+        if (!form.brand.trim())                      return "Escribe la marca de la cometa";
+        if (!form.metadata.reference?.trim())         return "Escribe la referencia / modelo";
+        if (!form.size)                              return "Selecciona el tamaño";
+        if (!form.metadata.year)                     return "Selecciona el año";
+        if (form.metadata.includesBar === undefined)  return "Indica si incluye barra y líneas";
+        if (form.metadata.includesBag === undefined)  return "Indica si incluye maleta";
+        if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
       }
       if (!isKiteCometa && !form.title.trim()) return "Escribe un título";
       if (!form.condition)     return "Selecciona el estado del equipo";
@@ -231,7 +234,7 @@ export default function VenderPage() {
                 {DISCIPLINES.map((d) => (
                   <button
                     key={d.value}
-                    onClick={() => setForm(prev => ({ ...prev, discipline: d.value, equipmentType: "", metadata: {} }))}
+                    onClick={() => { setForm(prev => ({ ...prev, discipline: d.value, equipmentType: "", metadata: {} })); setStep(1); }}
                     className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
                       form.discipline === d.value
                         ? "border-[#3B82F6] bg-blue-50"
@@ -408,14 +411,7 @@ export default function VenderPage() {
               {/* Ciudad */}
               <div>
                 <label className="block text-sm font-semibold text-[#374151] mb-1">Ciudad *</label>
-                <select
-                  value={form.city}
-                  onChange={e => set("city", e.target.value)}
-                  className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-                >
-                  <option value="">Selecciona tu ciudad</option>
-                  {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <CityPicker value={form.city} onChange={v => set("city", v)} />
               </div>
 
               </>}

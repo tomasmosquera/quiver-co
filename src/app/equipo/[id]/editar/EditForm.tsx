@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, CheckCircle, Loader2, Trash2 } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
+import CityPicker from "@/components/CityPicker";
 
 const DISCIPLINES = [
   { value: "KITESURF",  label: "Kitesurf",  emoji: "🪁" },
@@ -44,10 +45,6 @@ const CONDITIONS = [
   { value: "USADO",     label: "Usado",      desc: "Uso normal, puede tener marcas de uso" },
 ];
 
-const CITIES = [
-  "Cartagena", "Santa Marta", "Barranquilla", "Bogotá", "Medellín",
-  "Cali", "San Andrés", "Coveñas", "Tolú", "Buenaventura", "Otra",
-];
 
 interface InitialData {
   discipline: string;
@@ -367,14 +364,7 @@ export default function EditForm({ listingId, initial }: Props) {
           {/* Ciudad */}
           <div>
             <label className="block text-sm font-semibold text-[#374151] mb-1">Ciudad *</label>
-            <select
-              value={form.city}
-              onChange={e => set("city", e.target.value)}
-              className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-            >
-              <option value="">Selecciona tu ciudad</option>
-              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <CityPicker value={form.city} onChange={v => set("city", v)} />
           </div>
 
           {/* Fotos */}

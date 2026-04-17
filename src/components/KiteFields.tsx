@@ -12,6 +12,7 @@ export interface Repair {
 
 export interface KiteMetadata {
   reference?: string;
+  complement?: string;
   year?: string;
   color?: string;
   includesBar?: boolean;
@@ -19,6 +20,7 @@ export interface KiteMetadata {
   barReference?: string;
   barYear?: string;
   lineLength?: string;
+  includesBag?: boolean;
   hasRepairs?: boolean;
   repairs?: Repair[];
 }
@@ -230,6 +232,18 @@ export default function KiteFields({
         />
       </div>
 
+      {/* Complemento */}
+      <div>
+        <label className="block text-sm font-semibold text-[#374151] mb-1">Complemento <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
+        <input
+          type="text"
+          value={meta.complement ?? ""}
+          onChange={e => setMeta({ complement: e.target.value })}
+          placeholder="Ej: V1, V2, Alula..."
+          className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+        />
+      </div>
+
       {/* Tamaño */}
       <div>
         <label className="block text-sm font-semibold text-[#374151] mb-1">Tamaño *</label>
@@ -262,7 +276,7 @@ export default function KiteFields({
 
       {/* Año */}
       <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Año</label>
+        <label className="block text-sm font-semibold text-[#374151] mb-1">Año *</label>
         <select
           value={meta.year ?? ""}
           onChange={e => setMeta({ year: e.target.value || undefined })}
@@ -290,17 +304,25 @@ export default function KiteFields({
       <div className="border-t border-[#F3F4F6] pt-5 space-y-4">
 
         {/* ¿Incluye barra y líneas? */}
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <div
-            onClick={() => setMeta({ includesBar: !meta.includesBar, ...(!meta.includesBar ? {} : { barBrand: "", barReference: "", lineLength: "" }) })}
-            className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${
-              meta.includesBar ? "bg-[#3B82F6] border-[#3B82F6]" : "border-[#D1D5DB] group-hover:border-[#3B82F6]"
-            }`}
-          >
-            {meta.includesBar && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        <div>
+          <p className="text-sm font-semibold text-[#374151] mb-2">¿Incluye barra y líneas? *</p>
+          <div className="flex gap-2">
+            {[{ label: "Sí", value: true }, { label: "No", value: false }].map(opt => (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => setMeta({ includesBar: opt.value, ...(!opt.value ? { barBrand: "", barReference: "", lineLength: "" } : {}) })}
+                className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${
+                  meta.includesBar === opt.value
+                    ? "border-[#3B82F6] bg-blue-50 text-[#3B82F6]"
+                    : "border-[#E5E7EB] text-[#374151] hover:border-[#D1D5DB]"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
-          <span className="text-sm font-semibold text-[#374151]">Incluye barra y líneas</span>
-        </label>
+        </div>
 
         {meta.includesBar && (
           <div className="ml-8 space-y-3 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
@@ -355,6 +377,27 @@ export default function KiteFields({
           </div>
         )}
 
+        {/* ¿Incluye maleta? */}
+        <div>
+          <p className="text-sm font-semibold text-[#374151] mb-2">¿Incluye maleta? *</p>
+          <div className="flex gap-2">
+            {[{ label: "Sí", value: true }, { label: "No", value: false }].map(opt => (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => setMeta({ includesBag: opt.value })}
+                className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${
+                  meta.includesBag === opt.value
+                    ? "border-[#3B82F6] bg-blue-50 text-[#3B82F6]"
+                    : "border-[#E5E7EB] text-[#374151] hover:border-[#D1D5DB]"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* ¿Tiene reparaciones? */}
         <label className="flex items-center gap-3 cursor-pointer group">
           <div
@@ -365,7 +408,7 @@ export default function KiteFields({
           >
             {meta.hasRepairs && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
           </div>
-          <span className="text-sm font-semibold text-[#374151]">¿Tiene reparaciones?</span>
+          <span className="text-sm font-semibold text-[#374151]">¿Tiene reparaciones? *</span>
         </label>
 
         {meta.hasRepairs && (
