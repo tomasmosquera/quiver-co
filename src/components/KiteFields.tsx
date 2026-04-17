@@ -312,7 +312,7 @@ export default function KiteFields({
 
       {/* Color */}
       <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Color principal</label>
+        <label className="block text-sm font-semibold text-[#374151] mb-1">Color principal <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
         <ColorPicker
           value={meta.color}
           onChange={v => setMeta({ color: v || undefined })}
@@ -349,7 +349,7 @@ export default function KiteFields({
           <div className="ml-8 space-y-3 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-[#374151] mb-1">Marca de la barra</label>
+                <label className="block text-xs font-semibold text-[#374151] mb-1">Marca de la barra <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
                 <input
                   type="text"
                   value={meta.barBrand ?? ""}
@@ -359,7 +359,7 @@ export default function KiteFields({
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#374151] mb-1">Referencia / Modelo</label>
+                <label className="block text-xs font-semibold text-[#374151] mb-1">Referencia / Modelo <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
                 <input
                   type="text"
                   value={meta.barReference ?? ""}
@@ -371,7 +371,7 @@ export default function KiteFields({
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-[#374151] mb-1">Año de la barra</label>
+                <label className="block text-xs font-semibold text-[#374151] mb-1">Año de la barra <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
                 <select
                   value={meta.barYear ?? ""}
                   onChange={e => setMeta({ barYear: e.target.value || undefined })}
@@ -382,7 +382,7 @@ export default function KiteFields({
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[#374151] mb-1">Largo de las líneas</label>
+                <label className="block text-xs font-semibold text-[#374151] mb-1">Largo de las líneas <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
                 <select
                   value={meta.lineLength ?? ""}
                   onChange={e => setMeta({ lineLength: e.target.value })}
