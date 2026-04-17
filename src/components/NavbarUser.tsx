@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, ShoppingBag, Heart, Settings, MessageCircle } from "lucide-react";
+import { User, LogOut, ShoppingBag, Heart, Settings, MessageCircle, Package, TrendingUp } from "lucide-react";
 
 export default function NavbarUser() {
   const { data: session, status } = useSession();
@@ -55,13 +55,19 @@ export default function NavbarUser() {
 
       {open && (
         <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-[#E5E7EB] rounded-xl shadow-lg py-1.5 z-50">
-          <div className="px-4 py-2.5 border-b border-[#F3F4F6]">
+          <Link
+            href="/cuenta"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2.5 border-b border-[#F3F4F6] hover:bg-[#F9FAFB] transition-colors"
+          >
             <p className="text-sm font-semibold text-[#111827] truncate">{session.user.name}</p>
             <p className="text-xs text-[#9CA3AF] truncate">{session.user.email}</p>
-          </div>
+          </Link>
           <div className="py-1">
             {[
               { label: "Mis anuncios",  href: "/cuenta/anuncios",  icon: ShoppingBag },
+              { label: "Compras",       href: "/cuenta/compras",   icon: Package },
+              { label: "Ventas",        href: "/cuenta/ventas",    icon: TrendingUp },
               { label: "Mensajes",      href: "/mensajes",         icon: MessageCircle },
               { label: "Favoritos",     href: "/cuenta/favoritos", icon: Heart },
               { label: "Configuración", href: "/cuenta/config",    icon: Settings },

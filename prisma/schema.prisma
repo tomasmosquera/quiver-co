@@ -61,6 +61,7 @@ model User {
   name          String?
   image         String?
   phone         String?
+  address       String?
   city          String?
   bio           String?
   verified      Boolean   @default(false)
@@ -267,6 +268,10 @@ model Order {
   buyerPhone    String
   buyerCity     String
   buyerAddress  String
+
+  shippedAt        DateTime?
+  deliveredAt      DateTime?
+  deliveryDeadline DateTime?
 
   @@map("orders")
 }

@@ -31,8 +31,12 @@ export default function CheckoutFormClient({
 
     const formData = new FormData(e.currentTarget);
     
-    // Concatenar el barrio a la dirección
-    const fullAddress = `${formData.get("buyerAddress")} - Barrio: ${formData.get("buyerNeighborhood")}`;
+    // Concatenar el barrio a la dirección (opcional)
+    const neighborhood = formData.get("buyerNeighborhood");
+    const fullAddress = neighborhood 
+      ? `${formData.get("buyerAddress")} - Barrio: ${neighborhood}`
+      : `${formData.get("buyerAddress")}`;
+      
     const fullCity = `${city}, ${department}`; // ej: "Cali, Valle del Cauca"
 
     const data = {
@@ -133,8 +137,8 @@ export default function CheckoutFormClient({
             <input required type="text" name="buyerAddress" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Calle 123 #45-67 Apto 801, Edificio Mar" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#374151] mb-1">Barrio</label>
-            <input required type="text" name="buyerNeighborhood" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="El Laguito" />
+            <label className="block text-xs font-semibold text-[#374151] mb-1">Barrio <span className="text-[#9CA3AF] font-normal">(Opcional)</span></label>
+            <input type="text" name="buyerNeighborhood" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="El Laguito" />
           </div>
         </div>
       </div>

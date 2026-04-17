@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, ShoppingBag, Menu, X, ChevronDown, Wind, User, MessageCircle, Heart, LogOut } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, ChevronDown, Wind, User, MessageCircle, Heart, LogOut, Package } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 import NavbarUser from "@/components/NavbarUser";
 import { useSession, signOut } from "next-auth/react";
 
@@ -11,9 +12,6 @@ const DISCIPLINES = [
   { name: "Kitesurf",   slug: "kitesurf" },
   { name: "Kitefoil",   slug: "kitefoil" },
   { name: "Wingfoil",   slug: "wingfoil" },
-  { name: "Windsurf",   slug: "windsurf" },
-  { name: "Wakeboard",  slug: "wakeboard" },
-  { name: "Paddle",     slug: "paddle" },
 ];
 
 const EQUIPMENT = [
@@ -114,10 +112,9 @@ export default function Navbar() {
               <ShoppingBag className="w-4 h-4" />
               Vender
             </Link>
-            <button className="p-2 rounded-lg hover:bg-[#F9FAFB] text-[#374151] relative hidden md:flex">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#3B82F6] rounded-full" />
-            </button>
+            <div className="hidden md:flex">
+              <NotificationBell />
+            </div>
             <div className="hidden md:flex">
               <NavbarUser />
             </div>
@@ -374,7 +371,11 @@ export default function Navbar() {
           <div className="border-t border-[#E5E7EB] pt-4">
             {session ? (
               <div className="space-y-1">
-                <div className="flex items-center gap-3 px-2 pb-3">
+                <Link
+                  href="/cuenta"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-3 px-2 pb-3 hover:opacity-80"
+                >
                   {session.user.image
                     ? <img src={session.user.image} alt="" className="w-9 h-9 rounded-full object-cover" />
                     : <div className="w-9 h-9 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-bold text-sm">{session.user.name?.[0]}</div>
@@ -383,9 +384,10 @@ export default function Navbar() {
                     <p className="text-sm font-semibold text-[#111827]">{session.user.name}</p>
                     <p className="text-xs text-[#9CA3AF]">{session.user.email}</p>
                   </div>
-                </div>
+                </Link>
                 {[
                   { label: "Mis anuncios",  href: "/cuenta/anuncios",  Icon: ShoppingBag },
+                  { label: "Compras",       href: "/cuenta/compras",   Icon: Package },
                   { label: "Mensajes",      href: "/mensajes",         Icon: MessageCircle },
                   { label: "Favoritos",     href: "/cuenta/favoritos", Icon: Heart },
                 ].map(({ label, href, Icon }) => (
