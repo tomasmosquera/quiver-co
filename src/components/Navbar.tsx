@@ -353,6 +353,24 @@ export default function Navbar() {
             )}
           </div>
 
+          {/* Guías y Spots */}
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href="/guias"
+              className="flex items-center justify-center py-2.5 border border-[#E5E7EB] rounded-xl text-sm font-semibold text-[#374151] hover:bg-[#F9FAFB]"
+              onClick={() => setMenuOpen(false)}
+            >
+              Guías
+            </Link>
+            <Link
+              href="/spots"
+              className="flex items-center justify-center py-2.5 border border-[#E5E7EB] rounded-xl text-sm font-semibold text-[#374151] hover:bg-[#F9FAFB]"
+              onClick={() => setMenuOpen(false)}
+            >
+              Spots
+            </Link>
+          </div>
+
           {/* Perfil / Sesión */}
           <div className="border-t border-[#E5E7EB] pt-4">
             {session ? (

@@ -194,11 +194,8 @@ export default async function HomePage() {
 
       {/* ── DISCIPLINES ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2">
           <h2 className="text-2xl font-bold text-[#111827]">Elige tu disciplina</h2>
-          <Link href="/disciplinas" className="text-sm text-[#3B82F6] hover:underline flex items-center gap-1">
-            Ver todas <ChevronRight className="w-4 h-4" />
-          </Link>
         </div>
         <p className="text-sm text-[#6B7280] mb-7">
           Filtra todos los equipos por el deporte que practicas.
