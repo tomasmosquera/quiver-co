@@ -9,14 +9,15 @@ import { auth } from "@/lib/auth";
 
 /* ─── Data ─── */
 
+const COMING_SOON_DISCIPLINES = ["windsurf", "wakeboard", "paddle"];
+
 const DISCIPLINE_META = [
-  { name: "Kitesurf",  slug: "kitesurf",  desc: "Cometas, barras, tablas y arneses",            color: "bg-sky-50 border-sky-100 hover:border-sky-300",       badge: "text-sky-700"    },
-  { name: "Wingfoil",  slug: "wingfoil",  desc: "Wings, foils y tablas de wingfoil",             color: "bg-violet-50 border-violet-100 hover:border-violet-300", badge: "text-violet-700" },
+  { name: "Kitesurf",  slug: "kitesurf",  desc: "Cometas, barras, tablas y arneses",            color: "bg-sky-50 border-sky-100 hover:border-sky-300",          badge: "text-sky-700"    },
+  { name: "Kitefoil",  slug: "kitefoil",  desc: "Equipos específicos para foil con cometa",      color: "bg-rose-50 border-rose-100 hover:border-rose-300",         badge: "text-rose-700"   },
+  { name: "Wingfoil",  slug: "wingfoil",  desc: "Wings, foils y tablas de wingfoil",             color: "bg-violet-50 border-violet-100 hover:border-violet-300",  badge: "text-violet-700" },
   { name: "Windsurf",  slug: "windsurf",  desc: "Velas, tablas y mástiles",                      color: "bg-emerald-50 border-emerald-100 hover:border-emerald-300", badge: "text-emerald-700" },
-  { name: "Foilboard", slug: "foilboard", desc: "Foils, fuselajes, tablas y alas",               color: "bg-amber-50 border-amber-100 hover:border-amber-300",    badge: "text-amber-700"  },
-  { name: "Kitefoil",  slug: "kitefoil",  desc: "Equipos específicos para foil con cometa",      color: "bg-rose-50 border-rose-100 hover:border-rose-300",       badge: "text-rose-700"   },
-  { name: "Wakeboard", slug: "wakeboard", desc: "Tablas, bindings y accesorios wake",             color: "bg-orange-50 border-orange-100 hover:border-orange-300", badge: "text-orange-700" },
-  { name: "Paddle",    slug: "paddle",    desc: "Tablas de paddle y remos",                       color: "bg-teal-50 border-teal-100 hover:border-teal-300",       badge: "text-teal-700"   },
+  { name: "Wakeboard", slug: "wakeboard", desc: "Tablas, bindings y accesorios wake",             color: "bg-orange-50 border-orange-100 hover:border-orange-300",  badge: "text-orange-700" },
+  { name: "Paddle",    slug: "paddle",    desc: "Tablas de paddle y remos",                       color: "bg-teal-50 border-teal-100 hover:border-teal-300",         badge: "text-teal-700"   },
 ];
 
 const EQUIPMENT_TYPES = [
@@ -67,8 +68,8 @@ const CONDITION_COLORS: Record<string, string> = {
   USADO: "bg-amber-50 text-amber-700",
 };
 const DISCIPLINE_LABELS: Record<string, string> = {
-  KITESURF: "Kitesurf", WINGFOIL: "Wingfoil", WINDSURF: "Windsurf",
-  FOILBOARD: "Foilboard", KITEFOIL: "Kitefoil", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
+  KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
+  WINDSURF: "Windsurf", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
 };
 
 /* ─── Page ─── */
@@ -112,14 +113,14 @@ export default async function HomePage() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-[#1F2937] border border-[#374151] text-[#D1D5DB] text-xs font-medium px-3 py-1.5 rounded-full mb-6">
               <Wind className="w-3.5 h-3.5 text-[#3B82F6]" />
-              El marketplace de deportes acuáticos más serio de Colombia
+              El mejor marketplace especializado de deportes acuáticos en Colombia
             </div>
             <h1 className="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
               Tu próximo equipo,{" "}
               <span className="text-[#3B82F6]">tu disciplina</span>
             </h1>
             <p className="mt-5 text-lg text-[#9CA3AF] max-w-xl leading-relaxed">
-              Kitesurf, Wingfoil, Windsurf, Foil, Wakeboard y más. Compra y vende equipos con transacciones 100% seguras, solo en Colombia.
+              Kitesurf, Kitefoil, Wingfoil, y más. Compra y vende equipos con transacciones 100% seguras en Colombia.
             </p>
 
             {/* Search with discipline selector */}
@@ -141,7 +142,7 @@ export default async function HomePage() {
             {/* Quick discipline pills */}
             <div className="mt-5 flex flex-wrap gap-2">
               <span className="text-xs text-[#6B7280] my-auto mr-1">Ir directo a:</span>
-              {DISCIPLINES.map((d) => (
+              {DISCIPLINES.filter(d => !COMING_SOON_DISCIPLINES.includes(d.slug)).map((d) => (
                 <Link
                   key={d.slug}
                   href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
@@ -156,7 +157,7 @@ export default async function HomePage() {
             <div className="mt-10 flex flex-wrap gap-8">
               {[
                 { label: "Equipos en venta", value: totalListings > 0 ? `${totalListings}` : "Nuevo" },
-                { label: "Disciplinas", value: "7" },
+                { label: "Disciplinas activas", value: "3" },
                 { label: "Transacciones seguras", value: "100%" },
               ].map((s) => (
                 <div key={s.label}>
@@ -175,7 +176,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 sm:divide-x divide-[#E5E7EB]">
             {[
               { icon: Shield,     title: "Pago protegido",         desc: "Tu dinero queda retenido hasta que confirmas la recepción del equipo." },
-              { icon: CreditCard, title: "PSE, Nequi & tarjetas",  desc: "Paga con los métodos que ya usas. Procesado por Wompi." },
+              { icon: CreditCard, title: "PSE, Nequi & tarjetas",  desc: "Próximamente: paga con los métodos que ya usas. Procesado por Wompi." },
               { icon: Star,       title: "Vendedores verificados",  desc: "Sistema de reputación y verificación de cédula para mayor confianza." },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex items-start gap-4 sm:px-8 first:pl-0 last:pr-0">
@@ -202,23 +203,33 @@ export default async function HomePage() {
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {DISCIPLINES.map((d) => (
-            <Link
-              key={d.slug}
-              href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
-              className={`group border rounded-2xl p-5 flex flex-col gap-3 transition-all hover:shadow-md ${d.color}`}
-            >
-              <div>
-                <p className="font-bold text-[#111827] group-hover:text-[#3B82F6] transition-colors">
-                  {d.name}
-                </p>
-                <p className="text-xs text-[#6B7280] mt-0.5 leading-relaxed">{d.desc}</p>
+          {DISCIPLINES.map((d) => {
+            const soon = COMING_SOON_DISCIPLINES.includes(d.slug);
+            if (soon) return (
+              <div key={d.slug} className={`relative border rounded-2xl p-5 flex flex-col gap-3 opacity-50 cursor-not-allowed ${d.color}`}>
+                <div>
+                  <p className="font-bold text-[#111827]">{d.name}</p>
+                  <p className="text-xs text-[#6B7280] mt-0.5 leading-relaxed">{d.desc}</p>
+                </div>
+                <span className="text-xs font-semibold text-[#9CA3AF] mt-auto uppercase tracking-wider">Próximamente</span>
               </div>
-              <span className={`text-xs font-semibold ${d.badge} mt-auto`}>
-                {d.listings} equipos →
-              </span>
-            </Link>
-          ))}
+            );
+            return (
+              <Link
+                key={d.slug}
+                href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
+                className={`group border rounded-2xl p-5 flex flex-col gap-3 transition-all hover:shadow-md ${d.color}`}
+              >
+                <div>
+                  <p className="font-bold text-[#111827] group-hover:text-[#3B82F6] transition-colors">{d.name}</p>
+                  <p className="text-xs text-[#6B7280] mt-0.5 leading-relaxed">{d.desc}</p>
+                </div>
+                <span className={`text-xs font-semibold ${d.badge} mt-auto`}>
+                  {d.listings} equipos →
+                </span>
+              </Link>
+            );
+          })}
 
           {/* Ver todo CTA card */}
           <Link

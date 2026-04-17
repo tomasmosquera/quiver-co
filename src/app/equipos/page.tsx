@@ -14,12 +14,8 @@ const PREDEFINED_BRANDS = [
 const DISCIPLINES = [
   { value: "",          label: "Todas" },
   { value: "KITESURF",  label: "Kitesurf" },
-  { value: "WINGFOIL",  label: "Wingfoil" },
-  { value: "WINDSURF",  label: "Windsurf" },
-  { value: "FOILBOARD", label: "Foilboard" },
   { value: "KITEFOIL",  label: "Kitefoil" },
-  { value: "WAKEBOARD", label: "Wakeboard" },
-  { value: "PADDLE",    label: "Paddle" },
+  { value: "WINGFOIL",  label: "Wingfoil" },
 ];
 
 const CONDITIONS = [
@@ -49,8 +45,8 @@ const CONDITION_COLORS: Record<string, string> = {
 };
 
 const DISCIPLINE_LABELS: Record<string, string> = {
-  KITESURF: "Kitesurf", WINGFOIL: "Wingfoil", WINDSURF: "Windsurf",
-  FOILBOARD: "Foilboard", KITEFOIL: "Kitefoil", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
+  KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
+  WINDSURF: "Windsurf", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
 };
 
 const CONDITION_LABELS: Record<string, string> = {

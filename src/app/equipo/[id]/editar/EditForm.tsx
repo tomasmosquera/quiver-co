@@ -10,10 +10,9 @@ import CityPicker from "@/components/CityPicker";
 
 const DISCIPLINES = [
   { value: "KITESURF",  label: "Kitesurf",  emoji: "🪁" },
+  { value: "KITEFOIL",  label: "Kitefoil",  emoji: "🚀" },
   { value: "WINGFOIL",  label: "Wingfoil",  emoji: "🪽" },
   { value: "WINDSURF",  label: "Windsurf",  emoji: "⛵" },
-  { value: "FOILBOARD", label: "Foilboard", emoji: "🏄" },
-  { value: "KITEFOIL",  label: "Kitefoil",  emoji: "🚀" },
   { value: "WAKEBOARD", label: "Wakeboard", emoji: "🚤" },
   { value: "PADDLE",    label: "Paddle",    emoji: "🧘" },
 ];

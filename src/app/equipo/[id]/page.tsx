@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import Link from "next/link";
 import {
   MapPin, Star, Shield, ChevronLeft,
-  Share2, Heart, Eye, Calendar,
+  Share2, Eye, Calendar,
 } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import ExpandableImage from "@/components/ExpandableImage";
@@ -12,8 +12,8 @@ import FavoriteButton from "@/components/FavoriteButton";
 import ContactButton from "@/components/ContactButton";
 
 const DISCIPLINE_LABELS: Record<string, string> = {
-  KITESURF: "Kitesurf", WINGFOIL: "Wingfoil", WINDSURF: "Windsurf",
-  FOILBOARD: "Foilboard", KITEFOIL: "Kitefoil", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
+  KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
+  WINDSURF: "Windsurf", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
 };
 
 const CONDITION_LABELS: Record<string, string> = {
@@ -27,6 +27,17 @@ const EQUIPMENT_LABELS: Record<string, string> = {
 
 const BOARD_TYPE_LABELS: Record<string, string> = {
   twintip: "Twintip", surfboard: "Surfboard", foilboard: "Foilboard",
+};
+
+const ACCESORIO_TYPE_LABELS: Record<string, string> = {
+  bombas:             "Bombas",
+  accesorios_cometa:  "Accesorios de cometa",
+  accesorios_barra:   "Accesorios de barra",
+  accesorios_tabla:   "Accesorios de tabla",
+  accesorios_arnes:   "Accesorios de arnés",
+  maletas:            "Maletas y bolsas",
+  tecnologia:         "Tecnología",
+  otros:              "Otros",
 };
 
 function conditionColor(c: string) {
@@ -111,27 +122,48 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
               {/* Detalles técnicos del equipo */}
               {listing.metadata && (() => {
                 const m = listing.metadata as Record<string, unknown>;
-                const isCometa = listing.discipline === "KITESURF" && listing.equipmentType === "COMETA_WING";
-                const isTabla  = listing.discipline === "KITESURF" && listing.equipmentType === "TABLA";
-                if (!isCometa && !isTabla) return null;
+                const kite = ["KITESURF","KITEFOIL","WINGFOIL","WINDSURF"].includes(listing.discipline);
+                const isCometa    = kite && listing.equipmentType === "COMETA_WING";
+                const isTabla     = kite && listing.equipmentType === "TABLA";
+                const isBarra     = kite && listing.equipmentType === "BARRA_LINEAS";
+                const isArnes     = kite && listing.equipmentType === "ARNES";
+                const isAccesorio = kite && listing.equipmentType === "ACCESORIO";
+                if (!isCometa && !isTabla && !isBarra && !isArnes && !isAccesorio) return null;
 
                 return (
                   <div className="border-t border-[#F3F4F6] mt-5 pt-5 space-y-5">
                     <h3 className="font-semibold text-[#111827]">
-                      {isCometa ? "Detalles de la cometa" : "Detalles de la tabla"}
+                      {isCometa    ? "Detalles de la cometa"
+                       : isTabla  ? "Detalles de la tabla"
+                       : isBarra  ? "Detalles de la barra"
+                       : isArnes  ? "Detalles del arnés"
+                       : "Detalles del accesorio"}
                     </h3>
+
+                    {/* Tipo de accesorio */}
+                    {isAccesorio && !!m.accesorioType && (
+                      <div className="inline-block px-3 py-1.5 bg-[#F3F4F6] rounded-lg text-sm font-medium text-[#374151]">
+                        {ACCESORIO_TYPE_LABELS[String(m.accesorioType)] ?? String(m.accesorioType)}
+                      </div>
+                    )}
 
                     {/* Grid de campos básicos */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
                       {isTabla && !!m.boardType && (
                         <DetailRow label="Tipo" value={BOARD_TYPE_LABELS[String(m.boardType)] ?? String(m.boardType)} />
                       )}
-                      {!!listing.brand    && <DetailRow label="Marca"      value={listing.brand} />}
-                      {!!m.reference      && <DetailRow label="Modelo"     value={String(m.reference)} />}
+                      {isArnes && !!m.arnesType && (
+                        <DetailRow label="Tipo" value={String(m.arnesType) === "cintura" ? "Cintura" : "Asiento"} />
+                      )}
+                      {!!listing.brand    && <DetailRow label="Marca"       value={listing.brand} />}
+                      {!!m.reference      && <DetailRow label="Modelo"      value={String(m.reference)} />}
                       {!!m.complement     && <DetailRow label="Complemento" value={String(m.complement)} />}
-                      {!!listing.size     && <DetailRow label="Tamaño"     value={listing.size} />}
-                      {!!m.year           && <DetailRow label="Año"        value={String(m.year)} />}
-                      {!!m.color          && <DetailRow label="Color"      value={String(m.color)} />}
+                      {!!listing.size     && <DetailRow label={isArnes ? "Talla" : "Tamaño"} value={listing.size} />}
+                      {!!m.year           && <DetailRow label="Año"         value={String(m.year)} />}
+                      {!!m.color          && <DetailRow label="Color"       value={String(m.color)} />}
+                      {isBarra && !!m.lineLength && (
+                        <DetailRow label="Largo de líneas" value={String(m.lineLength)} />
+                      )}
                     </div>
 
                     {/* Incluye barra y líneas (solo cometa) */}
@@ -219,9 +251,12 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 </div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  <button className="w-full py-3.5 bg-[#111827] hover:bg-[#374151] text-white font-bold rounded-xl transition-colors text-sm">
+                  <Link 
+                    href={`/checkout/${listing.id}`}
+                    className="w-full flex items-center justify-center py-3.5 bg-[#111827] hover:bg-[#374151] text-white font-bold rounded-xl transition-colors text-sm"
+                  >
                     Comprar
-                  </button>
+                  </Link>
                   <ContactButton listingId={listing.id} isLoggedIn={!!session?.user?.id} />
                   <div className="flex gap-2">
                     <FavoriteButton 

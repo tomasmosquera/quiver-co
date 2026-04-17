@@ -9,10 +9,9 @@ import { useSession, signOut } from "next-auth/react";
 
 const DISCIPLINES = [
   { name: "Kitesurf",   slug: "kitesurf" },
+  { name: "Kitefoil",   slug: "kitefoil" },
   { name: "Wingfoil",   slug: "wingfoil" },
   { name: "Windsurf",   slug: "windsurf" },
-  { name: "Foilboard",  slug: "foilboard" },
-  { name: "Kitefoil",   slug: "kitefoil" },
   { name: "Wakeboard",  slug: "wakeboard" },
   { name: "Paddle",     slug: "paddle" },
 ];

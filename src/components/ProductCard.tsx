@@ -21,7 +21,6 @@ const DISCIPLINE_COLORS: Record<string, string> = {
   Kitesurf:  "bg-sky-50 text-sky-700",
   Wingfoil:  "bg-violet-50 text-violet-700",
   Windsurf:  "bg-emerald-50 text-emerald-700",
-  Foilboard: "bg-amber-50 text-amber-700",
   Kitefoil:  "bg-rose-50 text-rose-700",
   Wakeboard: "bg-orange-50 text-orange-700",
   Paddle:    "bg-teal-50 text-teal-700",

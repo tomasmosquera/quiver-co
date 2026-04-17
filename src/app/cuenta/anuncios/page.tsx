@@ -10,8 +10,8 @@ import {
 import ListingActions from "./ListingActions";
 
 const DISCIPLINE_LABELS: Record<string, string> = {
-  KITESURF: "Kitesurf", WINGFOIL: "Wingfoil", WINDSURF: "Windsurf",
-  FOILBOARD: "Foilboard", KITEFOIL: "Kitefoil", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
+  KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
+  WINDSURF: "Windsurf", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
 };
 
 const CONDITION_LABELS: Record<string, string> = {

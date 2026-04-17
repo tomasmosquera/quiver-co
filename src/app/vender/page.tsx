@@ -11,16 +11,19 @@ import {
 import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
 import BoardFields, { BoardMetadata, BOARD_TYPES } from "@/components/BoardFields";
+import BarraFields, { BarraMetadata } from "@/components/BarraFields";
+import ArnesFields, { ArnesMetadata, ARNES_TYPES } from "@/components/ArnesFields";
 import CityPicker from "@/components/CityPicker";
 
 /* ─── Constantes ─── */
 
+const COMING_SOON = ["WINDSURF", "WAKEBOARD", "PADDLE"];
+
 const DISCIPLINES = [
   { value: "KITESURF",  label: "Kitesurf",  emoji: "🪁" },
+  { value: "KITEFOIL",  label: "Kitefoil",  emoji: "🚀" },
   { value: "WINGFOIL",  label: "Wingfoil",  emoji: "🪽" },
   { value: "WINDSURF",  label: "Windsurf",  emoji: "⛵" },
-  { value: "FOILBOARD", label: "Foilboard", emoji: "🏄" },
-  { value: "KITEFOIL",  label: "Kitefoil",  emoji: "🚀" },
   { value: "WAKEBOARD", label: "Wakeboard", emoji: "🚤" },
   { value: "PADDLE",    label: "Paddle",    emoji: "🧘" },
 ];
@@ -32,7 +35,25 @@ const EQUIPMENT_TYPES_BY_DISCIPLINE: Record<string, { value: string; label: stri
     { value: "BARRA_LINEAS",label: "Barra & Líneas" },
     { value: "ARNES",       label: "Arnés" },
     { value: "ACCESORIO",   label: "Accesorios" },
-    { value: "COMBO",       label: "Equipo Completo" },
+  ],
+  KITEFOIL: [
+    { value: "COMETA_WING", label: "Cometa" },
+    { value: "TABLA",       label: "Tabla" },
+    { value: "BARRA_LINEAS",label: "Barra & Líneas" },
+    { value: "ARNES",       label: "Arnés" },
+    { value: "ACCESORIO",   label: "Accesorios" },
+  ],
+  WINGFOIL: [
+    { value: "COMETA_WING", label: "Wing" },
+    { value: "TABLA",       label: "Tabla" },
+    { value: "ARNES",       label: "Arnés" },
+    { value: "ACCESORIO",   label: "Accesorios" },
+  ],
+  WINDSURF: [
+    { value: "COMETA_WING", label: "Vela" },
+    { value: "TABLA",       label: "Tabla" },
+    { value: "ARNES",       label: "Arnés" },
+    { value: "ACCESORIO",   label: "Accesorios" },
   ],
   _DEFAULT: [
     { value: "COMETA_WING", label: "Cometa" },
@@ -68,7 +89,7 @@ interface FormData {
   description: string;
   city: string;
   images: string[];
-  metadata: KiteMetadata & BoardMetadata;
+  metadata: KiteMetadata & BoardMetadata & BarraMetadata & ArnesMetadata & { accesorioType?: string };
 }
 
 const EMPTY: FormData = {
@@ -103,9 +124,24 @@ export default function VenderPage() {
     );
   }
 
-  const isKiteCometa = form.discipline === "KITESURF" && form.equipmentType === "COMETA_WING";
-  const isKiteTabla  = form.discipline === "KITESURF" && form.equipmentType === "TABLA";
-  const hasSpecialFields = isKiteCometa || isKiteTabla;
+  const KITE_DISCIPLINES = ["KITESURF","KITEFOIL","WINGFOIL","WINDSURF"];
+  const isKiteCometa    = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "COMETA_WING";
+  const isKiteTabla     = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "TABLA";
+  const isKiteBarra     = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "BARRA_LINEAS";
+  const isKiteArnes     = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "ARNES";
+  const isKiteAccesorio = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "ACCESORIO";
+  const hasSpecialFields = isKiteCometa || isKiteTabla || isKiteBarra || isKiteArnes;
+
+  const ACCESORIO_PLACEHOLDERS: Record<string, string> = {
+    bombas:            "Ej: Bomba Cabrinha 03, Adaptador para bomba Duotone...",
+    accesorios_tabla:  "Ej: Handle Hulu, Orca fins...",
+    accesorios_barra:  "Ej: Duotone Quickrelease, North Freeride Loop...",
+    accesorios_cometa: "Ej: Válvula para Ozone Edge V12, Parche de poros...",
+    accesorios_arnes:  "Ej: Spreader bar Ride Engine, Leash corto Ozone...",
+    maletas:           "Ej: Cogua Golfbag, Maleta Evo SLS 9m...",
+    tecnologia:        "Ej: Woo Sports 3.0, Medidor de viento Weatherflow...",
+    otros:             "Ej: Calcomanías Cabrinha, Calcomanías Airush...",
+  };
   const equipmentTypes = EQUIPMENT_TYPES_BY_DISCIPLINE[form.discipline] ?? EQUIPMENT_TYPES_BY_DISCIPLINE._DEFAULT;
 
   const autoTitle = isKiteCometa
@@ -128,9 +164,25 @@ export default function VenderPage() {
         form.metadata.complement,
         form.metadata.year,
         form.size,
-        form.metadata.hasRepairs !== undefined
-          ? (form.metadata.hasRepairs ? "Con reparaciones" : "Sin reparaciones")
-          : "",
+      ].filter(Boolean).join(" ")
+    : isKiteBarra
+    ? [
+        "Barra",
+        form.brand,
+        form.metadata.reference,
+        form.metadata.complement,
+        form.size,
+        form.metadata.lineLength,
+        form.metadata.year,
+      ].filter(Boolean).join(" ")
+    : isKiteArnes
+    ? [
+        ARNES_TYPES.find(t => t.value === form.metadata.arnesType)?.label,
+        "Arnés",
+        form.brand,
+        form.metadata.reference,
+        form.size,
+        form.metadata.year,
       ].filter(Boolean).join(" ")
     : null;
 
@@ -174,6 +226,23 @@ export default function VenderPage() {
         if (!form.metadata.year)                     return "Selecciona el año";
         if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
       }
+      if (isKiteBarra) {
+        if (!form.brand.trim())                    return "Selecciona la marca de la barra";
+        if (!form.metadata.reference?.trim())       return "Escribe la referencia / modelo";
+        if (!form.size)                            return "Selecciona el tamaño de la barra";
+        if (!form.metadata.year)                   return "Selecciona el año";
+        if (!form.metadata.lineLength)             return "Selecciona el largo de las líneas";
+        if (form.metadata.hasRepairs === undefined) return "Indica si tiene reparaciones";
+      }
+      if (isKiteArnes) {
+        if (!form.metadata.arnesType)              return "Selecciona el tipo de arnés";
+        if (!form.brand.trim())                    return "Selecciona la marca del arnés";
+        if (!form.metadata.reference?.trim())       return "Escribe la referencia / modelo";
+        if (!form.size)                            return "Selecciona la talla";
+        if (!form.metadata.year)                   return "Selecciona el año";
+        if (form.metadata.hasRepairs === undefined) return "Indica si tiene reparaciones";
+      }
+      if (isKiteAccesorio && !form.metadata.accesorioType) return "Selecciona el tipo de accesorio";
       if (!hasSpecialFields && !form.title.trim()) return "Escribe un título";
       if (!form.condition)     return "Selecciona el estado del equipo";
       if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) return "Escribe un precio válido";
@@ -254,21 +323,30 @@ export default function VenderPage() {
               <h2 className="text-lg font-bold text-[#111827] mb-1">¿Qué disciplina?</h2>
               <p className="text-sm text-[#6B7280] mb-6">Selecciona el deporte al que pertenece el equipo</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {DISCIPLINES.map((d) => (
-                  <button
-                    key={d.value}
-                    onClick={() => { setForm(prev => ({ ...prev, discipline: d.value, equipmentType: "", metadata: {} })); setStep(1); }}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                      form.discipline === d.value
-                        ? "border-[#3B82F6] bg-blue-50"
-                        : "border-[#E5E7EB] hover:border-[#D1D5DB]"
-                    }`}
-                  >
-                    <span className={`text-sm font-semibold ${form.discipline === d.value ? "text-[#3B82F6]" : "text-[#374151]"}`}>
-                      {d.label}
-                    </span>
-                  </button>
-                ))}
+                {DISCIPLINES.map((d) => {
+                  const soon = COMING_SOON.includes(d.value);
+                  return (
+                    <button
+                      key={d.value}
+                      onClick={() => { if (soon) return; setForm(prev => ({ ...prev, discipline: d.value, equipmentType: "", metadata: {} })); setStep(1); }}
+                      disabled={soon}
+                      className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        soon
+                          ? "border-[#E5E7EB] bg-[#F9FAFB] cursor-not-allowed opacity-60"
+                          : form.discipline === d.value
+                          ? "border-[#3B82F6] bg-blue-50"
+                          : "border-[#E5E7EB] hover:border-[#D1D5DB]"
+                      }`}
+                    >
+                      <span className={`text-sm font-semibold ${form.discipline === d.value && !soon ? "text-[#3B82F6]" : "text-[#374151]"}`}>
+                        {d.label}
+                      </span>
+                      {soon && (
+                        <span className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider">Próximamente</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -334,6 +412,58 @@ export default function VenderPage() {
                 </div>
               )}
 
+              {/* Campos específicos de Kite+Barra */}
+              {isKiteBarra && (
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                  <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la barra</p>
+                  <BarraFields
+                    brand={form.brand}
+                    size={form.size}
+                    meta={form.metadata}
+                    onBrandChange={v => set("brand", v)}
+                    onSizeChange={v => set("size", v)}
+                    onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                  />
+                </div>
+              )}
+
+              {/* Campos específicos de Kite+Arnés */}
+              {isKiteArnes && (
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                  <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos del arnés</p>
+                  <ArnesFields
+                    brand={form.brand}
+                    size={form.size}
+                    meta={form.metadata}
+                    onBrandChange={v => set("brand", v)}
+                    onSizeChange={v => set("size", v)}
+                    onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                  />
+                </div>
+              )}
+
+              {/* Campos específicos de Kite+Accesorio */}
+              {isKiteAccesorio && (
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                  <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Tipo de accesorio *</p>
+                  <select
+                    value={form.metadata.accesorioType ?? ""}
+                    onChange={e => setForm(prev => ({ ...prev, metadata: { ...prev.metadata, accesorioType: e.target.value || undefined } }))}
+                    className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+                  >
+                    <option value="">Seleccionar tipo</option>
+                    <option value="bombas">Bombas</option>
+                    <option value="accesorios_cometa">Accesorios de cometa</option>
+                    <option value="accesorios_barra">Accesorios de barra</option>
+                    <option value="accesorios_tabla">Accesorios de tabla</option>
+                    <option value="accesorios_arnes">Accesorios de arnés</option>
+                    <option value="maletas">Maletas y bolsas</option>
+                    <option value="tecnologia">Tecnología</option>
+                    <option value="otros">Otros</option>
+                  </select>
+                </div>
+              )}
+
               {/* Título */}
               <div>
                 <label className="block text-sm font-semibold text-[#374151] mb-1">Título del anuncio</label>
@@ -347,7 +477,11 @@ export default function VenderPage() {
                       type="text"
                       value={form.title}
                       onChange={e => set("title", e.target.value)}
-                      placeholder="Ej: Tabla Wakeboard Liquid Force 142"
+                      placeholder={
+                        isKiteAccesorio && form.metadata.accesorioType
+                          ? ACCESORIO_PLACEHOLDERS[form.metadata.accesorioType] ?? "Escribe el título del anuncio"
+                          : "Ej: Tabla Wakeboard Liquid Force 142"
+                      }
                       maxLength={100}
                       className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
                     />
@@ -356,8 +490,8 @@ export default function VenderPage() {
                 )}
               </div>
 
-              {/* Marca y talla (solo si NO tiene campos especiales, que ya las tienen arriba) */}
-              {!hasSpecialFields && (
+              {/* Marca y talla (solo si NO tiene campos especiales ni es accesorio) */}
+              {!hasSpecialFields && !isKiteAccesorio && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-[#374151] mb-1">Marca</label>

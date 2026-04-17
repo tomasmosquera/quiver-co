@@ -6,7 +6,6 @@ const DISCIPLINE_ICONS: Record<string, string> = {
   Kitesurf: "🪁",
   Wingfoil: "🪽",
   Windsurf: "⛵",
-  Foilboard: "🏄",
   Wakeboard: "🚤",
   Paddle: "🧘",
 };
