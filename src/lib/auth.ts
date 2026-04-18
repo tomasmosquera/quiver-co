@@ -12,14 +12,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   session: { strategy: "database" },
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     session({ session, user }) {
       session.user.id = user.id;
       return session;
+    },
+  },
+  logger: {
+    error(error) {
+      console.error("[NextAuth Error]", error);
+    },
+    warn(code) {
+      console.warn("[NextAuth Warn]", code);
     },
   },
 });
