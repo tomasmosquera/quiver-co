@@ -11,7 +11,7 @@ interface Props {
   disciplines:    FilterOption[];
   equipmentTypes: FilterOption[];
   conditions:     FilterOption[];
-  top10Brands:    BrandOption[];
+  top5Brands:    BrandOption[];
   currentDisciplina: string;
   currentTipo:       string;
   currentCondicion:  string;
@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function MobileFilters({
-  disciplines, equipmentTypes, conditions, top10Brands,
+  disciplines, equipmentTypes, conditions, top5Brands,
   currentDisciplina, currentTipo, currentCondicion, currentMarca,
   currentCiudad, precioMin, precioMax, activeCount, baseParams,
 }: Props) {
@@ -144,11 +144,11 @@ export default function MobileFilters({
               </div>
 
               {/* Marca */}
-              {top10Brands.length > 0 && (
+              {top5Brands.length > 0 && (
                 <div>
                   <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">Marca</h3>
                   <div className="flex flex-wrap gap-2">
-                    {top10Brands.map((b) => (
+                    {top5Brands.map((b) => (
                       <button
                         key={b.slug}
                         onClick={() => toggle(marca, b.slug, setMarca)}

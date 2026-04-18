@@ -22,7 +22,7 @@ const CONDITION_LABELS: Record<string, string> = {
 };
 
 const EQUIPMENT_LABELS: Record<string, string> = {
-  COMETA_WING: "Cometa", TABLA: "Tabla", BARRA_LINEAS: "Barra & Líneas",
+  COMETA: "Cometa", TABLA: "Tabla", BARRA_LINEAS: "Barra & Líneas",
   FOIL: "Foil", ARNES: "Arnés", TRAJE: "Traje", ACCESORIO: "Accesorio", COMBO: "Combo",
 };
 
@@ -124,12 +124,14 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
               {listing.metadata && (() => {
                 const m = listing.metadata as Record<string, unknown>;
                 const kite = ["KITESURF","KITEFOIL","WINGFOIL","WINDSURF"].includes(listing.discipline);
-                const isCometa    = kite && listing.equipmentType === "COMETA_WING";
+                const isCometa    = kite && listing.equipmentType === "COMETA";
+                const isWing      = listing.discipline === "WINGFOIL" && listing.equipmentType === "WING";
+                const isLeash     = listing.discipline === "WINGFOIL" && listing.equipmentType === "LEASH";
                 const isTabla     = kite && listing.equipmentType === "TABLA";
                 const isBarra     = kite && listing.equipmentType === "BARRA_LINEAS";
                 const isArnes     = kite && listing.equipmentType === "ARNES";
                 const isAccesorio = kite && listing.equipmentType === "ACCESORIO";
-                if (!isCometa && !isTabla && !isBarra && !isArnes && !isAccesorio) return null;
+                if (!isCometa && !isWing && !isLeash && !isTabla && !isBarra && !isArnes && !isAccesorio) return null;
 
                 return (
                   <div className="border-t border-[#F3F4F6] mt-5 pt-5 space-y-5">

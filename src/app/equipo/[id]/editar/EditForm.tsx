@@ -19,7 +19,7 @@ const DISCIPLINES = [
 
 const EQUIPMENT_TYPES_BY_DISCIPLINE: Record<string, { value: string; label: string }[]> = {
   KITESURF: [
-    { value: "COMETA_WING", label: "Cometa" },
+    { value: "COMETA", label: "Cometa" },
     { value: "TABLA",       label: "Tabla" },
     { value: "BARRA_LINEAS",label: "Barra & Líneas" },
     { value: "ARNES",       label: "Arnés" },
@@ -27,7 +27,7 @@ const EQUIPMENT_TYPES_BY_DISCIPLINE: Record<string, { value: string; label: stri
     { value: "COMBO",       label: "Equipo Completo" },
   ],
   _DEFAULT: [
-    { value: "COMETA_WING", label: "Cometa" },
+    { value: "COMETA", label: "Cometa" },
     { value: "TABLA",       label: "Tabla" },
     { value: "BARRA_LINEAS",label: "Barra & Líneas" },
     { value: "FOIL",        label: "Foil" },
@@ -73,7 +73,7 @@ export default function EditForm({ listingId, initial }: Props) {
   const [error, setError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const isKiteCometa = form.discipline === "KITESURF" && form.equipmentType === "COMETA_WING";
+  const isKiteCometa = form.discipline === "KITESURF" && form.equipmentType === "COMETA";
   const equipmentTypes = EQUIPMENT_TYPES_BY_DISCIPLINE[form.discipline] ?? EQUIPMENT_TYPES_BY_DISCIPLINE._DEFAULT;
 
   function set(key: keyof InitialData, value: string | string[]) {

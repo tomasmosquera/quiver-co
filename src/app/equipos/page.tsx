@@ -20,7 +20,7 @@ const DISCIPLINES = [
   { value: "KITESURF",  label: "Kitesurf" },
   { value: "KITEFOIL",  label: "Kitefoil" },
   { value: "WINGFOIL",  label: "Wingfoil" },
-  { value: "WATERWEAR", label: "Accesorios" },
+  { value: "Accesorios", label: "Accesorios" },
 ];
 
 const CONDITIONS = [
@@ -31,7 +31,7 @@ const CONDITIONS = [
 ];
 
 const EQUIPMENT_TYPES = [
-  { value: "COMETA_WING", label: "Cometa" },
+  { value: "COMETA",      label: "Cometa" },
   { value: "WING",        label: "Wing" },
   { value: "TABLA",       label: "Tabla" },
   { value: "BARRA_LINEAS",label: "Barra & Líneas" },
@@ -53,20 +53,14 @@ const EQUIPMENT_TYPES = [
 
 /** Tipos visibles cuando una sección específica está seleccionada */
 const SECTION_EQUIPMENT_TYPES: Record<string, string[]> = {
-  KITESURF: ["COMETA_WING", "TABLA", "BARRA_LINEAS", "ARNES"],
-  KITEFOIL: ["COMETA_WING", "TABLA", "BARRA_LINEAS", "ARNES"],
-  WINGFOIL: ["COMETA_WING", "TABLA", "BARRA_LINEAS", "ARNES"],
-  WATERWEAR: ["ACC_COMETA", "ACC_WING", "ACC_BARRA", "ACC_TABLA", "ACC_ARNES",
-              "BOMBAS", "MALETAS", "WETSUIT", "PONCHO", "PROTECCION", "TECNOLOGIA", "OTROS"],
+  KITESURF: ["COMETA", "TABLA", "BARRA_LINEAS", "ARNES"],
+  KITEFOIL: ["COMETA", "TABLA", "BARRA_LINEAS", "ARNES"],
+  WINGFOIL: ["WING",   "TABLA", "LEASH",        "ARNES"],
+  Accesorios: ["ACC_COMETA", "ACC_WING", "ACC_BARRA", "ACC_TABLA", "ACC_ARNES",
+               "BOMBAS", "MALETAS", "WETSUIT", "PONCHO", "PROTECCION", "TECNOLOGIA", "OTROS"],
 };
 
-/** Etiquetas de tipo que cambian según la sección */
-const SECTION_TYPE_LABELS: Record<string, Record<string, string>> = {
-  WINGFOIL: {
-    COMETA_WING: "Wing",
-    BARRA_LINEAS: "Leash",
-  },
-};
+const SECTION_TYPE_LABELS: Record<string, Record<string, string>> = {};
 
 /* ─── Configuración de filtros inteligentes ─── */
 
@@ -81,7 +75,7 @@ interface SmartConfig {
 }
 
 const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
-  "KITESURF:COMETA_WING": {
+  "KITESURF:COMETA": {
     linkFilters: [
       { kind: "toggle", key: "incluyeBarra",    label: "Incluye barra",   onLabel: "Con barra y líneas" },
       { kind: "toggle", key: "incluyeMaleta",   label: "Incluye maleta",  onLabel: "Con maleta" },
@@ -90,7 +84,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
     textFilters: ["referencia", "tamanio", "anio"],
     tamanioLabel: "Tamaño (m²)",
   },
-  "KITEFOIL:COMETA_WING": {
+  "KITEFOIL:COMETA": {
     linkFilters: [
       { kind: "toggle", key: "incluyeBarra",    label: "Incluye barra",   onLabel: "Con barra y líneas" },
       { kind: "toggle", key: "incluyeMaleta",   label: "Incluye maleta",  onLabel: "Con maleta" },
@@ -99,7 +93,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
     textFilters: ["referencia", "tamanio", "anio"],
     tamanioLabel: "Tamaño (m)",
   },
-  "WINGFOIL:COMETA_WING": {
+  "WINGFOIL:WING": {
     linkFilters: [
       { kind: "toggle", key: "incluyeLeash",    label: "Incluye leash",   onLabel: "Con leash" },
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones",    onLabel: "Sin reparaciones" },
@@ -154,7 +148,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
     textFilters: ["referencia", "tamanio", "anio", "largoLineas"],
     tamanioLabel: "Tamaño barra (cm)",
   },
-  "WINGFOIL:BARRA_LINEAS": {
+  "WINGFOIL:LEASH": {
     linkFilters: [
       { kind: "subtipo", label: "Tipo de leash", metaKey: "lineLength", options: [
         { value: "muneca",     label: "De muñeca" },
@@ -217,7 +211,9 @@ const CONDITION_LABELS: Record<string, string> = {
   NUEVO: "Nuevo", COMO_NUEVO: "Como nuevo", USADO: "Usado",
 };
 
-const VALID_DISCIPLINES = ["KITESURF","KITEFOIL","WINGFOIL","WINDSURF","FOILBOARD","WAKEBOARD","PADDLE","WATERWEAR"];
+const VALID_DISCIPLINES = ["KITESURF","KITEFOIL","WINGFOIL","WINDSURF","FOILBOARD","WAKEBOARD","PADDLE","WATERWEAR","Accesorios"];
+/** Mapeo URL slug → valor enum de Prisma */
+const SECCION_TO_DB: Record<string, string> = { Accesorios: "WATERWEAR" };
 
 /* ─── Search params ─── */
 
@@ -264,7 +260,7 @@ export default async function EquiposPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const conditions: any[] = [{ status: "ACTIVE" }];
 
-  if (seccion && VALID_DISCIPLINES.includes(seccion)) conditions.push({ discipline: seccion });
+  if (seccion && VALID_DISCIPLINES.includes(seccion)) conditions.push({ discipline: SECCION_TO_DB[seccion] ?? seccion });
   if (tipo)     conditions.push({ equipmentType: tipo });
   if (marca)    conditions.push({ brand: { equals: marca, mode: "insensitive" } });
   if (condicion) conditions.push({ condition: condicion });
@@ -357,14 +353,23 @@ export default async function EquiposPage({
   }
 
   const PREDEFINED_LOWER = PREDEFINED_BRANDS.map(b => b.toLowerCase());
-  const allBrandSlugs = Array.from(new Set([...PREDEFINED_LOWER, ...brandCountMap.keys()]));
+  const hasActiveFilters = !!(seccion || tipo || marca || condicion || ciudad || subtipo ||
+    anio || tamanio || referencia || largoLineas || incluyeBarra || incluyeMaleta ||
+    incluyeLeash || sinReparaciones || precioMin || precioMax);
+
+  // Con filtros activos: solo marcas con anuncios. Sin filtros: incluir predefinidas aunque tengan 0.
+  const allBrandSlugs = hasActiveFilters
+    ? Array.from(brandCountMap.keys())
+    : Array.from(new Set([...PREDEFINED_LOWER, ...brandCountMap.keys()]));
+
   const allBrandsList = allBrandSlugs.map(slug => {
     const predefinedObj = PREDEFINED_BRANDS.find(b => b.toLowerCase() === slug);
-    const name = predefinedObj ?? (originalNames.get(slug) ?? slug).charAt(0).toUpperCase() + (originalNames.get(slug) ?? slug).slice(1);
-    return { name: typeof name === "string" ? name : name, slug, count: brandCountMap.get(slug) || 0 };
+    const raw = originalNames.get(slug) ?? slug;
+    const name = predefinedObj ?? (raw.charAt(0).toUpperCase() + raw.slice(1));
+    return { name, slug, count: brandCountMap.get(slug) || 0 };
   });
 
-  const sortedForTop10 = [...allBrandsList].sort((a, b) => {
+  const sortedForTop5 = [...allBrandsList].sort((a, b) => {
     if (b.count !== a.count) return b.count - a.count;
     const aIdx = PREDEFINED_LOWER.indexOf(a.slug);
     const bIdx = PREDEFINED_LOWER.indexOf(b.slug);
@@ -374,7 +379,7 @@ export default async function EquiposPage({
     return a.name.localeCompare(b.name);
   });
 
-  const top10Brands = sortedForTop10.slice(0, 10);
+  const top5Brands = sortedForTop5.slice(0, 5);
   const alphabeticalBrands = [...allBrandsList].sort((a, b) => a.name.localeCompare(b.name));
 
   /* ─── Ciudades ─── */
@@ -453,13 +458,35 @@ export default async function EquiposPage({
     ...(sinReparaciones && { sinReparaciones }),
   };
 
-  /* ─── Conteo de filtros activos ─── */
+  /* ─── Chips de filtros activos ─── */
 
-  const activeFilterCount = [
-    seccion, tipo, marca, condicion, precioMin, precioMax,
-    ciudad, subtipo, anio, tamanio, referencia, largoLineas,
-    incluyeBarra, incluyeMaleta, incluyeLeash, sinReparaciones,
-  ].filter(Boolean).length;
+  // Etiqueta de subtipo activo
+  const subtipoLabel = (() => {
+    if (!subtipo || !smartConfig) return null;
+    const sf = smartConfig.linkFilters.find(f => f.kind === "subtipo") as { kind: "subtipo"; options: { value: string; label: string }[] } | undefined;
+    return sf?.options.find(o => o.value === subtipo)?.label ?? subtipo;
+  })();
+
+  type ActiveChip = { label: string; clearUrl: string };
+  const activeChips: ActiveChip[] = [
+    seccion  && { label: DISCIPLINES.find(d => d.value === seccion)?.label ?? seccion,  clearUrl: buildUrl({ seccion: "", tipo: "", subtipo: "", incluyeBarra: "", incluyeMaleta: "", incluyeLeash: "", sinReparaciones: "", anio: "", tamanio: "", referencia: "", largoLineas: "" }) },
+    tipo     && { label: getTypeLabel(tipo), clearUrl: buildUrl({ tipo: "", subtipo: "", incluyeBarra: "", incluyeMaleta: "", incluyeLeash: "", sinReparaciones: "", anio: "", tamanio: "", referencia: "", largoLineas: "" }) },
+    marca    && { label: marca.charAt(0).toUpperCase() + marca.slice(1), clearUrl: buildUrl({ marca: "" }) },
+    condicion && { label: CONDITIONS.find(c => c.value === condicion)?.label ?? condicion, clearUrl: buildUrl({ condicion: "" }) },
+    ciudad   && { label: ciudad, clearUrl: buildUrl({ ciudad: "" }) },
+    subtipo  && subtipoLabel && { label: subtipoLabel, clearUrl: buildUrl({ subtipo: "" }) },
+    anio     && { label: `Año ${anio}`, clearUrl: buildUrl({ anio: "" }) },
+    tamanio  && { label: `Talla ${tamanio}`, clearUrl: buildUrl({ tamanio: "" }) },
+    referencia && { label: `Ref. ${referencia}`, clearUrl: buildUrl({ referencia: "" }) },
+    largoLineas && { label: `Líneas ${largoLineas}`, clearUrl: buildUrl({ largoLineas: "" }) },
+    incluyeBarra   === "si" && { label: "Con barra",          clearUrl: buildUrl({ incluyeBarra: "" }) },
+    incluyeMaleta  === "si" && { label: "Con maleta",         clearUrl: buildUrl({ incluyeMaleta: "" }) },
+    incluyeLeash   === "si" && { label: "Con leash",          clearUrl: buildUrl({ incluyeLeash: "" }) },
+    sinReparaciones === "si" && { label: "Sin reparaciones",  clearUrl: buildUrl({ sinReparaciones: "" }) },
+    (precioMin || precioMax) && { label: `${precioMin ? `$${parseInt(precioMin).toLocaleString("es-CO")}` : ""}${precioMin && precioMax ? " – " : ""}${precioMax ? `$${parseInt(precioMax).toLocaleString("es-CO")}` : ""}`, clearUrl: buildUrl({ precioMin: "", precioMax: "" }) },
+  ].filter(Boolean) as ActiveChip[];
+
+  const activeFilterCount = activeChips.length;
 
   return (
     <div className="bg-[#FAFAF8] min-h-screen overflow-x-hidden">
@@ -498,6 +525,30 @@ export default async function EquiposPage({
           {/* ── Sidebar ── */}
           <aside className="hidden lg:block w-56 shrink-0 space-y-6">
             <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 space-y-6">
+
+              {/* Filtros activos */}
+              {activeChips.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider">Filtros activos</h3>
+                    <Link href="/equipos" className="text-[10px] text-red-400 hover:text-red-600 font-medium">
+                      Limpiar todo
+                    </Link>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeChips.map((chip) => (
+                      <Link
+                        key={chip.label}
+                        href={chip.clearUrl}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#111827] text-white text-xs font-medium rounded-full hover:bg-[#374151] transition-colors"
+                      >
+                        {chip.label}
+                        <span className="ml-0.5 opacity-70 hover:opacity-100 text-[10px] leading-none">✕</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Sección */}
               <div>
@@ -555,7 +606,7 @@ export default async function EquiposPage({
 
               {/* Marca */}
               <BrandFilterClient
-                top10Brands={top10Brands.map(b => ({ ...b, href: buildUrl({ marca: b.slug }) }))}
+                top5Brands={top5Brands.map(b => ({ ...b, href: buildUrl({ marca: b.slug }) }))}
                 alphabeticalBrands={alphabeticalBrands.map(b => ({ ...b, href: buildUrl({ marca: b.slug }) }))}
                 currentMarca={marca}
                 clearMarcaHref={buildUrl({ marca: "" })}
@@ -697,15 +748,6 @@ export default async function EquiposPage({
                 </form>
               </div>
 
-              {/* Limpiar filtros */}
-              {activeFilterCount > 0 && (
-                <Link
-                  href="/equipos"
-                  className="block text-center text-sm text-red-500 hover:text-red-600 font-medium"
-                >
-                  Limpiar filtros
-                </Link>
-              )}
             </div>
           </aside>
 
@@ -719,7 +761,7 @@ export default async function EquiposPage({
                   disciplines={DISCIPLINES.map(d => ({ value: d.value, label: d.label }))}
                   equipmentTypes={visibleTypes.map(t => ({ value: t.value, label: getTypeLabel(t.value) }))}
                   conditions={CONDITIONS.map(c => ({ value: c.value, label: c.label }))}
-                  top10Brands={top10Brands.map(b => ({ name: b.name, slug: b.slug, count: b.count }))}
+                  top5Brands={top5Brands.map(b => ({ name: b.name, slug: b.slug, count: b.count }))}
                   currentDisciplina={seccion}
                   currentTipo={tipo}
                   currentCondicion={condicion}

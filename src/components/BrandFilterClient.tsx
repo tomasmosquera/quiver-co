@@ -12,14 +12,14 @@ export interface BrandItem {
 }
 
 interface BrandFilterClientProps {
-  top10Brands: BrandItem[];
+  top5Brands: BrandItem[];
   alphabeticalBrands: BrandItem[];
   currentMarca: string;
   clearMarcaHref: string;
 }
 
 export default function BrandFilterClient({
-  top10Brands,
+  top5Brands,
   alphabeticalBrands,
   currentMarca,
   clearMarcaHref,
@@ -58,7 +58,7 @@ export default function BrandFilterClient({
         >
           Todas las marcas
         </Link>
-        {top10Brands.map((b) => (
+        {top5Brands.map((b) => (
           <Link
             key={b.slug}
             href={b.href}

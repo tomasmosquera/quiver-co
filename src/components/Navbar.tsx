@@ -9,14 +9,14 @@ import NavbarUser from "@/components/NavbarUser";
 import { useSession, signOut } from "next-auth/react";
 
 const DISCIPLINES = [
-  { name: "Kitesurf",    slug: "kitesurf" },
-  { name: "Kitefoil",    slug: "kitefoil" },
-  { name: "Wingfoil",    slug: "wingfoil" },
-  { name: "Accesorios",  slug: "accesorios" },
+  { name: "Kitesurf",    slug: "kitesurf",    seccion: "KITESURF" },
+  { name: "Kitefoil",    slug: "kitefoil",    seccion: "KITEFOIL" },
+  { name: "Wingfoil",    slug: "wingfoil",    seccion: "WINGFOIL" },
+  { name: "Accesorios",  slug: "accesorios",  seccion: "Accesorios" },
 ];
 
 const EQUIPMENT = [
-  { label: "Cometas",  value: "COMETA_WING" },
+  { label: "Cometas",  value: "COMETA" },
   { label: "Tablas",           value: "TABLA" },
   { label: "Barras & Líneas",  value: "BARRA_LINEAS" },
   { label: "Foils",            value: "FOIL" },
@@ -144,7 +144,7 @@ export default function Navbar() {
                 {DISCIPLINES.map((d) => (
                   <Link
                     key={d.slug}
-                    href={`/equipos?seccion=${d.slug.toUpperCase()}`}
+                    href={`/equipos?seccion=${d.seccion}`}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] hover:text-[#111827] transition-colors"
                     onClick={() => setDiscOpen(false)}
                   >
@@ -280,7 +280,7 @@ export default function Navbar() {
                 {DISCIPLINES.map((d) => (
                   <Link
                     key={d.slug}
-                    href={`/equipos?seccion=${d.slug.toUpperCase()}`}
+                    href={`/equipos?seccion=${d.seccion}`}
                     className="px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
                     onClick={() => setMenuOpen(false)}
                   >

@@ -21,14 +21,28 @@ enum Discipline {
 }
 
 enum EquipmentType {
-  COMETA_WING
+  COMETA
+  WING
   TABLA
   BARRA_LINEAS
+  LEASH
   FOIL
   ARNES
   TRAJE
   ACCESORIO
   COMBO
+  ACC_COMETA
+  ACC_WING
+  ACC_BARRA
+  ACC_TABLA
+  ACC_ARNES
+  BOMBAS
+  MALETAS
+  WETSUIT
+  PONCHO
+  PROTECCION
+  TECNOLOGIA
+  OTROS
 }
 
 enum Condition {

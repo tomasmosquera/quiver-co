@@ -21,7 +21,7 @@ const DISCIPLINE_META = [
 ];
 
 const EQUIPMENT_TYPES = [
-  { name: "Cometas", icon: "🪁", href: "/equipos?tipo=COMETA_WING" },
+  { name: "Cometas", icon: "🪁", href: "/equipos?tipo=COMETA" },
   { name: "Tablas",          icon: "🏄", href: "/equipos?tipo=TABLA" },
   { name: "Barras & Líneas", icon: "🎯", href: "/equipos?tipo=BARRA_LINEAS" },
   { name: "Foils",           icon: "⚡", href: "/equipos?tipo=FOIL" },
