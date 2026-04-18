@@ -272,6 +272,7 @@ model Order {
   shippedAt        DateTime?
   deliveredAt      DateTime?
   deliveryDeadline DateTime?
+  shippingProofUrl String?
 
   @@map("orders")
 }

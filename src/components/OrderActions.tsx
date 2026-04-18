@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Loader2, X, Truck } from "lucide-react";
+import { Loader2, X, Truck, Upload, ImageIcon, XCircle } from "lucide-react";
 
 interface Props {
   orderId: string;
@@ -12,7 +12,134 @@ interface Props {
   hasReview: boolean;
 }
 
+// ── Ship Modal ────────────────────────────────────────────────────────────────
+
 function ShipModal({
+  onConfirm,
+  onCancel,
+}: {
+  onConfirm: (proofUrl: string) => void;
+  onCancel: () => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key === "Escape") onCancel();
+    }
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onCancel]);
+
+  async function handleFile(file: File) {
+    setUploadError("");
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    setUploading(false);
+    if (!res.ok) { setUploadError("Error subiendo la imagen, intenta de nuevo."); return; }
+    const { url } = await res.json();
+    setProofUrl(url);
+    setPreview(URL.createObjectURL(file));
+  }
+
+  async function handleConfirm() {
+    if (!proofUrl) { setUploadError("Debes subir la prueba de envío."); return; }
+    setConfirming(true);
+    await onConfirm(proofUrl);
+    setConfirming(false);
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm space-y-4">
+        <button onClick={onCancel} className="absolute top-4 right-4 text-[#9CA3AF] hover:text-[#374151]">
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+          <Truck className="w-5 h-5 text-[#3B82F6]" />
+        </div>
+
+        <div>
+          <h3 className="text-base font-bold text-[#111827] mb-1">Confirmar envío</h3>
+          <p className="text-sm text-[#6B7280]">
+            Sube una foto de la guía o recibo de envío como comprobante. El comprador tendrá 15 días para confirmar la entrega.
+          </p>
+        </div>
+
+        {/* Upload area */}
+        <div>
+          {preview ? (
+            <div className="relative rounded-xl overflow-hidden border border-[#E5E7EB]">
+              <img src={preview} alt="Prueba de envío" className="w-full h-40 object-cover" />
+              <button
+                onClick={() => { setProofUrl(null); setPreview(null); }}
+                className="absolute top-2 right-2 bg-white rounded-full p-0.5 shadow"
+              >
+                <XCircle className="w-5 h-5 text-red-500" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              className="w-full h-32 border-2 border-dashed border-[#E5E7EB] rounded-xl flex flex-col items-center justify-center gap-2 hover:border-[#3B82F6] hover:bg-blue-50 transition-colors disabled:opacity-60"
+            >
+              {uploading ? (
+                <Loader2 className="w-6 h-6 text-[#3B82F6] animate-spin" />
+              ) : (
+                <>
+                  <Upload className="w-6 h-6 text-[#9CA3AF]" />
+                  <span className="text-sm text-[#6B7280]">Toca para subir foto o documento</span>
+                  <span className="text-xs text-[#9CA3AF]">JPG, PNG, PDF</span>
+                </>
+              )}
+            </button>
+          )}
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*,.pdf"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+          />
+          {uploadError && <p className="text-xs text-red-600 mt-1">{uploadError}</p>}
+        </div>
+
+        <div className="flex gap-3 pt-1">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-2.5 text-sm border border-[#E5E7EB] rounded-xl text-[#374151] hover:bg-[#F9FAFB] font-medium transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={!proofUrl || confirming}
+            className="flex-1 py-2.5 text-sm bg-[#111827] hover:bg-[#374151] text-white rounded-xl font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {confirming && <Loader2 className="w-4 h-4 animate-spin" />}
+            Confirmar envío
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+// ── Cancel Modal ──────────────────────────────────────────────────────────────
+
+function CancelModal({
   onConfirm,
   onCancel,
   loading,
@@ -32,36 +159,33 @@ function ShipModal({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <button
-          onClick={onCancel}
-          className="absolute top-4 right-4 text-[#9CA3AF] hover:text-[#374151]"
-        >
+      <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm space-y-4">
+        <button onClick={onCancel} className="absolute top-4 right-4 text-[#9CA3AF] hover:text-[#374151]">
           <X className="w-4 h-4" />
         </button>
-        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-          <Truck className="w-5 h-5 text-[#3B82F6]" />
+        <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+          <XCircle className="w-5 h-5 text-red-500" />
         </div>
-        <h3 className="text-base font-bold text-[#111827] mb-1">
-          ¿Marcar como enviado?
-        </h3>
-        <p className="text-sm text-[#6B7280] mb-5">
-          Confirma que ya despachaste el equipo. El comprador recibirá 15 días para confirmar la entrega.
-        </p>
-        <div className="flex gap-3">
+        <div>
+          <h3 className="text-base font-bold text-[#111827] mb-1">¿Cancelar esta orden?</h3>
+          <p className="text-sm text-[#6B7280]">
+            El artículo volverá a estar disponible en el marketplace. Esta acción no se puede deshacer.
+          </p>
+        </div>
+        <div className="flex gap-3 pt-1">
           <button
             onClick={onCancel}
             className="flex-1 py-2.5 text-sm border border-[#E5E7EB] rounded-xl text-[#374151] hover:bg-[#F9FAFB] font-medium transition-colors"
           >
-            Cancelar
+            Volver
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 py-2.5 text-sm bg-[#111827] hover:bg-[#374151] text-white rounded-xl font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 text-sm bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            Confirmar envío
+            Sí, cancelar
           </button>
         </div>
       </div>
@@ -70,13 +194,9 @@ function ShipModal({
   );
 }
 
-function StarRating({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-}) {
+// ── Star Rating ───────────────────────────────────────────────────────────────
+
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [hovered, setHovered] = useState(0);
   return (
     <div className="flex gap-1">
@@ -108,10 +228,13 @@ function StarRating({
   );
 }
 
+// ── Main Component ────────────────────────────────────────────────────────────
+
 export default function OrderActions({ orderId, status, role, hasReview }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showShipModal, setShowShipModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [extendedMsg, setExtendedMsg] = useState(false);
 
   // Review state
@@ -120,10 +243,27 @@ export default function OrderActions({ orderId, status, role, hasReview }: Props
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
   const [reviewError, setReviewError] = useState("");
 
-  async function callApi(path: string, method = "PATCH") {
+  async function callApi(path: string, method = "PATCH", body?: object) {
     setLoading(true);
-    await fetch(`/api/orders/${orderId}/${path}`, { method });
+    await fetch(`/api/orders/${orderId}/${path}`, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
     setLoading(false);
+    router.refresh();
+  }
+
+  async function handleShipConfirm(proofUrl: string) {
+    setShowShipModal(false);
+    await callApi("ship", "PATCH", { shippingProofUrl: proofUrl });
+  }
+
+  async function handleCancel() {
+    setLoading(true);
+    await fetch(`/api/orders/${orderId}/cancel`, { method: "PATCH" });
+    setLoading(false);
+    setShowCancelModal(false);
     router.refresh();
   }
 
@@ -147,17 +287,22 @@ export default function OrderActions({ orderId, status, role, hasReview }: Props
     }
   }
 
+  // Who can cancel?
+  const canCancel =
+    (role === "buyer" && status === "PENDING") ||
+    (role === "seller" && (status === "PENDING" || status === "PAID"));
+
   return (
     <>
       <div className="mt-4 space-y-3">
+
         {/* Seller + PAID: mark as shipped */}
         {role === "seller" && status === "PAID" && (
           <button
             onClick={() => setShowShipModal(true)}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#111827] hover:bg-[#374151] text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#111827] hover:bg-[#374151] text-white text-sm font-semibold rounded-xl transition-colors"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Truck className="w-4 h-4" />}
+            <Truck className="w-4 h-4" />
             Marcar como enviado
           </button>
         )}
@@ -222,12 +367,29 @@ export default function OrderActions({ orderId, status, role, hasReview }: Props
         {(reviewSubmitted || (role === "buyer" && status === "DELIVERED" && hasReview)) && (
           <p className="text-sm text-[#6B7280]">Ya dejaste tu reseña para este vendedor.</p>
         )}
+
+        {/* Cancel button */}
+        {canCancel && (
+          <button
+            onClick={() => setShowCancelModal(true)}
+            className="text-xs text-red-500 hover:text-red-700 underline underline-offset-2 transition-colors"
+          >
+            Cancelar orden
+          </button>
+        )}
       </div>
 
       {showShipModal && (
         <ShipModal
-          onConfirm={() => { setShowShipModal(false); callApi("ship"); }}
+          onConfirm={handleShipConfirm}
           onCancel={() => setShowShipModal(false)}
+        />
+      )}
+
+      {showCancelModal && (
+        <CancelModal
+          onConfirm={handleCancel}
+          onCancel={() => setShowCancelModal(false)}
           loading={loading}
         />
       )}

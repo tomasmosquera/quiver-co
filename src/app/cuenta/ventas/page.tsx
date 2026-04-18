@@ -90,16 +90,24 @@ export default async function VentasPage() {
                       <p className="text-sm font-semibold text-[#111827]">{order.buyerName}</p>
                       <p className="text-xs text-[#374151]">C.C. {order.buyerIdDoc}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-[#9CA3AF] mb-0.5 flex items-center gap-1"><Phone className="w-3 h-3" /> Contacto</p>
-                      <p className="text-sm font-semibold text-[#111827]">{order.buyerPhone}</p>
-                      <p className="text-xs text-[#374151]">{order.buyer.email}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-[#9CA3AF] mb-0.5 flex items-center gap-1"><MapPin className="w-3 h-3" /> Dirección</p>
-                      <p className="text-sm font-semibold text-[#111827]">{order.buyerCity}</p>
-                      <p className="text-xs text-[#374151] leading-relaxed">{order.buyerAddress}</p>
-                    </div>
+                    {order.status === "PENDING" ? (
+                      <div className="sm:col-span-2 flex items-center">
+                        <p className="text-xs text-[#9CA3AF] italic">Los datos de contacto y dirección estarán disponibles una vez confirmemos el pago.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="text-xs text-[#9CA3AF] mb-0.5 flex items-center gap-1"><Phone className="w-3 h-3" /> Contacto</p>
+                          <p className="text-sm font-semibold text-[#111827]">{order.buyerPhone}</p>
+                          <p className="text-xs text-[#374151]">{order.buyer.email}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-[#9CA3AF] mb-0.5 flex items-center gap-1"><MapPin className="w-3 h-3" /> Dirección</p>
+                          <p className="text-sm font-semibold text-[#111827]">{order.buyerCity}</p>
+                          <p className="text-xs text-[#374151] leading-relaxed">{order.buyerAddress}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <OrderTimeline

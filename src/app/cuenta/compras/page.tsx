@@ -15,7 +15,7 @@ export default async function ComprasPage() {
       where: { buyerId: session.user.id },
       include: {
         listing: { include: { images: { orderBy: { order: "asc" }, take: 1 } } },
-        seller: { select: { name: true, phone: true } },
+        seller: { select: { name: true, phone: true, email: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -26,7 +26,7 @@ export default async function ComprasPage() {
   ]);
 
   // Set of sellerIds the buyer has already reviewed
-  const reviewedSellerIds = new Set(reviews.map((r) => r.subjectId));
+  const reviewedSellerIds = new Set(reviews.map((r: { subjectId: string }) => r.subjectId));
 
   const statusLabel: Record<string, string> = {
     PENDING:   "Validando pago",
@@ -74,9 +74,12 @@ export default async function ComprasPage() {
                     </div>
                     <h3 className="font-bold text-[#111827] leading-snug">{order.listing.title}</h3>
                     <p className="text-sm font-medium text-[#111827] mt-1">${order.amount.toLocaleString("es-CO")} COP</p>
-                    <div className="mt-2 flex gap-4 text-xs text-[#6B7280]">
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#6B7280]">
                       <p>Vendedor: <span className="font-medium text-[#374151]">{order.seller.name}</span></p>
                       <p>Destino: <span className="font-medium text-[#374151]">{order.buyerCity}</span></p>
+                      {["PAID","SHIPPED","DELIVERED"].includes(order.status) && order.seller.phone && (
+                        <p>Contacto vendedor: <span className="font-medium text-[#374151]">{order.seller.phone}</span></p>
+                      )}
                     </div>
                   </div>
 
