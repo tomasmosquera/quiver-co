@@ -256,7 +256,7 @@ export default function BoardFields({
 
       {/* Referencia / modelo */}
       <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Referencia / Modelo *</label>
+        <label className="block text-sm font-semibold text-[#374151] mb-1">Referencia / Modelo <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
         <input
           type="text"
           value={meta.reference ?? ""}

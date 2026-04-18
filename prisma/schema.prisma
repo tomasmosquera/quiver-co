@@ -17,6 +17,7 @@ enum Discipline {
   KITEFOIL
   WAKEBOARD
   PADDLE
+  WATERWEAR
 }
 
 enum EquipmentType {

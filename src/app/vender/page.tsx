@@ -20,12 +20,13 @@ import CityPicker from "@/components/CityPicker";
 const COMING_SOON = ["WINDSURF", "WAKEBOARD", "PADDLE"];
 
 const DISCIPLINES = [
-  { value: "KITESURF",  label: "Kitesurf",  emoji: "🪁" },
-  { value: "KITEFOIL",  label: "Kitefoil",  emoji: "🚀" },
-  { value: "WINGFOIL",  label: "Wingfoil",  emoji: "🪽" },
-  { value: "WINDSURF",  label: "Windsurf",  emoji: "⛵" },
-  { value: "WAKEBOARD", label: "Wakeboard", emoji: "🚤" },
-  { value: "PADDLE",    label: "Paddle",    emoji: "🧘" },
+  { value: "KITESURF",   label: "Kitesurf",   emoji: "🪁" },
+  { value: "KITEFOIL",   label: "Kitefoil",   emoji: "🚀" },
+  { value: "WINGFOIL",   label: "Wingfoil",   emoji: "🪽" },
+  { value: "WATERWEAR",  label: "Accesorios", emoji: "🎒" },
+  { value: "WINDSURF",   label: "Windsurf",   emoji: "⛵" },
+  { value: "WAKEBOARD",  label: "Wakeboard",  emoji: "🚤" },
+  { value: "PADDLE",     label: "Paddle",     emoji: "🧘" },
 ];
 
 const EQUIPMENT_TYPES_BY_DISCIPLINE: Record<string, { value: string; label: string }[]> = {
@@ -34,21 +35,32 @@ const EQUIPMENT_TYPES_BY_DISCIPLINE: Record<string, { value: string; label: stri
     { value: "TABLA",       label: "Tabla" },
     { value: "BARRA_LINEAS",label: "Barra & Líneas" },
     { value: "ARNES",       label: "Arnés" },
-    { value: "ACCESORIO",   label: "Accesorios" },
   ],
   KITEFOIL: [
     { value: "COMETA_WING", label: "Cometa" },
     { value: "TABLA",       label: "Tabla" },
     { value: "BARRA_LINEAS",label: "Barra & Líneas" },
     { value: "ARNES",       label: "Arnés" },
-    { value: "ACCESORIO",   label: "Accesorios" },
   ],
   WINGFOIL: [
     { value: "COMETA_WING", label: "Wing" },
     { value: "TABLA",       label: "Tabla" },
     { value: "BARRA_LINEAS",label: "Leash" },
     { value: "ARNES",       label: "Arnés" },
-    { value: "ACCESORIO",   label: "Accesorios" },
+  ],
+  WATERWEAR: [
+    { value: "ACC_COMETA",  label: "Accesorios de cometa" },
+    { value: "ACC_WING",    label: "Accesorios de wing" },
+    { value: "ACC_BARRA",   label: "Accesorios de barra" },
+    { value: "ACC_TABLA",   label: "Accesorios de tabla" },
+    { value: "ACC_ARNES",   label: "Accesorios de arnés" },
+    { value: "BOMBAS",      label: "Bombas" },
+    { value: "MALETAS",     label: "Maletas y bolsas" },
+    { value: "WETSUIT",     label: "Wetsuits" },
+    { value: "PONCHO",      label: "Ponchos y Toallas" },
+    { value: "PROTECCION",  label: "Protección" },
+    { value: "TECNOLOGIA",  label: "Tecnología" },
+    { value: "OTROS",       label: "Otros" },
   ],
   WINDSURF: [
     { value: "COMETA_WING", label: "Vela" },
@@ -75,7 +87,7 @@ const CONDITIONS = [
 ];
 
 
-const STEPS = ["Disciplina", "Detalles", "Fotos", "Confirmar"];
+const STEPS = ["Sección", "Detalles", "Fotos", "Confirmar"];
 
 /* ─── Tipos ─── */
 
@@ -142,6 +154,36 @@ export default function VenderPage() {
     maletas:           "Ej: Cogua Golfbag, Maleta Evo SLS 9m...",
     tecnologia:        "Ej: Woo Sports 3.0, Medidor de viento Weatherflow...",
     otros:             "Ej: Calcomanías Cabrinha, Calcomanías Airush...",
+  };
+
+  const WATERWEAR_TITLE_PLACEHOLDERS: Record<string, string> = {
+    ACC_COMETA:  "Ej: Válvula Ozone Edge V12, Parche de poros Cabrinha...",
+    ACC_WING:    "Ej: Handle ION Boom Wing, Inflate valve Duotone...",
+    ACC_BARRA:   "Ej: Quickrelease Duotone, Freeride Loop North...",
+    ACC_TABLA:   "Ej: Handle Hulu, Orca Fins, Pad & Strap Cabrinha...",
+    ACC_ARNES:   "Ej: Spreader bar Ride Engine, Hook Mystic M...",
+    BOMBAS:      "Ej: Bomba Cabrinha 03, Adaptador para bomba Duotone...",
+    MALETAS:     "Ej: Cogua Golfbag, Maleta Evo SLS 9m...",
+    WETSUIT:     "Ej: Traje ION 5/4 Seek Core, Wetsuit Manera Seafarer...",
+    PONCHO:      "Ej: Poncho Prolimit Velcro, Toalla Mystic Poncho...",
+    PROTECCION:  "Ej: Casco Mystic MK8, Chaleco ION Riot Float...",
+    TECNOLOGIA:  "Ej: Woo Sports 3.0, Medidor de viento Weatherflow...",
+    OTROS:       "Ej: Calcomanías Cabrinha, Sticker pack Airush...",
+  };
+
+  const WATERWEAR_BRAND_PLACEHOLDERS: Record<string, string> = {
+    ACC_COMETA:  "Ej: Cabrinha, Ozone, Duotone...",
+    ACC_WING:    "Ej: Duotone, ION, F-One...",
+    ACC_BARRA:   "Ej: Duotone, North, Cabrinha...",
+    ACC_TABLA:   "Ej: Cabrinha, Slingshot, Hulu...",
+    ACC_ARNES:   "Ej: Ride Engine, Mystic, Dakine...",
+    BOMBAS:      "Ej: Cabrinha, Duotone, Ozone...",
+    MALETAS:     "Ej: Cogua, Duotone, Cabrinha...",
+    WETSUIT:     "Ej: ION, Manera, Prolimit, Mystic...",
+    PONCHO:      "Ej: Prolimit, Mystic, ION...",
+    PROTECCION:  "Ej: Mystic, ION, Prolimit...",
+    TECNOLOGIA:  "Ej: Woo, Weatherflow, GoPro...",
+    OTROS:       "Ej: Cabrinha, Airush, Duotone...",
   };
   const equipmentTypes = EQUIPMENT_TYPES_BY_DISCIPLINE[form.discipline] ?? EQUIPMENT_TYPES_BY_DISCIPLINE._DEFAULT;
 
@@ -212,7 +254,6 @@ export default function VenderPage() {
       if (!form.equipmentType) return "Selecciona el tipo de equipo";
       if (isKiteCometa) {
         if (!form.brand.trim())                      return "Escribe la marca de la cometa";
-        if (!form.metadata.reference?.trim())         return "Escribe la referencia / modelo";
         if (!form.size)                              return "Selecciona el tamaño";
         if (!form.metadata.year)                     return "Selecciona el año";
         if (form.metadata.includesBar === undefined)  return "Indica si incluye barra y líneas";
@@ -222,18 +263,22 @@ export default function VenderPage() {
       if (isKiteTabla) {
         if (!form.metadata.boardType)                return "Selecciona el tipo de tabla";
         if (!form.brand.trim())                      return "Escribe la marca de la tabla";
-        if (!form.metadata.reference?.trim())         return "Escribe la referencia / modelo";
         if (!form.size)                              return "Selecciona el tamaño";
         if (!form.metadata.year)                     return "Selecciona el año";
         if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
       }
       if (isKiteBarra) {
-        if (!form.brand.trim())                    return "Selecciona la marca de la barra";
-        if (!form.metadata.reference?.trim())       return "Escribe la referencia / modelo";
-        if (!form.size)                            return "Selecciona el tamaño de la barra";
-        if (!form.metadata.year)                   return "Selecciona el año";
-        if (!form.metadata.lineLength)             return "Selecciona el largo de las líneas";
-        if (form.metadata.hasRepairs === undefined) return "Indica si tiene reparaciones";
+        if (form.discipline === "WINGFOIL") {
+          if (!form.brand.trim())                    return "Selecciona la marca del leash";
+          if (!form.metadata.lineLength)             return "Selecciona el tipo de leash";
+          if (form.metadata.hasRepairs === undefined) return "Indica si tiene reparaciones";
+        } else {
+          if (!form.brand.trim())                    return "Selecciona la marca de la barra";
+          if (!form.size)                            return "Selecciona el tamaño de la barra";
+          if (!form.metadata.year)                   return "Selecciona el año";
+          if (!form.metadata.lineLength)             return "Selecciona el largo de las líneas";
+          if (form.metadata.hasRepairs === undefined) return "Indica si tiene reparaciones";
+        }
       }
       if (isKiteArnes) {
         if (!form.metadata.arnesType)              return "Selecciona el tipo de arnés";
@@ -332,8 +377,8 @@ export default function VenderPage() {
           {/* ── Paso 0: Disciplina ── */}
           {step === 0 && (
             <div>
-              <h2 className="text-lg font-bold text-[#111827] mb-1">¿Qué disciplina?</h2>
-              <p className="text-sm text-[#6B7280] mb-6">Selecciona el deporte al que pertenece el equipo</p>
+              <h2 className="text-lg font-bold text-[#111827] mb-1">¿Qué sección o disciplina?</h2>
+              <p className="text-sm text-[#6B7280] mb-6">Selecciona el deporte o la sección a la que pertenece el equipo</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {DISCIPLINES.map((d) => {
                   const soon = COMING_SOON.includes(d.value);
@@ -353,9 +398,6 @@ export default function VenderPage() {
                       <span className={`text-sm font-semibold ${form.discipline === d.value && !soon ? "text-[#3B82F6]" : "text-[#374151]"}`}>
                         {d.label}
                       </span>
-                      {soon && (
-                        <span className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wider">Próximamente</span>
-                      )}
                     </button>
                   );
                 })}
@@ -487,7 +529,7 @@ export default function VenderPage() {
 
               {/* Título */}
               <div>
-                <label className="block text-sm font-semibold text-[#374151] mb-1">Título del anuncio</label>
+                <label className="block text-sm font-semibold text-[#374151] mb-1">Título del anuncio *</label>
                 {hasSpecialFields ? (
                   <div className="w-full px-4 py-2.5 border border-[#E5E7EB] rounded-xl text-sm bg-[#F9FAFB] text-[#374151] min-h-[42px]">
                     {autoTitle || <span className="text-[#9CA3AF]">Se genera automáticamente con los datos del equipo</span>}
@@ -501,6 +543,8 @@ export default function VenderPage() {
                       placeholder={
                         isKiteAccesorio && form.metadata.accesorioType
                           ? ACCESORIO_PLACEHOLDERS[form.metadata.accesorioType] ?? "Escribe el título del anuncio"
+                          : form.discipline === "WATERWEAR" && form.equipmentType
+                          ? WATERWEAR_TITLE_PLACEHOLDERS[form.equipmentType] ?? "Escribe el título del anuncio"
                           : "Ej: Tabla Wakeboard Liquid Force 142"
                       }
                       maxLength={100}
@@ -511,30 +555,43 @@ export default function VenderPage() {
                 )}
               </div>
 
-              {/* Marca y talla (solo si NO tiene campos especiales ni es accesorio) */}
+              {/* Marca y talla */}
               {!hasSpecialFields && !isKiteAccesorio && (
-                <div className="grid grid-cols-2 gap-4">
+                form.discipline === "WATERWEAR" ? (
                   <div>
-                    <label className="block text-sm font-semibold text-[#374151] mb-1">Marca</label>
+                    <label className="block text-sm font-semibold text-[#374151] mb-1">Marca <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
                     <input
                       type="text"
                       value={form.brand}
                       onChange={e => set("brand", e.target.value)}
-                      placeholder="Ej: Cabrinha, Duotone..."
+                      placeholder={form.equipmentType ? WATERWEAR_BRAND_PLACEHOLDERS[form.equipmentType] ?? "Ej: Cabrinha, ION, Dakine..." : "Ej: Cabrinha, ION, Dakine..."}
                       className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#374151] mb-1">Talla / Tamaño</label>
-                    <input
-                      type="text"
-                      value={form.size}
-                      onChange={e => set("size", e.target.value)}
-                      placeholder="Ej: 142cm, M, 7.0m²..."
-                      className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
-                    />
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-[#374151] mb-1">Marca</label>
+                      <input
+                        type="text"
+                        value={form.brand}
+                        onChange={e => set("brand", e.target.value)}
+                        placeholder="Ej: Cabrinha, Duotone..."
+                        className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#374151] mb-1">Talla / Tamaño</label>
+                      <input
+                        type="text"
+                        value={form.size}
+                        onChange={e => set("size", e.target.value)}
+                        placeholder="Ej: 142cm, M, 7.0m²..."
+                        className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+                      />
+                    </div>
                   </div>
-                </div>
+                )
               )}
 
               {/* Estado */}

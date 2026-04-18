@@ -70,6 +70,7 @@ const CONDITION_COLORS: Record<string, string> = {
 const DISCIPLINE_LABELS: Record<string, string> = {
   KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
   WINDSURF: "Windsurf", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
+  WATERWEAR: "Accesorios",
 };
 
 /* ─── Page ─── */
@@ -145,7 +146,7 @@ export default async function HomePage() {
               {DISCIPLINES.filter(d => !COMING_SOON_DISCIPLINES.includes(d.slug)).map((d) => (
                 <Link
                   key={d.slug}
-                  href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
+                  href={`/equipos?seccion=${d.slug.toUpperCase()}`}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1F2937] border border-[#374151] hover:border-[#3B82F6] text-[#D1D5DB] hover:text-white text-xs rounded-full transition-all"
                 >
                   {d.name}
@@ -217,7 +218,7 @@ export default async function HomePage() {
             return (
               <Link
                 key={d.slug}
-                href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
+                href={`/equipos?seccion=${d.slug.toUpperCase()}`}
                 className={`group border rounded-2xl p-5 flex flex-col gap-3 transition-all hover:shadow-md ${d.color}`}
               >
                 <div>

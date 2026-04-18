@@ -18,8 +18,9 @@ export default async function EditarPage({
     include: { images: { orderBy: { order: "asc" } } },
   });
 
+  const isAdmin = session.user.email === "tmosquera93@gmail.com";
   if (!listing || listing.status === "REMOVED") notFound();
-  if (listing.sellerId !== session.user.id) notFound();
+  if (!isAdmin && listing.sellerId !== session.user.id) notFound();
 
   return (
     <EditForm

@@ -14,6 +14,7 @@ import ContactButton from "@/components/ContactButton";
 const DISCIPLINE_LABELS: Record<string, string> = {
   KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
   WINDSURF: "Windsurf", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
+  WATERWEAR: "Accesorios",
 };
 
 const CONDITION_LABELS: Record<string, string> = {

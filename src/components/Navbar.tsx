@@ -9,9 +9,10 @@ import NavbarUser from "@/components/NavbarUser";
 import { useSession, signOut } from "next-auth/react";
 
 const DISCIPLINES = [
-  { name: "Kitesurf",   slug: "kitesurf" },
-  { name: "Kitefoil",   slug: "kitefoil" },
-  { name: "Wingfoil",   slug: "wingfoil" },
+  { name: "Kitesurf",    slug: "kitesurf" },
+  { name: "Kitefoil",    slug: "kitefoil" },
+  { name: "Wingfoil",    slug: "wingfoil" },
+  { name: "Accesorios",  slug: "accesorios" },
 ];
 
 const EQUIPMENT = [
@@ -136,14 +137,14 @@ export default function Navbar() {
               className="flex items-center gap-1 px-3 py-1.5 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB] rounded-md transition-colors"
               onClick={() => { setDiscOpen(!discOpen); setEquipOpen(false); setBrandOpen(false); }}
             >
-              Por disciplina <ChevronDown className={`w-3.5 h-3.5 transition-transform ${discOpen ? "rotate-180" : ""}`} />
+              Por sección <ChevronDown className={`w-3.5 h-3.5 transition-transform ${discOpen ? "rotate-180" : ""}`} />
             </button>
             {discOpen && (
               <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-[#E5E7EB] rounded-xl shadow-lg py-1.5 z-50">
                 {DISCIPLINES.map((d) => (
                   <Link
                     key={d.slug}
-                    href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
+                    href={`/equipos?seccion=${d.slug.toUpperCase()}`}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] hover:text-[#111827] transition-colors"
                     onClick={() => setDiscOpen(false)}
                   >
@@ -156,7 +157,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#3B82F6] font-medium hover:bg-[#F9FAFB] transition-colors"
                     onClick={() => setDiscOpen(false)}
                   >
-                    Ver todas las disciplinas →
+                    Ver todas las secciones →
                   </Link>
                 </div>
               </div>
@@ -271,7 +272,7 @@ export default function Navbar() {
               onClick={() => setMDiscOpen(!mDiscOpen)}
               className="flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB]"
             >
-              Por disciplina
+              Por sección
               <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform ${mDiscOpen ? "rotate-180" : ""}`} />
             </button>
             {mDiscOpen && (
@@ -279,7 +280,7 @@ export default function Navbar() {
                 {DISCIPLINES.map((d) => (
                   <Link
                     key={d.slug}
-                    href={`/equipos?disciplina=${d.slug.toUpperCase()}`}
+                    href={`/equipos?seccion=${d.slug.toUpperCase()}`}
                     className="px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
                     onClick={() => setMenuOpen(false)}
                   >

@@ -16,6 +16,7 @@ interface Props {
   currentTipo:       string;
   currentCondicion:  string;
   currentMarca:      string;
+  currentCiudad:     string;
   precioMin:         string;
   precioMax:         string;
   activeCount:       number;
@@ -25,7 +26,7 @@ interface Props {
 export default function MobileFilters({
   disciplines, equipmentTypes, conditions, top10Brands,
   currentDisciplina, currentTipo, currentCondicion, currentMarca,
-  precioMin, precioMax, activeCount, baseParams,
+  currentCiudad, precioMin, precioMax, activeCount, baseParams,
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -35,10 +36,11 @@ export default function MobileFilters({
   const [tipo,    setTipo]    = useState(currentTipo);
   const [cond,    setCond]    = useState(currentCondicion);
   const [marca,   setMarca]   = useState(currentMarca);
+  const [ciudad,  setCiudad]  = useState(currentCiudad);
   const [pMin,    setPMin]    = useState(precioMin);
   const [pMax,    setPMax]    = useState(precioMax);
 
-  const pendingCount = [disc, tipo, cond, marca, pMin, pMax].filter(Boolean).length;
+  const pendingCount = [disc, tipo, cond, marca, ciudad, pMin, pMax].filter(Boolean).length;
 
   function openModal() {
     // Sincronizar con los filtros actuales al abrir
@@ -46,6 +48,7 @@ export default function MobileFilters({
     setTipo(currentTipo);
     setCond(currentCondicion);
     setMarca(currentMarca);
+    setCiudad(currentCiudad);
     setPMin(precioMin);
     setPMax(precioMax);
     setOpen(true);
@@ -53,18 +56,19 @@ export default function MobileFilters({
 
   function applyFilters() {
     const params = new URLSearchParams(baseParams);
-    if (disc)  params.set("disciplina", disc);
-    if (tipo)  params.set("tipo", tipo);
-    if (cond)  params.set("condicion", cond);
-    if (marca) params.set("marca", marca);
-    if (pMin)  params.set("precioMin", pMin);
-    if (pMax)  params.set("precioMax", pMax);
+    if (disc)   params.set("seccion", disc);
+    if (tipo)   params.set("tipo", tipo);
+    if (cond)   params.set("condicion", cond);
+    if (marca)  params.set("marca", marca);
+    if (ciudad) params.set("ciudad", ciudad);
+    if (pMin)   params.set("precioMin", pMin);
+    if (pMax)   params.set("precioMax", pMax);
     router.push(`/equipos?${params.toString()}`);
     setOpen(false);
   }
 
   function clearFilters() {
-    setDisc(""); setTipo(""); setCond(""); setMarca(""); setPMin(""); setPMax("");
+    setDisc(""); setTipo(""); setCond(""); setMarca(""); setCiudad(""); setPMin(""); setPMax("");
   }
 
   function toggle(current: string, value: string, setter: (v: string) => void) {
@@ -171,6 +175,18 @@ export default function MobileFilters({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Ciudad */}
+              <div>
+                <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">Ciudad</h3>
+                <input
+                  type="text"
+                  value={ciudad}
+                  onChange={e => setCiudad(e.target.value)}
+                  placeholder="Ej: Cartagena, Santa Marta..."
+                  className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
+                />
               </div>
 
               {/* Precio */}

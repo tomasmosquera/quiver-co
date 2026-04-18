@@ -33,6 +33,19 @@ const KITEFOIL_BARRA_BRANDS = [
   "North", "Ozone", "Reedin", "Slingshot",
 ];
 
+const WINGFOIL_LEASH_BRANDS = [
+  "Cabrinha", "Dakine", "Duotone", "F-One", "ION",
+  "Naish", "North", "Prolimit", "Slingshot",
+];
+
+const LEASH_TYPES = [
+  { value: "muneca", label: "De muñeca" },
+  { value: "antebrazo", label: "De antebrazo" },
+  { value: "arnes", label: "De arnés" },
+];
+
+const LEASH_LENGTHS = ["1.5m", "1.8m", "2m", "2.5m", "3m"];
+
 const BAR_SIZES = ["45", "48", "50", "52", "55", "60"];
 const KITEFOIL_BAR_SIZES = ["42", "44", "45", "48", "50", "52"];
 
@@ -135,11 +148,14 @@ export default function BarraFields({
   brand, size, meta, onBrandChange, onSizeChange, onMetaChange, discipline,
 }: Props) {
   const isKitefoil = discipline === "KITEFOIL";
-  const BRANDS      = isKitefoil ? KITEFOIL_BARRA_BRANDS   : BARRA_BRANDS;
-  const BAR_OPTS    = isKitefoil ? KITEFOIL_BAR_SIZES       : BAR_SIZES;
-  const LINE_OPTS   = isKitefoil ? KITEFOIL_LINE_LENGTHS    : LINE_LENGTHS;
+  const isWingfoil = discipline === "WINGFOIL";
+  const BRANDS      = isKitefoil ? KITEFOIL_BARRA_BRANDS : isWingfoil ? WINGFOIL_LEASH_BRANDS : BARRA_BRANDS;
+  const BAR_OPTS    = isKitefoil ? KITEFOIL_BAR_SIZES    : BAR_SIZES;
+  const LINE_OPTS   = isKitefoil ? KITEFOIL_LINE_LENGTHS : LINE_LENGTHS;
   const refPlaceholder = isKitefoil
     ? "Ej: Gambler, Click Bar, Trust Bar Foil..."
+    : isWingfoil
+    ? "Ej: Core, Leash Pro, Wrist Leash..."
     : "Ej: Click Bar, Fireball, Trust Bar...";
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
@@ -210,7 +226,7 @@ export default function BarraFields({
 
       {/* Referencia / Modelo */}
       <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Referencia / Modelo *</label>
+        <label className="block text-sm font-semibold text-[#374151] mb-1">Referencia / Modelo <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
         <input
           type="text"
           value={meta.reference ?? ""}
@@ -220,84 +236,131 @@ export default function BarraFields({
         />
       </div>
 
-      {/* Complemento */}
-      <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Complemento <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
-        <input
-          type="text"
-          value={meta.complement ?? ""}
-          onChange={e => setMeta({ complement: e.target.value })}
-          placeholder="Ej: V3, 4 líneas, con chicken loop..."
-          className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-        />
-      </div>
+      {isWingfoil ? (
+        /* ── Campos específicos de leash para Wingfoil ── */
+        <>
+          {/* Tipo de leash */}
+          <div>
+            <label className="block text-sm font-semibold text-[#374151] mb-1">Tipo de leash *</label>
+            <select
+              value={meta.lineLength ?? ""}
+              onChange={e => setMeta({ lineLength: e.target.value || undefined })}
+              className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+            >
+              <option value="">Seleccionar tipo</option>
+              {LEASH_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+          </div>
 
-      {/* Tamaño de la barra */}
-      <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Tamaño de la barra *</label>
-        <select
-          value={customBarSize ? "otro" : (size.replace("cm", "") || "")}
-          onChange={e => {
-            if (e.target.value === "otro") { setCustomBarSize(true); onSizeChange(""); }
-            else { setCustomBarSize(false); onSizeChange(e.target.value ? `${e.target.value}cm` : ""); }
-          }}
-          className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-        >
-          <option value="">Seleccionar tamaño</option>
-          {BAR_OPTS.map(s => <option key={s} value={s}>{s} cm</option>)}
-          <option value="otro">Otro tamaño...</option>
-        </select>
-        {customBarSize && (
-          <input
-            type="text"
-            value={size}
-            onChange={e => onSizeChange(e.target.value)}
-            placeholder="Ej: 42cm, 58cm..."
-            className="mt-2 w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-            autoFocus
-          />
-        )}
-      </div>
+          {/* Largo del leash */}
+          <div>
+            <label className="block text-sm font-semibold text-[#374151] mb-1">Largo del leash <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
+            <select
+              value={size}
+              onChange={e => onSizeChange(e.target.value)}
+              className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+            >
+              <option value="">Seleccionar largo</option>
+              {LEASH_LENGTHS.map(l => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </div>
 
-      {/* Año */}
-      <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Año *</label>
-        <select
-          value={meta.year ?? ""}
-          onChange={e => setMeta({ year: e.target.value || undefined })}
-          className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-        >
-          <option value="">Seleccionar año</option>
-          {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
-      </div>
+          {/* Año */}
+          <div>
+            <label className="block text-sm font-semibold text-[#374151] mb-1">Año <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
+            <select
+              value={meta.year ?? ""}
+              onChange={e => setMeta({ year: e.target.value || undefined })}
+              className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+            >
+              <option value="">Seleccionar año</option>
+              {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+        </>
+      ) : (
+        /* ── Campos de barra para Kitesurf / Kitefoil ── */
+        <>
+          {/* Complemento */}
+          <div>
+            <label className="block text-sm font-semibold text-[#374151] mb-1">Complemento <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
+            <input
+              type="text"
+              value={meta.complement ?? ""}
+              onChange={e => setMeta({ complement: e.target.value })}
+              placeholder="Ej: V3, 4 líneas, con chicken loop..."
+              className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+            />
+          </div>
 
-      {/* Largo de las líneas */}
-      <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Largo de las líneas *</label>
-        <select
-          value={customLineLength ? "otro" : (meta.lineLength ?? "")}
-          onChange={e => {
-            if (e.target.value === "otro") { setCustomLineLength(true); setMeta({ lineLength: undefined }); }
-            else { setCustomLineLength(false); setMeta({ lineLength: e.target.value || undefined }); }
-          }}
-          className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-        >
-          <option value="">Seleccionar largo</option>
-          {LINE_OPTS.map(l => <option key={l} value={l}>{l}</option>)}
-          <option value="otro">Otro largo...</option>
-        </select>
-        {customLineLength && (
-          <input
-            type="text"
-            value={meta.lineLength ?? ""}
-            onChange={e => setMeta({ lineLength: e.target.value || undefined })}
-            placeholder="Ej: 25m, 30m..."
-            className="mt-2 w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
-            autoFocus
-          />
-        )}
-      </div>
+          {/* Tamaño de la barra */}
+          <div>
+            <label className="block text-sm font-semibold text-[#374151] mb-1">Tamaño de la barra *</label>
+            <select
+              value={customBarSize ? "otro" : (size.replace("cm", "") || "")}
+              onChange={e => {
+                if (e.target.value === "otro") { setCustomBarSize(true); onSizeChange(""); }
+                else { setCustomBarSize(false); onSizeChange(e.target.value ? `${e.target.value}cm` : ""); }
+              }}
+              className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+            >
+              <option value="">Seleccionar tamaño</option>
+              {BAR_OPTS.map(s => <option key={s} value={s}>{s} cm</option>)}
+              <option value="otro">Otro tamaño...</option>
+            </select>
+            {customBarSize && (
+              <input
+                type="text"
+                value={size}
+                onChange={e => onSizeChange(e.target.value)}
+                placeholder="Ej: 42cm, 58cm..."
+                className="mt-2 w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+                autoFocus
+              />
+            )}
+          </div>
+
+          {/* Año */}
+          <div>
+            <label className="block text-sm font-semibold text-[#374151] mb-1">Año *</label>
+            <select
+              value={meta.year ?? ""}
+              onChange={e => setMeta({ year: e.target.value || undefined })}
+              className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+            >
+              <option value="">Seleccionar año</option>
+              {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+
+          {/* Largo de las líneas */}
+          <div>
+            <label className="block text-sm font-semibold text-[#374151] mb-1">Largo de las líneas *</label>
+            <select
+              value={customLineLength ? "otro" : (meta.lineLength ?? "")}
+              onChange={e => {
+                if (e.target.value === "otro") { setCustomLineLength(true); setMeta({ lineLength: undefined }); }
+                else { setCustomLineLength(false); setMeta({ lineLength: e.target.value || undefined }); }
+              }}
+                className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+            >
+              <option value="">Seleccionar largo</option>
+              {LINE_OPTS.map(l => <option key={l} value={l}>{l}</option>)}
+              <option value="otro">Otro largo...</option>
+            </select>
+            {customLineLength && (
+              <input
+                type="text"
+                value={meta.lineLength ?? ""}
+                onChange={e => setMeta({ lineLength: e.target.value || undefined })}
+                placeholder="Ej: 25m, 30m..."
+                className="mt-2 w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
+                autoFocus
+              />
+            )}
+          </div>
+        </>
+      )}
 
       {/* Color */}
       <div>

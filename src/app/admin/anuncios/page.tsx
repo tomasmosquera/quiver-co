@@ -25,6 +25,7 @@ const STATUS_LABEL: Record<string, string> = {
 const DISCIPLINE_LABEL: Record<string, string> = {
   KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
   WINDSURF: "Windsurf", WAKEBOARD: "Wakeboard", PADDLE: "Paddle",
+  WATERWEAR: "Accesorios",
 };
 
 export default async function AdminAnunciosPage() {
@@ -97,6 +98,12 @@ export default async function AdminAnunciosPage() {
                       className="text-xs text-[#3B82F6] hover:underline"
                     >
                       Ver
+                    </Link>
+                    <Link
+                      href={`/equipo/${listing.id}/editar`}
+                      className="text-xs text-[#6B7280] hover:text-[#111827] hover:underline"
+                    >
+                      Editar
                     </Link>
                     <ListingStatusToggle listingId={listing.id} currentStatus={listing.status} />
                   </div>
