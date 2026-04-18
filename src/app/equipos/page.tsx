@@ -5,6 +5,7 @@ import BrandFilterClient from "@/components/BrandFilterClient";
 import SortSelect from "@/components/SortSelect";
 import MobileFilters from "@/components/MobileFilters";
 import SmartFormFilters, { type TextFilterKey } from "@/components/SmartFormFilters";
+import CityFilterClient from "@/components/CityFilterClient";
 import { auth } from "@/lib/auth";
 
 /* ─── Datos estáticos ─── */
@@ -268,7 +269,7 @@ export default async function EquiposPage({
   if (marca)    conditions.push({ brand: { equals: marca, mode: "insensitive" } });
   if (condicion) conditions.push({ condition: condicion });
   if (q)        conditions.push({ title: { contains: q, mode: "insensitive" } });
-  if (ciudad)   conditions.push({ city: { contains: ciudad, mode: "insensitive" } });
+  if (ciudad)   conditions.push({ city: { equals: ciudad, mode: "insensitive" } });
   if (tamanio)  conditions.push({ size: { contains: tamanio, mode: "insensitive" } });
   if (precioMin || precioMax) {
     const priceFilter: Record<string, number> = {};
@@ -315,7 +316,11 @@ export default async function EquiposPage({
 
   /* ─── Queries ─── */
 
-  const [listings, total, brandGroups] = await Promise.all([
+  // Para el agrupado de ciudades, excluir el filtro de ciudad
+  const conditionsForCities = conditions.filter(c => !("city" in c));
+  const whereForCities = { AND: conditionsForCities };
+
+  const [listings, total, brandGroups, cityGroups] = await Promise.all([
     prisma.listing.findMany({
       where,
       orderBy,
@@ -331,6 +336,12 @@ export default async function EquiposPage({
       by: ["brand"],
       where: whereForBrands,
       _count: { brand: true },
+    }),
+    prisma.listing.groupBy({
+      by: ["city"],
+      where: whereForCities,
+      _count: { city: true },
+      orderBy: { _count: { city: "desc" } },
     }),
   ]);
 
@@ -365,6 +376,16 @@ export default async function EquiposPage({
 
   const top10Brands = sortedForTop10.slice(0, 10);
   const alphabeticalBrands = [...allBrandsList].sort((a, b) => a.name.localeCompare(b.name));
+
+  /* ─── Ciudades ─── */
+
+  const allCitiesList = cityGroups
+    .filter(g => g.city)
+    .map(g => ({ name: g.city!, count: g._count.city }))
+    .sort((a, b) => b.count - a.count);
+
+  const top5Cities = allCitiesList.slice(0, 5);
+  const allCitiesSorted = [...allCitiesList].sort((a, b) => a.name.localeCompare(b.name));
 
   /* ─── buildUrl ─── */
 
@@ -560,18 +581,27 @@ export default async function EquiposPage({
                 </div>
               </div>
 
-              {/* Ciudad + filtros de texto contextuales */}
-              <SmartFormFilters
-                key={`${seccion}-${tipo}`}
-                activeFilters={smartConfig?.textFilters ?? []}
-                ciudad={ciudad}
-                referencia={referencia}
-                tamanio={tamanio}
-                anio={anio}
-                largoLineas={largoLineas}
-                baseParams={textFilterBaseParams}
-                tamanioLabel={smartConfig?.tamanioLabel}
+              {/* Ciudad */}
+              <CityFilterClient
+                top5Cities={top5Cities.map(c => ({ ...c, href: buildUrl({ ciudad: c.name }) }))}
+                allCities={allCitiesSorted.map(c => ({ ...c, href: buildUrl({ ciudad: c.name }) }))}
+                currentCiudad={ciudad}
+                clearCiudadHref={buildUrl({ ciudad: "" })}
               />
+
+              {/* Filtros de texto contextuales (nivel 2) */}
+              {smartConfig && smartConfig.textFilters.length > 0 && (
+                <SmartFormFilters
+                  key={`${seccion}-${tipo}`}
+                  activeFilters={smartConfig.textFilters}
+                  referencia={referencia}
+                  tamanio={tamanio}
+                  anio={anio}
+                  largoLineas={largoLineas}
+                  baseParams={textFilterBaseParams}
+                  tamanioLabel={smartConfig.tamanioLabel}
+                />
+              )}
 
               {/* Filtros inteligentes de link (subtipo, toggles) */}
               {smartConfig && smartConfig.linkFilters.length > 0 && (

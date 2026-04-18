@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import ListingStatusToggle from "./ListingStatusToggle";
+import DeleteListingButton from "./DeleteListingButton";
 
 const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
@@ -106,6 +107,7 @@ export default async function AdminAnunciosPage() {
                       Editar
                     </Link>
                     <ListingStatusToggle listingId={listing.id} currentStatus={listing.status} />
+                    <DeleteListingButton listingId={listing.id} listingTitle={listing.title} />
                   </div>
                 </td>
               </tr>

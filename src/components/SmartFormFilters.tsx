@@ -13,7 +13,6 @@ const LINE_LENGTHS = ["18m", "20m", "22m", "24m", "27m", "Mixtas"];
 
 interface Props {
   activeFilters: TextFilterKey[];
-  ciudad: string;
   referencia: string;
   tamanio: string;
   anio: string;
@@ -24,7 +23,6 @@ interface Props {
 
 export default function SmartFormFilters({
   activeFilters,
-  ciudad,
   referencia,
   tamanio,
   anio,
@@ -33,11 +31,10 @@ export default function SmartFormFilters({
   tamanioLabel = "Tamaño",
 }: Props) {
   const router = useRouter();
-  const [vals, setVals] = useState({ ciudad, referencia, tamanio, anio, largoLineas });
+  const [vals, setVals] = useState({ referencia, tamanio, anio, largoLineas });
 
   function apply() {
     const params = new URLSearchParams(baseParams);
-    if (vals.ciudad) params.set("ciudad", vals.ciudad); else params.delete("ciudad");
     if (vals.referencia && activeFilters.includes("referencia")) params.set("referencia", vals.referencia); else params.delete("referencia");
     if (vals.tamanio && activeFilters.includes("tamanio")) params.set("tamanio", vals.tamanio); else params.delete("tamanio");
     if (vals.anio && activeFilters.includes("anio")) params.set("anio", vals.anio); else params.delete("anio");
@@ -45,23 +42,12 @@ export default function SmartFormFilters({
     router.push(`/equipos?${params.toString()}`);
   }
 
-  const hasValues = vals.ciudad || vals.referencia || vals.tamanio || vals.anio || vals.largoLineas;
+  const hasValues = vals.referencia || vals.tamanio || vals.anio || vals.largoLineas;
+
+  if (activeFilters.length === 0) return null;
 
   return (
     <div className="space-y-4">
-
-      {/* Ciudad — siempre visible */}
-      <div>
-        <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">Ciudad</h3>
-        <input
-          type="text"
-          value={vals.ciudad}
-          onChange={e => setVals(v => ({ ...v, ciudad: e.target.value }))}
-          onKeyDown={e => e.key === "Enter" && apply()}
-          placeholder="Ej: Cartagena..."
-          className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
-        />
-      </div>
 
       {/* Referencia */}
       {activeFilters.includes("referencia") && (
