@@ -33,7 +33,9 @@
       "Bash(node -e \"fetch\\('https://supabase.com'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('Error:', e.cause?.message || e.message\\)\\)\")",
       "Bash(node -e \"fetch\\('https://aws.amazon.com'\\).then\\(r => console.log\\('OK', r.status\\)\\).catch\\(e => console.log\\('Error:', e.cause?.message || e.message\\)\\)\")",
       "Bash(node -e \"fetch\\('http://localhost:5432'\\).catch\\(e => console.log\\(e.cause?.code || e.message\\)\\)\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(curl -s \"http://localhost:3000/equipo/cmo0vo0c000096841le6ynqwg\")"
     ]
   }
 }
