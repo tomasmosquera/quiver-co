@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, CheckCircle, Loader2, Trash2 } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
+import BarraFields, { BarraMetadata } from "@/components/BarraFields";
 import CityPicker from "@/components/CityPicker";
 
 const DISCIPLINES = [
@@ -19,22 +20,42 @@ const DISCIPLINES = [
 
 const EQUIPMENT_TYPES_BY_DISCIPLINE: Record<string, { value: string; label: string }[]> = {
   KITESURF: [
-    { value: "COMETA", label: "Cometa" },
+    { value: "COMETA",      label: "Cometa" },
     { value: "TABLA",       label: "Tabla" },
     { value: "BARRA_LINEAS",label: "Barra & Líneas" },
     { value: "ARNES",       label: "Arnés" },
-    { value: "ACCESORIO",   label: "Accesorios" },
-    { value: "COMBO",       label: "Equipo Completo" },
+  ],
+  KITEFOIL: [
+    { value: "COMETA",      label: "Cometa" },
+    { value: "TABLA",       label: "Tabla" },
+    { value: "BARRA_LINEAS",label: "Barra & Líneas" },
+    { value: "ARNES",       label: "Arnés" },
+  ],
+  WINGFOIL: [
+    { value: "WING",        label: "Wing" },
+    { value: "TABLA",       label: "Tabla" },
+    { value: "LEASH",       label: "Leash" },
+    { value: "ARNES",       label: "Arnés" },
+  ],
+  WATERWEAR: [
+    { value: "ACC_COMETA",  label: "Accesorios de cometa" },
+    { value: "ACC_WING",    label: "Accesorios de wing" },
+    { value: "ACC_BARRA",   label: "Accesorios de barra" },
+    { value: "ACC_TABLA",   label: "Accesorios de tabla" },
+    { value: "ACC_ARNES",   label: "Accesorios de arnés" },
+    { value: "BOMBAS",      label: "Bombas" },
+    { value: "MALETAS",     label: "Maletas y bolsas" },
+    { value: "WETSUIT",     label: "Wetsuits" },
+    { value: "PONCHO",      label: "Ponchos y Toallas" },
+    { value: "PROTECCION",  label: "Protección" },
+    { value: "TECNOLOGIA",  label: "Tecnología" },
+    { value: "OTROS",       label: "Otros" },
   ],
   _DEFAULT: [
-    { value: "COMETA", label: "Cometa" },
+    { value: "COMETA",      label: "Cometa" },
     { value: "TABLA",       label: "Tabla" },
     { value: "BARRA_LINEAS",label: "Barra & Líneas" },
-    { value: "FOIL",        label: "Foil" },
     { value: "ARNES",       label: "Arnés" },
-    { value: "TRAJE",       label: "Traje" },
-    { value: "ACCESORIO",   label: "Accesorio" },
-    { value: "COMBO",       label: "Combo completo" },
   ],
 };
 
@@ -56,7 +77,7 @@ interface InitialData {
   description: string;
   city: string;
   images: string[];
-  metadata: KiteMetadata;
+  metadata: KiteMetadata & BarraMetadata;
 }
 
 interface Props {
@@ -73,7 +94,12 @@ export default function EditForm({ listingId, initial }: Props) {
   const [error, setError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const isKiteCometa = form.discipline === "KITESURF" && form.equipmentType === "COMETA";
+  const KITE_DISCIPLINES = ["KITESURF", "KITEFOIL", "WINDSURF"];
+  const isKiteCometa = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "COMETA";
+  const isWing       = form.discipline === "WINGFOIL" && form.equipmentType === "WING";
+  const isLeash      = form.discipline === "WINGFOIL" && form.equipmentType === "LEASH";
+  const isKiteBarra  = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "BARRA_LINEAS";
+  const hasSpecialFields = isKiteCometa || isWing || isLeash || isKiteBarra;
   const equipmentTypes = EQUIPMENT_TYPES_BY_DISCIPLINE[form.discipline] ?? EQUIPMENT_TYPES_BY_DISCIPLINE._DEFAULT;
 
   function set(key: keyof InitialData, value: string | string[]) {
@@ -118,7 +144,7 @@ export default function EditForm({ listingId, initial }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          metadata: isKiteCometa ? form.metadata : undefined,
+          metadata: hasSpecialFields ? form.metadata : undefined,
         }),
       });
       const data = await res.json();
@@ -246,7 +272,7 @@ export default function EditForm({ listingId, initial }: Props) {
           {/* Resto de campos — solo si ya eligió tipo de equipo */}
           {form.equipmentType && <>
 
-          {/* Campos específicos de kite+cometa */}
+          {/* Cometa (KITESURF / KITEFOIL / WINDSURF) */}
           {isKiteCometa && (
             <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
               <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la cometa</p>
@@ -257,6 +283,55 @@ export default function EditForm({ listingId, initial }: Props) {
                 onBrandChange={v => set("brand", v)}
                 onSizeChange={v => set("size", v)}
                 onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                mode={form.discipline === "KITEFOIL" ? "kitefoil" : "kite"}
+              />
+            </div>
+          )}
+
+          {/* Wing (WINGFOIL) */}
+          {isWing && (
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos del wing</p>
+              <KiteFields
+                brand={form.brand}
+                size={form.size}
+                meta={form.metadata}
+                onBrandChange={v => set("brand", v)}
+                onSizeChange={v => set("size", v)}
+                onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                mode="wing"
+              />
+            </div>
+          )}
+
+          {/* Leash (WINGFOIL) */}
+          {isLeash && (
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos del leash</p>
+              <BarraFields
+                brand={form.brand}
+                size={form.size}
+                meta={form.metadata}
+                onBrandChange={v => set("brand", v)}
+                onSizeChange={v => set("size", v)}
+                onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                discipline="WINGFOIL"
+              />
+            </div>
+          )}
+
+          {/* Barra & Líneas (KITESURF / KITEFOIL) */}
+          {isKiteBarra && (
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la barra</p>
+              <BarraFields
+                brand={form.brand}
+                size={form.size}
+                meta={form.metadata}
+                onBrandChange={v => set("brand", v)}
+                onSizeChange={v => set("size", v)}
+                onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                discipline={form.discipline}
               />
             </div>
           )}
@@ -274,8 +349,8 @@ export default function EditForm({ listingId, initial }: Props) {
             <p className="text-xs text-[#9CA3AF] mt-1">{form.title.length}/100</p>
           </div>
 
-          {/* Marca y talla (solo si NO es kite+cometa) */}
-          {!isKiteCometa && (
+          {/* Marca y talla (solo si NO tiene campos especiales) */}
+          {!hasSpecialFields && (
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-[#374151] mb-1">Marca</label>

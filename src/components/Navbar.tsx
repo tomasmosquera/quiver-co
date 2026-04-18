@@ -16,14 +16,14 @@ const DISCIPLINES = [
 ];
 
 const EQUIPMENT = [
-  { label: "Cometas",  value: "COMETA" },
-  { label: "Tablas",           value: "TABLA" },
-  { label: "Barras & Líneas",  value: "BARRA_LINEAS" },
-  { label: "Foils",            value: "FOIL" },
-  { label: "Arneses",          value: "ARNES" },
-  { label: "Trajes",           value: "TRAJE" },
-  { label: "Accesorios",       value: "ACCESORIO" },
-  { label: "Combos completos", value: "COMBO" },
+  { label: "Cometas",         href: "/equipos?tipo=COMETA&orden=reciente" },
+  { label: "Tablas",          href: "/equipos?tipo=TABLA&orden=reciente" },
+  { label: "Barras & Líneas", href: "/equipos?tipo=BARRA_LINEAS&orden=reciente" },
+  { label: "Wings",           href: "/equipos?tipo=WING&orden=reciente" },
+  { label: "Leashes",         href: "/equipos?tipo=LEASH&orden=reciente" },
+  { label: "Arneses",         href: "/equipos?tipo=ARNES&orden=reciente" },
+  { label: "Wetsuits",        href: "/equipos?orden=reciente&tipo=WETSUIT" },
+  { label: "Accesorios",      href: "/equipos?orden=reciente&seccion=Accesorios" },
 ];
 
 const BRANDS = [
@@ -176,8 +176,8 @@ export default function Navbar() {
               <div className="absolute top-full left-0 mt-1 w-52 bg-white border border-[#E5E7EB] rounded-xl shadow-lg py-1.5 z-50">
                 {EQUIPMENT.map((eq) => (
                   <Link
-                    key={eq.value}
-                    href={`/equipos?tipo=${eq.value}`}
+                    key={eq.href}
+                    href={eq.href}
                     className="block px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] hover:text-[#111827] transition-colors"
                     onClick={() => setEquipOpen(false)}
                   >
@@ -304,8 +304,8 @@ export default function Navbar() {
               <div className="border-t border-[#F3F4F6]">
                 {EQUIPMENT.map((eq) => (
                   <Link
-                    key={eq.value}
-                    href={`/equipos?tipo=${eq.value}`}
+                    key={eq.href}
+                    href={eq.href}
                     className="block px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
                     onClick={() => setMenuOpen(false)}
                   >
