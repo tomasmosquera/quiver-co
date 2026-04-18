@@ -17,7 +17,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm text-[#9CA3AF] leading-relaxed">
-              El marketplace de kitesurf más serio de Colombia. Compra y vende equipos con confianza.
+              El mejor marketplace especializado de deportes acuáticos en Colombia.
             </p>
             <div className="flex gap-3">
               {[Share2, MessageCircle, PlayCircle].map((Icon, i) => (
@@ -38,15 +38,19 @@ export default function Footer() {
               Marketplace
             </h4>
             <ul className="space-y-2.5">
-              {["Comprar equipos", "Vender mi equipo", "Cómo funciona", "Tarifas y comisiones", "Protección al comprador"].map(
-                (item) => (
-                  <li key={item}>
-                    <Link href="#" className="text-sm text-[#9CA3AF] hover:text-white transition-colors">
-                      {item}
-                    </Link>
-                  </li>
-                )
-              )}
+              {[
+                { label: "Comprar equipos",       href: "/equipos" },
+                { label: "Vender mi equipo",       href: "/vender" },
+                { label: "Cómo funciona",          href: "#" },
+                { label: "Tarifas y comisiones",   href: "#" },
+                { label: "Protección al comprador",href: "#" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-sm text-[#9CA3AF] hover:text-white transition-colors">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -58,10 +62,10 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {[
                 { label: "Spots en Colombia", href: "/spots" },
-                { label: "Foro",              href: "#" },
+                { label: "Foro",              href: "/comunidad" },
                 { label: "Eventos y clínicas",href: "#" },
                 { label: "Guías",             href: "/guias" },
-                { label: "Blog",              href: "#" },
+                { label: "Blog",              href: "/comunidad" },
               ].map((item) => (
                 <li key={item.label}>
                   <Link href={item.href} className="text-sm text-[#9CA3AF] hover:text-white transition-colors">

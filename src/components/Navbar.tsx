@@ -51,7 +51,7 @@ export default function Navbar() {
   const navRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  function handleSearch(e: React.FormEvent) {
+  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const term = q.trim();
     router.push(term ? `/equipos?q=${encodeURIComponent(term)}` : "/equipos");
@@ -130,13 +130,13 @@ export default function Navbar() {
         {/* Secondary nav — desktop */}
         <div className="hidden md:flex items-center gap-1 pb-2">
 
-          {/* Disciplinas dropdown */}
+          {/* Por disciplina dropdown */}
           <div className="relative">
             <button
               className="flex items-center gap-1 px-3 py-1.5 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB] rounded-md transition-colors"
               onClick={() => { setDiscOpen(!discOpen); setEquipOpen(false); setBrandOpen(false); }}
             >
-              Disciplinas <ChevronDown className={`w-3.5 h-3.5 transition-transform ${discOpen ? "rotate-180" : ""}`} />
+              Por disciplina <ChevronDown className={`w-3.5 h-3.5 transition-transform ${discOpen ? "rotate-180" : ""}`} />
             </button>
             {discOpen && (
               <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-[#E5E7EB] rounded-xl shadow-lg py-1.5 z-50">
@@ -152,7 +152,7 @@ export default function Navbar() {
                 ))}
                 <div className="border-t border-[#F3F4F6] mt-1 pt-1">
                   <Link
-                    href="/disciplinas"
+                    href="/equipos"
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#3B82F6] font-medium hover:bg-[#F9FAFB] transition-colors"
                     onClick={() => setDiscOpen(false)}
                   >
@@ -265,13 +265,13 @@ export default function Navbar() {
             Publicar un equipo
           </Link>
 
-          {/* Disciplinas */}
+          {/* Por disciplina */}
           <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
             <button
               onClick={() => setMDiscOpen(!mDiscOpen)}
               className="flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-[#111827] hover:bg-[#F9FAFB]"
             >
-              Disciplinas
+              Por disciplina
               <ChevronDown className={`w-4 h-4 text-[#9CA3AF] transition-transform ${mDiscOpen ? "rotate-180" : ""}`} />
             </button>
             {mDiscOpen && (

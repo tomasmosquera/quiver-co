@@ -33,7 +33,13 @@ const ARNES_BRANDS = [
   "Ozone", "Prolimit", "Ride Engine", "Slingshot", "Watery",
 ];
 
+const KITEFOIL_ARNES_BRANDS = [
+  "Cabrinha", "Dakine", "Duotone", "ION",
+  "Manera", "Mystic", "North", "Prolimit", "Ride Engine",
+];
+
 const ARNES_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+const KITEFOIL_ARNES_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 1 }, (_, i) => String(CURRENT_YEAR - i));
@@ -63,6 +69,7 @@ interface Props {
   onBrandChange: (v: string) => void;
   onSizeChange: (v: string) => void;
   onMetaChange: (m: ArnesMetadata) => void;
+  discipline?: string;
 }
 
 /* ─── Color Picker ─── */
@@ -127,8 +134,14 @@ function ColorPicker({
 }
 
 export default function ArnesFields({
-  brand, size, meta, onBrandChange, onSizeChange, onMetaChange,
+  brand, size, meta, onBrandChange, onSizeChange, onMetaChange, discipline,
 }: Props) {
+  const isKitefoil = discipline === "KITEFOIL";
+  const BRANDS = isKitefoil ? KITEFOIL_ARNES_BRANDS : ARNES_BRANDS;
+  const SIZES  = isKitefoil ? KITEFOIL_ARNES_SIZES  : ARNES_SIZES;
+  const refPlaceholder = isKitefoil
+    ? "Ej: Warrior Foil, Apex, C2..."
+    : "Ej: Warrior, Razor, Roam...";
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
   const colorRef = useRef<HTMLDivElement>(null);
@@ -184,7 +197,7 @@ export default function ArnesFields({
       <div>
         <label className="block text-sm font-semibold text-[#374151] mb-1">Marca *</label>
         <select
-          value={ARNES_BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
+          value={BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
           onChange={e => {
             if (e.target.value === "otra") onBrandChange("__otra__");
             else onBrandChange(e.target.value);
@@ -192,10 +205,10 @@ export default function ArnesFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar marca</option>
-          {ARNES_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+          {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
           <option value="otra">Otra marca...</option>
         </select>
-        {!ARNES_BRANDS.includes(brand) && brand && (
+        {!BRANDS.includes(brand) && brand && (
           <input
             type="text"
             value={brand === "__otra__" ? "" : brand}
@@ -214,7 +227,7 @@ export default function ArnesFields({
           type="text"
           value={meta.reference ?? ""}
           onChange={e => setMeta({ reference: e.target.value })}
-          placeholder="Ej: Warrior, Razor, Roam..."
+          placeholder={refPlaceholder}
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>
@@ -240,7 +253,7 @@ export default function ArnesFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar talla</option>
-          {ARNES_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+          {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 

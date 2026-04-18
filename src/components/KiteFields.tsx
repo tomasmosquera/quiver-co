@@ -33,9 +33,23 @@ const KITE_BRANDS = [
   "Ocean Rodeo", "Ozone", "Reedin", "Slingshot", "Switch Kites",
 ];
 
+const WING_BRANDS = [
+  "Airush", "Cabrinha", "Core", "Duotone", "F-One",
+  "Flysurfer", "Naish", "North", "Ozone", "Reedin", "Slingshot",
+];
+
 const KITE_SIZES = [
   "4", "5", "6", "7", "8", "9", "10", "11", "12",
   "13", "14", "15", "16", "17", "18",
+];
+
+const WING_SIZES = [
+  "2", "2.5", "3", "3.5", "4", "4.5", "5", "5.5", "6", "6.5", "7", "7.5", "8",
+];
+
+// Cometas de kitefoil: rangos amplios, se usan cometas grandes en viento ligero
+const KITEFOIL_SIZES = [
+  "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "21",
 ];
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -66,6 +80,7 @@ interface Props {
   onBrandChange: (v: string) => void;
   onSizeChange: (v: string) => void;
   onMetaChange: (m: KiteMetadata) => void;
+  mode?: "kite" | "wing" | "kitefoil";
 }
 
 /* ─── Color Picker custom ─── */
@@ -140,13 +155,17 @@ function ColorPicker({
 }
 
 export default function KiteFields({
-  brand, size, meta, onBrandChange, onSizeChange, onMetaChange,
+  brand, size, meta, onBrandChange, onSizeChange, onMetaChange, mode = "kite",
 }: Props) {
+  const isWing     = mode === "wing";
+  const isKitefoil = mode === "kitefoil";
+  const BRANDS = isWing ? WING_BRANDS : KITE_BRANDS;
+  const SIZES  = isWing ? WING_SIZES : isKitefoil ? KITEFOIL_SIZES : KITE_SIZES;
   const [customSize, setCustomSize] = useState(
-    size && !KITE_SIZES.includes(size) ? size : ""
+    size && !SIZES.includes(size.replace("m", "")) ? size : ""
   );
   const [useCustomSize, setUseCustomSize] = useState(
-    !!size && !KITE_SIZES.includes(size)
+    !!size && !SIZES.includes(size.replace("m", ""))
   );
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
@@ -182,7 +201,7 @@ export default function KiteFields({
   function selectedSize() {
     if (useCustomSize) return "otro";
     const num = size?.replace("m", "");
-    return KITE_SIZES.includes(num) ? num : "";
+    return SIZES.includes(num) ? num : "";
   }
 
   /* Reparaciones */
@@ -218,7 +237,7 @@ export default function KiteFields({
       <div>
         <label className="block text-sm font-semibold text-[#374151] mb-1">Marca *</label>
         <select
-          value={KITE_BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
+          value={BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
           onChange={e => {
             if (e.target.value === "otra") onBrandChange("__otra__");
             else onBrandChange(e.target.value);
@@ -226,10 +245,10 @@ export default function KiteFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar marca</option>
-          {KITE_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+          {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
           <option value="otra">Otra marca...</option>
         </select>
-        {!KITE_BRANDS.includes(brand) && brand && (
+        {!BRANDS.includes(brand) && brand && (
           <input
             type="text"
             value={brand === "__otra__" ? "" : brand}
@@ -248,7 +267,7 @@ export default function KiteFields({
           type="text"
           value={meta.reference ?? ""}
           onChange={e => setMeta({ reference: e.target.value })}
-          placeholder="Ej: Switchblade, Bandit, Enduro..."
+          placeholder={isWing ? "Ej: Mojo, Slick, Freeride..." : isKitefoil ? "Ej: Vegas, Naim, Enduro, Soul..." : "Ej: Switchblade, Bandit, Enduro..."}
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>
@@ -274,8 +293,8 @@ export default function KiteFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar tamaño</option>
-          {KITE_SIZES.map(s => (
-            <option key={s} value={s}>{s}m</option>
+          {SIZES.map(s => (
+            <option key={s} value={s}>{s}{isWing ? "m²" : "m"}</option>
           ))}
           <option value="otro">Otro tamaño...</option>
         </select>

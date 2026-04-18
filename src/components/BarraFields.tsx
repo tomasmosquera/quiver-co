@@ -28,9 +28,16 @@ const BARRA_BRANDS = [
   "Ocean Rodeo", "Ozone", "Reedin", "Slingshot", "Switch Kites",
 ];
 
+const KITEFOIL_BARRA_BRANDS = [
+  "Cabrinha", "Core", "Duotone", "F-One", "Naish",
+  "North", "Ozone", "Reedin", "Slingshot",
+];
+
 const BAR_SIZES = ["45", "48", "50", "52", "55", "60"];
+const KITEFOIL_BAR_SIZES = ["42", "44", "45", "48", "50", "52"];
 
 const LINE_LENGTHS = ["18m", "20m", "22m", "24m", "27m", "Mixtas"];
+const KITEFOIL_LINE_LENGTHS = ["20m", "22m", "24m", "Mixtas"];
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 1 }, (_, i) => String(CURRENT_YEAR - i));
@@ -60,6 +67,7 @@ interface Props {
   onBrandChange: (v: string) => void;
   onSizeChange: (v: string) => void;
   onMetaChange: (m: BarraMetadata) => void;
+  discipline?: string;
 }
 
 /* ─── Color Picker ─── */
@@ -124,8 +132,15 @@ function ColorPicker({
 }
 
 export default function BarraFields({
-  brand, size, meta, onBrandChange, onSizeChange, onMetaChange,
+  brand, size, meta, onBrandChange, onSizeChange, onMetaChange, discipline,
 }: Props) {
+  const isKitefoil = discipline === "KITEFOIL";
+  const BRANDS      = isKitefoil ? KITEFOIL_BARRA_BRANDS   : BARRA_BRANDS;
+  const BAR_OPTS    = isKitefoil ? KITEFOIL_BAR_SIZES       : BAR_SIZES;
+  const LINE_OPTS   = isKitefoil ? KITEFOIL_LINE_LENGTHS    : LINE_LENGTHS;
+  const refPlaceholder = isKitefoil
+    ? "Ej: Gambler, Click Bar, Trust Bar Foil..."
+    : "Ej: Click Bar, Fireball, Trust Bar...";
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
   const [customBarSize, setCustomBarSize] = useState(false);
@@ -170,7 +185,7 @@ export default function BarraFields({
       <div>
         <label className="block text-sm font-semibold text-[#374151] mb-1">Marca *</label>
         <select
-          value={BARRA_BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
+          value={BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
           onChange={e => {
             if (e.target.value === "otra") onBrandChange("__otra__");
             else onBrandChange(e.target.value);
@@ -178,10 +193,10 @@ export default function BarraFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar marca</option>
-          {BARRA_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+          {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
           <option value="otra">Otra marca...</option>
         </select>
-        {!BARRA_BRANDS.includes(brand) && brand && (
+        {!BRANDS.includes(brand) && brand && (
           <input
             type="text"
             value={brand === "__otra__" ? "" : brand}
@@ -200,7 +215,7 @@ export default function BarraFields({
           type="text"
           value={meta.reference ?? ""}
           onChange={e => setMeta({ reference: e.target.value })}
-          placeholder="Ej: Click Bar, Fireball, Trust Bar..."
+          placeholder={refPlaceholder}
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>
@@ -229,7 +244,7 @@ export default function BarraFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar tamaño</option>
-          {BAR_SIZES.map(s => <option key={s} value={s}>{s} cm</option>)}
+          {BAR_OPTS.map(s => <option key={s} value={s}>{s} cm</option>)}
           <option value="otro">Otro tamaño...</option>
         </select>
         {customBarSize && (
@@ -269,7 +284,7 @@ export default function BarraFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar largo</option>
-          {LINE_LENGTHS.map(l => <option key={l} value={l}>{l}</option>)}
+          {LINE_OPTS.map(l => <option key={l} value={l}>{l}</option>)}
           <option value="otro">Otro largo...</option>
         </select>
         {customLineLength && (

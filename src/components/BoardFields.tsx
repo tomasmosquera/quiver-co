@@ -37,6 +37,11 @@ const BOARD_BRANDS = [
   "Ocean Rodeo", "Ozone", "Slingshot",
 ];
 
+const KITEFOIL_BOARD_BRANDS = [
+  "AXIS", "Cabrinha", "Duotone", "F-One", "Naish", "Nobile",
+  "North", "Slingshot", "Takoon", "Crazyfly",
+];
+
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 1 }, (_, i) => String(CURRENT_YEAR - i));
 
@@ -65,6 +70,8 @@ interface Props {
   onBrandChange: (v: string) => void;
   onSizeChange: (v: string) => void;
   onMetaChange: (m: BoardMetadata) => void;
+  allowedTypes?: string[];
+  discipline?: string;
 }
 
 /* ─── Color Picker ─── */
@@ -139,8 +146,16 @@ function ColorPicker({
 }
 
 export default function BoardFields({
-  brand, size, meta, onBrandChange, onSizeChange, onMetaChange,
+  brand, size, meta, onBrandChange, onSizeChange, onMetaChange, allowedTypes, discipline,
 }: Props) {
+  const isKitefoil = discipline === "KITEFOIL";
+  const BRANDS = isKitefoil ? KITEFOIL_BOARD_BRANDS : BOARD_BRANDS;
+  const referencePlaceholder = isKitefoil
+    ? "Ej: Slice, Trax, Nexus, Skylord..."
+    : "Ej: Spectrum, Atmos, Falcon...";
+  const visibleBoardTypes = allowedTypes
+    ? BOARD_TYPES.filter(t => allowedTypes.includes(t.value))
+    : BOARD_TYPES;
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
   const colorRef = useRef<HTMLDivElement>(null);
@@ -195,7 +210,7 @@ export default function BoardFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar tipo</option>
-          {BOARD_TYPES.map(t => (
+          {visibleBoardTypes.map(t => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
@@ -205,7 +220,7 @@ export default function BoardFields({
       <div>
         <label className="block text-sm font-semibold text-[#374151] mb-1">Marca *</label>
         <select
-          value={BOARD_BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
+          value={BRANDS.includes(brand) ? brand : (brand ? "otra" : "")}
           onChange={e => {
             if (e.target.value === "otra") onBrandChange("__otra__");
             else onBrandChange(e.target.value);
@@ -213,10 +228,10 @@ export default function BoardFields({
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         >
           <option value="">Seleccionar marca</option>
-          {BOARD_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+          {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
           <option value="otra">Otra marca...</option>
         </select>
-        {!BOARD_BRANDS.includes(brand) && brand && (
+        {!BRANDS.includes(brand) && brand && (
           <input
             type="text"
             value={brand === "__otra__" ? "" : brand}
@@ -235,7 +250,7 @@ export default function BoardFields({
           type="text"
           value={meta.reference ?? ""}
           onChange={e => setMeta({ reference: e.target.value })}
-          placeholder="Ej: Spectrum, Atmos, Falcon..."
+          placeholder={referencePlaceholder}
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>

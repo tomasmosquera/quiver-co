@@ -242,7 +242,7 @@ export default function VenderPage() {
         if (!form.metadata.year)                   return "Selecciona el año";
         if (form.metadata.hasRepairs === undefined) return "Indica si tiene reparaciones";
       }
-      if (isKiteAccesorio && !form.metadata.accesorioType) return "Selecciona el tipo de accesorio";
+      if (isKiteAccesorio && form.discipline !== "KITEFOIL" && !form.metadata.accesorioType) return "Selecciona el tipo de accesorio";
       if (!hasSpecialFields && !form.title.trim()) return "Escribe un título";
       if (!form.condition)     return "Selecciona el estado del equipo";
       if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) return "Escribe un precio válido";
@@ -299,16 +299,27 @@ export default function VenderPage() {
         <div className="flex items-center gap-2 mb-8">
           {STEPS.map((s, i) => (
             <div key={s} className="flex items-center gap-2 flex-1">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
-                i < step ? "bg-[#3B82F6] text-white" :
-                i === step ? "bg-[#111827] text-white" :
-                "bg-[#E5E7EB] text-[#9CA3AF]"
-              }`}>
-                {i < step ? <CheckCircle className="w-4 h-4" /> : i + 1}
-              </div>
-              <span className={`text-xs hidden sm:block ${i === step ? "text-[#111827] font-semibold" : "text-[#9CA3AF]"}`}>
-                {s}
-              </span>
+              <button
+                type="button"
+                onClick={() => { if (i < step) setStep(i); }}
+                disabled={i >= step}
+                className={`flex items-center gap-2 min-w-0 ${i < step ? "cursor-pointer group" : "cursor-default"}`}
+              >
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                  i < step ? "bg-[#3B82F6] text-white group-hover:bg-blue-700" :
+                  i === step ? "bg-[#111827] text-white" :
+                  "bg-[#E5E7EB] text-[#9CA3AF]"
+                }`}>
+                  {i < step ? <CheckCircle className="w-4 h-4" /> : i + 1}
+                </div>
+                <span className={`text-xs hidden sm:block ${
+                  i < step ? "text-[#3B82F6] group-hover:underline" :
+                  i === step ? "text-[#111827] font-semibold" :
+                  "text-[#9CA3AF]"
+                }`}>
+                  {s}
+                </span>
+              </button>
               {i < STEPS.length - 1 && <div className="flex-1 h-px bg-[#E5E7EB]" />}
             </div>
           ))}
@@ -385,7 +396,9 @@ export default function VenderPage() {
               {/* Campos específicos de Kite+Cometa */}
               {isKiteCometa && (
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                  <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la cometa</p>
+                  <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">
+                    {form.discipline === "WINGFOIL" ? "Datos del wing" : "Datos de la cometa"}
+                  </p>
                   <KiteFields
                     brand={form.brand}
                     size={form.size}
@@ -393,6 +406,7 @@ export default function VenderPage() {
                     onBrandChange={v => set("brand", v)}
                     onSizeChange={v => set("size", v)}
                     onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                    mode={form.discipline === "WINGFOIL" ? "wing" : form.discipline === "KITEFOIL" ? "kitefoil" : "kite"}
                   />
                 </div>
               )}
@@ -408,6 +422,8 @@ export default function VenderPage() {
                     onBrandChange={v => set("brand", v)}
                     onSizeChange={v => set("size", v)}
                     onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                    allowedTypes={form.discipline === "KITEFOIL" ? ["foilboard"] : undefined}
+                    discipline={form.discipline}
                   />
                 </div>
               )}
@@ -423,6 +439,7 @@ export default function VenderPage() {
                     onBrandChange={v => set("brand", v)}
                     onSizeChange={v => set("size", v)}
                     onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                    discipline={form.discipline}
                   />
                 </div>
               )}
@@ -438,12 +455,13 @@ export default function VenderPage() {
                     onBrandChange={v => set("brand", v)}
                     onSizeChange={v => set("size", v)}
                     onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                    discipline={form.discipline}
                   />
                 </div>
               )}
 
               {/* Campos específicos de Kite+Accesorio */}
-              {isKiteAccesorio && (
+              {isKiteAccesorio && form.discipline !== "KITEFOIL" && (
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
                   <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Tipo de accesorio *</p>
                   <select
