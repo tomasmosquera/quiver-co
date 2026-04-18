@@ -21,14 +21,14 @@ const DISCIPLINE_META = [
 ];
 
 const EQUIPMENT_TYPES = [
-  { name: "Cometas", icon: "🪁", href: "/equipos?tipo=COMETA" },
-  { name: "Tablas",          icon: "🏄", href: "/equipos?tipo=TABLA" },
-  { name: "Barras & Líneas", icon: "🎯", href: "/equipos?tipo=BARRA_LINEAS" },
-  { name: "Foils",           icon: "⚡", href: "/equipos?tipo=FOIL" },
-  { name: "Arneses",         icon: "🦺", href: "/equipos?tipo=ARNES" },
-  { name: "Trajes",          icon: "🤿", href: "/equipos?tipo=TRAJE" },
-  { name: "Accesorios",      icon: "⚙️", href: "/equipos?tipo=ACCESORIO" },
-  { name: "Combos",          icon: "📦", href: "/equipos?tipo=COMBO" },
+  { name: "Cometas",         href: "/equipos?tipo=COMETA&orden=reciente" },
+  { name: "Tablas",          href: "/equipos?tipo=TABLA&orden=reciente" },
+  { name: "Barras & Líneas", href: "/equipos?tipo=BARRA_LINEAS&orden=reciente" },
+  { name: "Wings",           href: "/equipos?tipo=WING&orden=reciente" },
+  { name: "Leashes",         href: "/equipos?tipo=LEASH&orden=reciente" },
+  { name: "Arneses",         href: "/equipos?tipo=ARNES&orden=reciente" },
+  { name: "Wetsuits",        href: "/equipos?orden=reciente&tipo=WETSUIT" },
+  { name: "Accesorios",      href: "/equipos?orden=reciente&seccion=Accesorios" },
 ];
 
 
@@ -152,6 +152,12 @@ export default async function HomePage() {
                   {d.name}
                 </Link>
               ))}
+              <Link
+                href="/equipos?seccion=Accesorios"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1F2937] border border-[#374151] hover:border-[#3B82F6] text-[#D1D5DB] hover:text-white text-xs rounded-full transition-all"
+              >
+                Accesorios
+              </Link>
             </div>
 
             {/* Stats */}
@@ -250,7 +256,7 @@ export default async function HomePage() {
       <section className="bg-white border-y border-[#E5E7EB] py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider mb-5">
-            O busca por tipo de equipo
+            O busca por equipo
           </p>
           <div className="flex gap-3 overflow-x-auto pb-1">
             {EQUIPMENT_TYPES.map((eq) => (
