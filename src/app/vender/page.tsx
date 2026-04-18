@@ -46,6 +46,7 @@ const EQUIPMENT_TYPES_BY_DISCIPLINE: Record<string, { value: string; label: stri
   WINGFOIL: [
     { value: "COMETA_WING", label: "Wing" },
     { value: "TABLA",       label: "Tabla" },
+    { value: "BARRA_LINEAS",label: "Leash" },
     { value: "ARNES",       label: "Arnés" },
     { value: "ACCESORIO",   label: "Accesorios" },
   ],
@@ -242,7 +243,7 @@ export default function VenderPage() {
         if (!form.metadata.year)                   return "Selecciona el año";
         if (form.metadata.hasRepairs === undefined) return "Indica si tiene reparaciones";
       }
-      if (isKiteAccesorio && form.discipline !== "KITEFOIL" && !form.metadata.accesorioType) return "Selecciona el tipo de accesorio";
+      if (isKiteAccesorio && form.discipline !== "KITEFOIL" && form.discipline !== "WINGFOIL" && !form.metadata.accesorioType) return "Selecciona el tipo de accesorio";
       if (!hasSpecialFields && !form.title.trim()) return "Escribe un título";
       if (!form.condition)     return "Selecciona el estado del equipo";
       if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) return "Escribe un precio válido";
@@ -422,7 +423,7 @@ export default function VenderPage() {
                     onBrandChange={v => set("brand", v)}
                     onSizeChange={v => set("size", v)}
                     onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
-                    allowedTypes={form.discipline === "KITEFOIL" ? ["foilboard"] : undefined}
+                    allowedTypes={form.discipline === "KITEFOIL" || form.discipline === "WINGFOIL" ? ["foilboard"] : undefined}
                     discipline={form.discipline}
                   />
                 </div>
@@ -431,7 +432,9 @@ export default function VenderPage() {
               {/* Campos específicos de Kite+Barra */}
               {isKiteBarra && (
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                  <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la barra</p>
+                  <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">
+                    {form.discipline === "WINGFOIL" ? "Datos del leash" : "Datos de la barra"}
+                  </p>
                   <BarraFields
                     brand={form.brand}
                     size={form.size}
@@ -461,7 +464,7 @@ export default function VenderPage() {
               )}
 
               {/* Campos específicos de Kite+Accesorio */}
-              {isKiteAccesorio && form.discipline !== "KITEFOIL" && (
+              {isKiteAccesorio && form.discipline !== "KITEFOIL" && form.discipline !== "WINGFOIL" && (
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
                   <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Tipo de accesorio *</p>
                   <select

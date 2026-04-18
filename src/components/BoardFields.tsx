@@ -42,6 +42,11 @@ const KITEFOIL_BOARD_BRANDS = [
   "North", "Slingshot", "Takoon", "Crazyfly",
 ];
 
+const WINGFOIL_BOARD_BRANDS = [
+  "Armstrong", "AXIS", "Cabrinha", "Duotone", "F-One",
+  "Fanatic", "Naish", "North", "Ozone", "Slingshot", "Starboard",
+];
+
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 1 }, (_, i) => String(CURRENT_YEAR - i));
 
@@ -149,10 +154,16 @@ export default function BoardFields({
   brand, size, meta, onBrandChange, onSizeChange, onMetaChange, allowedTypes, discipline,
 }: Props) {
   const isKitefoil = discipline === "KITEFOIL";
-  const BRANDS = isKitefoil ? KITEFOIL_BOARD_BRANDS : BOARD_BRANDS;
+  const isWingfoil = discipline === "WINGFOIL";
+  const BRANDS = isKitefoil ? KITEFOIL_BOARD_BRANDS : isWingfoil ? WINGFOIL_BOARD_BRANDS : BOARD_BRANDS;
   const referencePlaceholder = isKitefoil
     ? "Ej: Slice, Trax, Nexus, Skylord..."
+    : isWingfoil
+    ? "Ej: Rocket Air, Minima, Rocket Wing, Maliko..."
     : "Ej: Spectrum, Atmos, Falcon...";
+  const complementPlaceholder = isWingfoil
+    ? "Ej: V2, Carbon, Inflatable..."
+    : "Ej: Air, Pro, V1...";
   const visibleBoardTypes = allowedTypes
     ? BOARD_TYPES.filter(t => allowedTypes.includes(t.value))
     : BOARD_TYPES;
@@ -262,7 +273,7 @@ export default function BoardFields({
           type="text"
           value={meta.complement ?? ""}
           onChange={e => setMeta({ complement: e.target.value })}
-          placeholder="Ej: Air, Pro, V1..."
+          placeholder={complementPlaceholder}
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>

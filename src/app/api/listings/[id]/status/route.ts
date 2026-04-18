@@ -14,13 +14,18 @@ export async function PATCH(
   const { id } = await params;
   const { status } = await req.json();
 
-  const allowed: ListingStatus[] = ["ACTIVE", "PAUSED", "SOLD"];
+  const isAdmin = session.user.email === "tmosquera93@gmail.com";
+  const allowedOwner: ListingStatus[] = ["ACTIVE", "PAUSED", "SOLD"];
+  const allowedAdmin: ListingStatus[] = ["ACTIVE", "PAUSED", "SOLD", "REMOVED"];
+
+  const allowed = isAdmin ? allowedAdmin : allowedOwner;
   if (!allowed.includes(status))
     return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
 
   const existing = await prisma.listing.findUnique({ where: { id } });
-  if (!existing || existing.sellerId !== session.user.id)
-    return NextResponse.json({ error: "No encontrado o sin permiso" }, { status: 403 });
+  if (!existing) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+  if (!isAdmin && existing.sellerId !== session.user.id)
+    return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
 
   const listing = await prisma.listing.update({
     where: { id },

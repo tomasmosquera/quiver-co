@@ -279,7 +279,7 @@ export default function KiteFields({
           type="text"
           value={meta.complement ?? ""}
           onChange={e => setMeta({ complement: e.target.value })}
-          placeholder="Ej: V1, V2, Alula..."
+          placeholder={isWing ? "Ej: Boom, Handle, Window..." : "Ej: V1, V2, Alula..."}
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
         />
       </div>
@@ -343,9 +343,11 @@ export default function KiteFields({
 
       <div className="border-t border-[#F3F4F6] pt-5 space-y-4">
 
-        {/* ¿Incluye barra y líneas? */}
+        {/* ¿Incluye barra y líneas? / ¿Incluye leash? */}
         <div>
-          <p className="text-sm font-semibold text-[#374151] mb-2">¿Incluye barra y líneas? *</p>
+          <p className="text-sm font-semibold text-[#374151] mb-2">
+            {isWing ? "¿Incluye leash?" : "¿Incluye barra y líneas?"} *
+          </p>
           <div className="flex gap-2">
             {[{ label: "Sí", value: true }, { label: "No", value: false }].map(opt => (
               <button
@@ -366,6 +368,36 @@ export default function KiteFields({
 
         {meta.includesBar && (
           <div className="ml-8 space-y-3 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
+            {isWing ? (
+              /* Leash details for wingfoil */
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#374151] mb-1">Marca del leash <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
+                  <input
+                    type="text"
+                    value={meta.barBrand ?? ""}
+                    onChange={e => setMeta({ barBrand: e.target.value })}
+                    placeholder="Ej: ION, Dakine, Prolimit..."
+                    className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#374151] mb-1">Tipo de leash <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
+                  <select
+                    value={meta.lineLength ?? ""}
+                    onChange={e => setMeta({ lineLength: e.target.value })}
+                    className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6] bg-white"
+                  >
+                    <option value="">Seleccionar</option>
+                    <option value="muñeca">De muñeca</option>
+                    <option value="antebrazo">De antebrazo</option>
+                    <option value="arnes">De arnés</option>
+                  </select>
+                </div>
+              </div>
+            ) : (
+              /* Bar + lines details for kitesurf/kitefoil */
+              <>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-[#374151] mb-1">Marca de la barra <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
@@ -414,11 +446,13 @@ export default function KiteFields({
                 </select>
               </div>
             </div>
+            </>
+            )}
           </div>
         )}
 
-        {/* ¿Incluye maleta? */}
-        <div>
+        {/* ¿Incluye maleta? — no aplica para wing */}
+        {!isWing && <div>
           <p className="text-sm font-semibold text-[#374151] mb-2">¿Incluye maleta? *</p>
           <div className="flex gap-2">
             {[{ label: "Sí", value: true }, { label: "No", value: false }].map(opt => (
@@ -436,7 +470,7 @@ export default function KiteFields({
               </button>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* ¿Tiene reparaciones? */}
         <div>

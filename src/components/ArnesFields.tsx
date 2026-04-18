@@ -38,8 +38,13 @@ const KITEFOIL_ARNES_BRANDS = [
   "Manera", "Mystic", "North", "Prolimit", "Ride Engine",
 ];
 
+const WINGFOIL_ARNES_BRANDS = [
+  "Dakine", "Duotone", "ION", "Manera", "Mystic", "North", "Prolimit", "Ride Engine",
+];
+
 const ARNES_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 const KITEFOIL_ARNES_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+const WINGFOIL_ARNES_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: CURRENT_YEAR - 2000 + 1 }, (_, i) => String(CURRENT_YEAR - i));
@@ -137,10 +142,13 @@ export default function ArnesFields({
   brand, size, meta, onBrandChange, onSizeChange, onMetaChange, discipline,
 }: Props) {
   const isKitefoil = discipline === "KITEFOIL";
-  const BRANDS = isKitefoil ? KITEFOIL_ARNES_BRANDS : ARNES_BRANDS;
-  const SIZES  = isKitefoil ? KITEFOIL_ARNES_SIZES  : ARNES_SIZES;
+  const isWingfoil = discipline === "WINGFOIL";
+  const BRANDS = isKitefoil ? KITEFOIL_ARNES_BRANDS : isWingfoil ? WINGFOIL_ARNES_BRANDS : ARNES_BRANDS;
+  const SIZES  = isKitefoil ? KITEFOIL_ARNES_SIZES  : isWingfoil ? WINGFOIL_ARNES_SIZES  : ARNES_SIZES;
   const refPlaceholder = isKitefoil
     ? "Ej: Warrior Foil, Apex, C2..."
+    : isWingfoil
+    ? "Ej: Sonic, Apex, Radar, Vega..."
     : "Ej: Warrior, Razor, Roam...";
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
