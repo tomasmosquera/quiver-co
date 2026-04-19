@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Bell, MessageCircle, TrendingUp, ShoppingBag, ChevronLeft } from "lucide-react";
+import { Bell, MessageCircle, TrendingUp, ShoppingBag, ChevronLeft, ShieldAlert } from "lucide-react";
 
 interface Notification {
   id: string;
-  type: "message" | "sale" | "purchase";
+  type: "message" | "sale" | "purchase" | "admin";
   title: string;
   body: string;
   href: string;
@@ -16,12 +16,14 @@ interface Notification {
 function NotifIcon({ type }: { type: Notification["type"] }) {
   if (type === "message")  return <MessageCircle className="w-5 h-5 text-[#3B82F6]" />;
   if (type === "sale")     return <TrendingUp className="w-5 h-5 text-emerald-500" />;
+  if (type === "admin")    return <ShieldAlert className="w-5 h-5 text-violet-500" />;
   return <ShoppingBag className="w-5 h-5 text-amber-500" />;
 }
 
 function NotifBg({ type }: { type: Notification["type"] }) {
   if (type === "message")  return "bg-blue-50";
   if (type === "sale")     return "bg-emerald-50";
+  if (type === "admin")    return "bg-violet-50";
   return "bg-amber-50";
 }
 
@@ -80,7 +82,14 @@ export default function NotificacionesPage() {
                   <NotifIcon type={n.type} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#111827] leading-snug">{n.title}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-semibold text-[#111827] leading-snug">{n.title}</p>
+                    {n.type === "admin" && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700">
+                        Admin
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-[#6B7280] mt-0.5 leading-relaxed">{n.body}</p>
                 </div>
                 <span className="text-xs text-[#9CA3AF] shrink-0 mt-1">{timeAgo(n.createdAt)}</span>

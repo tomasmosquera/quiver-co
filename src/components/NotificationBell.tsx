@@ -33,7 +33,7 @@ function NotifIcon({ type }: { type: Notification["type"] }) {
 function NotifBg({ type }: { type: Notification["type"] }) {
   if (type === "message")  return "bg-blue-50";
   if (type === "sale")     return "bg-emerald-50";
-  if (type === "admin")    return "bg-[#111827]";
+  if (type === "admin")    return "bg-[#6B7280]";
   return "bg-amber-50";
 }
 
@@ -130,7 +130,7 @@ export default function NotificationBell() {
                         </div>
                       )}
                       {i === 0 && adminNotifs.length > 0 && (
-                        <div key="admin-label" className="px-4 py-1.5 bg-[#111827]">
+                        <div key="admin-label" className="px-4 py-1.5 bg-[#F3F4F6]">
                           <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Panel admin</p>
                         </div>
                       )}
@@ -138,14 +138,14 @@ export default function NotificationBell() {
                         key={n.id}
                         href={n.href}
                         onClick={() => setOpen(false)}
-                        className={`flex items-start gap-3 px-4 py-3 transition-colors ${n.type === "admin" ? "bg-[#1F2937] hover:bg-[#374151]" : "hover:bg-[#F9FAFB]"}`}
+                        className={`flex items-start gap-3 px-4 py-3 transition-colors ${n.type === "admin" ? "bg-[#F3F4F6] hover:bg-[#E5E7EB]" : "hover:bg-[#F9FAFB]"}`}
                       >
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${NotifBg({ type: n.type })}`}>
                           <NotifIcon type={n.type} />
                         </div>
                         <div className="min-w-0">
-                          <p className={`text-sm font-semibold leading-snug ${n.type === "admin" ? "text-white" : "text-[#111827]"}`}>{n.title}</p>
-                          <p className={`text-xs mt-0.5 leading-relaxed line-clamp-2 ${n.type === "admin" ? "text-[#9CA3AF]" : "text-[#6B7280]"}`}>{n.body}</p>
+                          <p className="text-sm font-semibold leading-snug text-[#111827]">{n.title}</p>
+                          <p className="text-xs mt-0.5 leading-relaxed line-clamp-2 text-[#6B7280]">{n.body}</p>
                         </div>
                       </Link>
                     </>

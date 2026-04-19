@@ -8,18 +8,29 @@ export default async function CuentaPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      name: true, email: true, image: true, phone: true,
-      address: true, city: true, department: true, bio: true, verified: true, createdAt: true,
-      _count: { select: { listings: true, favorites: true } },
-    },
-  });
+  const [user, ratingAgg] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        name: true, email: true, image: true, phone: true,
+        address: true, city: true, department: true, bio: true, verified: true, createdAt: true,
+        _count: { select: { listings: true, favorites: true } },
+      },
+    }),
+    prisma.review.aggregate({
+      where: { subjectId: session.user.id },
+      _avg: { rating: true },
+      _count: { rating: true },
+    }),
+  ]);
 
   if (!user) redirect("/login");
 
   const memberSince = new Date(user.createdAt).toLocaleDateString("es-CO", { month: "long", year: "numeric" });
+  const avgRating = ratingAgg._avg.rating;
+  const ratingLabel = avgRating !== null
+    ? `${avgRating.toFixed(1)} ★ (${ratingAgg._count.rating})`
+    : "Nuevo";
 
   return (
     <div className="space-y-6">
@@ -47,7 +58,7 @@ export default async function CuentaPage() {
         {[
           { label: "Anuncios activos", value: user._count.listings },
           { label: "Favoritos",        value: user._count.favorites },
-          { label: "Calificación",     value: "Nuevo" },
+          { label: "Calificación",     value: ratingLabel },
           { label: "Verificado",       value: user.verified ? "Sí" : "No" },
         ].map(s => (
           <div key={s.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-4 text-center">
