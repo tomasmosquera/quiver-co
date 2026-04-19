@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: "Quiver Co. — Marketplace de Deportes de Viento y Agua en Colombia",
   description:
     "Compra y vende equipos de kitesurf, wingfoil, windsurf, wakeboard, foil y más en Colombia. El marketplace más serio para deportes acuáticos.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
