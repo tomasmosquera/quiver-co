@@ -37,7 +37,6 @@ export default async function AdminAnunciosPage() {
     include: {
       seller: { select: { name: true, email: true } },
       images: { orderBy: { order: "asc" }, take: 1 },
-      orders: { select: { status: true }, take: 1, orderBy: { createdAt: "desc" } },
     },
     orderBy: { createdAt: "desc" },
   });

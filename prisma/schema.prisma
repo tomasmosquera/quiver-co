@@ -301,6 +301,12 @@ model Order {
   shippingProofUrl String?
   review           Review?
 
+  sellerBankName          String?
+  sellerBankAccountType   String?
+  sellerBankAccountNumber String?
+  sellerBankAccountHolder String?
+  sellerBankIdDoc         String?
+
   @@map("orders")
 }
 

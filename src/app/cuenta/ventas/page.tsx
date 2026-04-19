@@ -5,37 +5,20 @@ import Link from "next/link";
 import { Package, MapPin, Phone, ChevronRight } from "lucide-react";
 import OrderTimeline from "@/components/OrderTimeline";
 import OrderActions from "@/components/OrderActions";
-import SellerProfileForm from "@/components/SellerProfileForm";
+import SellerBankForm from "@/components/SellerBankForm";
 
 export default async function VentasPage() {
   const session = await auth();
   if (!session?.user?.id) return redirect("/login");
 
-  const [orders, seller] = await Promise.all([
-    prisma.order.findMany({
-      where: { sellerId: session.user.id },
-      include: {
-        listing: { include: { images: { orderBy: { order: "asc" }, take: 1 } } },
-        buyer: { select: { name: true, email: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        name: true, phone: true, department: true, city: true, address: true,
-        bankName: true, bankAccountType: true, bankAccountNumber: true,
-        bankAccountHolder: true, bankIdDoc: true,
-      },
-    }),
-  ]);
-
-  const hasActiveOrders = orders.some(o => o.status !== "CANCELLED");
-  const sellerProfileComplete = !!(
-    seller?.name && seller?.phone && seller?.department && seller?.city &&
-    seller?.address && seller?.bankName && seller?.bankAccountType &&
-    seller?.bankAccountNumber && seller?.bankAccountHolder && seller?.bankIdDoc
-  );
+  const orders = await prisma.order.findMany({
+    where: { sellerId: session.user.id },
+    include: {
+      listing: { include: { images: { orderBy: { order: "asc" }, take: 1 } } },
+      buyer: { select: { name: true, email: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   const statusLabel: Record<string, string> = {
     PENDING:   "Esperando validación",
@@ -59,24 +42,10 @@ export default async function VentasPage() {
         <p className="text-sm text-[#6B7280] mt-1">Órdenes de compra y seguimiento de despachos.</p>
       </div>
 
-      {hasActiveOrders && !sellerProfileComplete && (
-        <SellerProfileForm initial={{
-          name: seller?.name ?? "",
-          phone: seller?.phone ?? "",
-          department: seller?.department ?? "",
-          city: seller?.city ?? "",
-          address: seller?.address ?? "",
-          bankName: seller?.bankName ?? "",
-          bankAccountType: seller?.bankAccountType ?? "",
-          bankAccountNumber: seller?.bankAccountNumber ?? "",
-          bankAccountHolder: seller?.bankAccountHolder ?? "",
-          bankIdDoc: seller?.bankIdDoc ?? "",
-        }} />
-      )}
-
       {orders.length > 0 ? (
         <div className="space-y-4">
           {orders.map((order: typeof orders[number]) => {
+            const needsBankInfo = order.status !== "CANCELLED" && !order.sellerBankAccountNumber;
             return (
               <div key={order.id} className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
 
@@ -142,6 +111,22 @@ export default async function VentasPage() {
                       </>
                     )}
                   </div>
+
+                  {/* Datos bancarios: formulario si faltan, resumen si ya están */}
+                  {needsBankInfo ? (
+                    <SellerBankForm orderId={order.id} listingTitle={order.listing.title} />
+                  ) : order.sellerBankAccountNumber ? (
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
+                      <p className="text-xs font-bold text-emerald-800 mb-2">Datos bancarios para esta venta</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-emerald-900">
+                        <div><span className="text-emerald-600">Banco:</span> {order.sellerBankName}</div>
+                        <div><span className="text-emerald-600">Tipo:</span> {order.sellerBankAccountType}</div>
+                        <div><span className="text-emerald-600">Cuenta:</span> {order.sellerBankAccountNumber}</div>
+                        <div><span className="text-emerald-600">Titular:</span> {order.sellerBankAccountHolder}</div>
+                        <div><span className="text-emerald-600">Cédula:</span> {order.sellerBankIdDoc}</div>
+                      </div>
+                    </div>
+                  ) : null}
 
                   <OrderTimeline
                     orderId={order.id}

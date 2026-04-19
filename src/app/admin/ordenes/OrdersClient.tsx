@@ -17,6 +17,11 @@ type Order = {
   buyerCity: string;
   buyerAddress: string;
   buyerIdDoc: string;
+  sellerBankName: string | null;
+  sellerBankAccountType: string | null;
+  sellerBankAccountNumber: string | null;
+  sellerBankAccountHolder: string | null;
+  sellerBankIdDoc: string | null;
   listing: { title: string; id: string };
   buyer: { name: string | null; email: string; phone: string | null };
   seller: { name: string | null; email: string; phone: string | null };
@@ -262,6 +267,22 @@ function OrderRow({ order }: { order: Order }) {
               <p className="text-[#374151]">Entregado: {new Date(order.deliveredAt).toLocaleDateString("es-CO")}</p>
             )}
           </div>
+          {order.sellerBankAccountNumber ? (
+            <div className="sm:col-span-2 lg:col-span-1">
+              <p className="text-xs text-[#9CA3AF] mb-1">Datos bancarios del vendedor</p>
+              <div className="space-y-0.5 text-sm">
+                <p className="font-semibold text-[#111827]">{order.sellerBankName} · {order.sellerBankAccountType}</p>
+                <p className="text-[#374151]">Cuenta: <span className="font-medium">{order.sellerBankAccountNumber}</span></p>
+                <p className="text-[#374151]">Titular: {order.sellerBankAccountHolder}</p>
+                <p className="text-[#374151]">C.C. {order.sellerBankIdDoc}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="sm:col-span-2 lg:col-span-1">
+              <p className="text-xs text-[#9CA3AF] mb-1">Datos bancarios del vendedor</p>
+              <p className="text-xs text-amber-600 font-medium">Pendiente — el vendedor aún no los ha ingresado.</p>
+            </div>
+          )}
           {order.shippingProofUrl && (
             <div className="sm:col-span-2 lg:col-span-3">
               <p className="text-xs text-[#9CA3AF] mb-2">Prueba de envío</p>
