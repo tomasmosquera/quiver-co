@@ -128,19 +128,18 @@ export default function NotificationBell() {
                   const items = [...adminNotifs, ...userNotifs].slice(0, 5);
                   const firstUserIdx = items.findIndex(n => n.type !== "admin");
                   return items.map((n, i) => (
-                    <>
-                      {i === firstUserIdx && adminNotifs.length > 0 && (
-                        <div key="divider" className="px-4 py-1.5 bg-[#F3F4F6]">
-                          <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Tus notificaciones</p>
-                        </div>
-                      )}
+                    <div key={n.id}>
                       {i === 0 && adminNotifs.length > 0 && (
-                        <div key="admin-label" className="px-4 py-1.5 bg-[#F3F4F6]">
+                        <div className="px-4 py-1.5 bg-[#F3F4F6]">
                           <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Panel admin</p>
                         </div>
                       )}
+                      {i === firstUserIdx && adminNotifs.length > 0 && (
+                        <div className="px-4 py-1.5 bg-[#F3F4F6]">
+                          <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Tus notificaciones</p>
+                        </div>
+                      )}
                       <Link
-                        key={n.id}
                         href={n.href}
                         onClick={() => setOpen(false)}
                         className={`flex items-start gap-3 px-4 py-3 transition-colors ${n.type === "admin" ? "bg-[#F3F4F6] hover:bg-[#E5E7EB]" : "hover:bg-[#F9FAFB]"}`}
@@ -153,7 +152,7 @@ export default function NotificationBell() {
                           <p className="text-xs mt-0.5 leading-relaxed line-clamp-2 text-[#6B7280]">{n.body}</p>
                         </div>
                       </Link>
-                    </>
+                    </div>
                   ));
                 })()}
               </div>
