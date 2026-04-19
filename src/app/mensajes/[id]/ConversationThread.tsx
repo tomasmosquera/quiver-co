@@ -81,9 +81,9 @@ export default function ConversationThread({ conversationId, currentUserId, init
   }
 
   return (
-    <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full px-4">
+    <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full px-4 min-h-0">
       {/* Mensajes */}
-      <div ref={scrollContainerRef} className="flex-1 py-6 space-y-4 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 min-h-0 py-6 space-y-4 overflow-y-auto">
         {messages.length === 0 && (
           <p className="text-center text-sm text-[#9CA3AF] mt-10">
             Sé el primero en escribir. Recuerda no compartir datos de contacto.
@@ -142,7 +142,7 @@ export default function ConversationThread({ conversationId, currentUserId, init
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
             placeholder="Escribe un mensaje..."
             maxLength={1000}
-            className="flex-1 px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] transition-colors"
+            className="flex-1 px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-base focus:outline-none focus:border-[#3B82F6] transition-colors"
           />
           <button
             onClick={send}
