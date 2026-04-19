@@ -22,8 +22,28 @@ const CONDITION_LABELS: Record<string, string> = {
 };
 
 const EQUIPMENT_LABELS: Record<string, string> = {
-  COMETA: "Cometa", TABLA: "Tabla", BARRA_LINEAS: "Barra & Líneas",
-  FOIL: "Foil", ARNES: "Arnés", TRAJE: "Traje", ACCESORIO: "Accesorio", COMBO: "Combo",
+  COMETA:      "Cometa",
+  WING:        "Wing",
+  TABLA:       "Tabla",
+  BARRA_LINEAS:"Barra & Líneas",
+  LEASH:       "Leash",
+  FOIL:        "Foil",
+  ARNES:       "Arnés",
+  TRAJE:       "Traje",
+  ACCESORIO:   "Accesorio",
+  COMBO:       "Combo",
+  ACC_COMETA:  "Accesorios de cometa",
+  ACC_WING:    "Accesorios de wing",
+  ACC_BARRA:   "Accesorios de barra",
+  ACC_TABLA:   "Accesorios de tabla",
+  ACC_ARNES:   "Accesorios de arnés",
+  BOMBAS:      "Bombas",
+  MALETAS:     "Maletas y bolsas",
+  WETSUIT:     "Wetsuit",
+  PONCHO:      "Poncho",
+  PROTECCION:  "Protección",
+  TECNOLOGIA:  "Tecnología",
+  OTROS:       "Otros",
 };
 
 const BOARD_TYPE_LABELS: Record<string, string> = {
@@ -73,6 +93,15 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
   // Incrementar vistas
   await prisma.listing.update({ where: { id }, data: { views: { increment: 1 } } });
+
+  // Reseñas del vendedor
+  const sellerReviews = await prisma.review.findMany({
+    where: { subjectId: listing.sellerId },
+    select: { rating: true },
+  });
+  const sellerRating = sellerReviews.length > 0
+    ? sellerReviews.reduce((sum, r) => sum + r.rating, 0) / sellerReviews.length
+    : null;
 
   const isOwner = session?.user?.id === listing.sellerId;
 
@@ -303,7 +332,13 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                   <p className="font-semibold text-[#111827] text-sm">{listing.seller.name}</p>
                   <div className="flex items-center gap-1 mt-0.5">
                     <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                    <span className="text-xs text-[#6B7280]">Nuevo vendedor</span>
+                    {sellerRating !== null ? (
+                      <span className="text-xs text-[#6B7280]">
+                        {sellerRating.toFixed(1)} ({sellerReviews.length} reseña{sellerReviews.length !== 1 ? "s" : ""})
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[#6B7280]">Nuevo vendedor</span>
+                    )}
                     {listing.seller.verified && <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />}
                   </div>
                 </div>

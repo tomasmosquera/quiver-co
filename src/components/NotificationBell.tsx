@@ -32,9 +32,16 @@ export default function NotificationBell() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch("/api/notifications")
-      .then(r => r.json())
-      .then(d => { setNotifications(d.notifications ?? []); setLoaded(true); });
+    function fetchNotifications() {
+      fetch("/api/notifications")
+        .then(r => r.json())
+        .then(d => { setNotifications(d.notifications ?? []); setLoaded(true); })
+        .catch(() => setLoaded(true));
+    }
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -86,7 +93,15 @@ export default function NotificationBell() {
                 <Link
                   key={n.id}
                   href={n.href}
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    setOpen(false);
+                    // Refrescar tras navegar para limpiar el contador
+                    setTimeout(() => {
+                      fetch("/api/notifications")
+                        .then(r => r.json())
+                        .then(d => setNotifications(d.notifications ?? []));
+                    }, 1500);
+                  }}
                   className="flex items-start gap-3 px-4 py-3 hover:bg-[#F9FAFB] transition-colors"
                 >
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${NotifBg({ type: n.type })}`}>

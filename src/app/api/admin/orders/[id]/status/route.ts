@@ -48,10 +48,8 @@ export async function PATCH(
 
   // Si se cancela, restaurar el listing a ACTIVE
   if (status === "CANCELLED") {
-    await prisma.$transaction([
-      prisma.order.update({ where: { id }, data }),
-      prisma.listing.update({ where: { id: order.listingId }, data: { status: "ACTIVE" } }),
-    ]);
+    await prisma.order.update({ where: { id }, data });
+    await prisma.listing.update({ where: { id: order.listingId }, data: { status: "ACTIVE" } });
     return NextResponse.json({ success: true });
   }
 
