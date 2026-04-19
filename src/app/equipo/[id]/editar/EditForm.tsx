@@ -74,6 +74,7 @@ interface InitialData {
   size: string;
   condition: string;
   price: string;
+  currency: string;
   description: string;
   city: string;
   images: string[];
@@ -406,20 +407,33 @@ export default function EditForm({ listingId, initial }: Props) {
 
           {/* Precio */}
           <div>
-            <label className="block text-sm font-semibold text-[#374151] mb-1">Precio (COP) *</label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] text-sm">$</span>
-              <input
-                type="number"
-                value={form.price}
-                onChange={e => set("price", e.target.value)}
-                min={0}
-                className="w-full pl-8 pr-16 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] text-xs">COP</span>
+            <label className="block text-sm font-semibold text-[#374151] mb-1">Precio *</label>
+            <div className="flex gap-2">
+              <div className="flex rounded-xl border border-[#D1D5DB] overflow-hidden shrink-0">
+                {["COP", "USD"].map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => set("currency", c)}
+                    className={`px-4 py-2.5 text-sm font-semibold transition-colors ${form.currency === c ? "bg-[#111827] text-white" : "text-[#6B7280] hover:bg-[#F3F4F6]"}`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+              <div className="relative flex-1">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] text-sm">$</span>
+                <input
+                  type="number"
+                  value={form.price}
+                  onChange={e => set("price", e.target.value)}
+                  min={0}
+                  className="w-full pl-8 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+                />
+              </div>
             </div>
-            {form.price && !isNaN(Number(form.price)) && (
-              <p className="text-xs text-[#6B7280] mt-1">${Number(form.price).toLocaleString("es-CO")} COP</p>
+            {form.currency === "USD" && (
+              <p className="text-xs text-blue-600 mt-1.5">El precio en USD se mostrará con el equivalente aproximado en COP según la TRM del día.</p>
             )}
           </div>
 

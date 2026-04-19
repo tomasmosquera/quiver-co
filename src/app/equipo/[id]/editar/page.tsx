@@ -34,6 +34,7 @@ export default async function EditarPage({
         size:          listing.size  ?? "",
         condition:     listing.condition,
         price:         listing.price.toString(),
+        currency:      (listing as any).currency ?? "COP",
         description:   listing.description,
         city:          listing.city,
         images:        listing.images.map(img => img.url),
