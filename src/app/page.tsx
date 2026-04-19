@@ -34,28 +34,28 @@ const EQUIPMENT_TYPES = [
 
 const SPOTS = [
   {
-    name: "Cartagena",
-    region: "Costa Caribe",
-    wind: "Dic – Abr",
+    name: "Cabo de la Vela",
+    region: "La Guajira",
+    wind: "Nov – Jun",
     level: "Todos",
     disciplines: ["Kitesurf", "Wingfoil"],
-    img: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=500&q=75",
+    img: "https://res.cloudinary.com/daevi83pr/image/upload/v1776614935/Cabo_De_La_Vela_qscxnr.jpg",
   },
   {
-    name: "Coveñas",
-    region: "Sucre",
-    wind: "Dic – Mar",
-    level: "Intermedio",
+    name: "Salinas del Rey",
+    region: "Córdoba",
+    wind: "Dic – Abr",
+    level: "Todos",
     disciplines: ["Kitesurf", "Windsurf"],
-    img: "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=500&q=75",
+    img: "https://res.cloudinary.com/daevi83pr/image/upload/v1776614464/Salinas_Del_Rey_flzwg7.jpg",
   },
   {
-    name: "Laguna del Sonso",
+    name: "Lago Calima",
     region: "Valle del Cauca",
     wind: "Todo el año",
     level: "Todos",
-    disciplines: ["Wakeboard", "Paddle"],
-    img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&q=75",
+    disciplines: ["Kitesurf", "Windsurf", "Wakeboard"],
+    img: "https://res.cloudinary.com/daevi83pr/image/upload/v1776614801/Calima_qghul1.jpg",
   },
 ];
 
