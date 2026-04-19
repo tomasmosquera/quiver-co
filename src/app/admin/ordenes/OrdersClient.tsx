@@ -132,7 +132,7 @@ function OrderRow({ order }: { order: Order }) {
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${STATUS_COLOR[order.status]}`}>
               {STATUS_LABEL[order.status]}
             </span>
-            <span className="text-xs text-[#9CA3AF]">
+            <span suppressHydrationWarning className="text-xs text-[#9CA3AF]">
               {new Date(order.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
             </span>
           </div>

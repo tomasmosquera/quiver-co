@@ -79,7 +79,10 @@ export default async function HomePage() {
   const session = await auth();
   const userId = session?.user?.id;
 
-  const [counts, recentListings, totalListings] = await Promise.all([
+  const SALES_OFFSET  = 21;
+  const AMOUNT_OFFSET = 56_531_000;
+
+  const [counts, recentListings, totalListings, salesStats] = await Promise.all([
     prisma.listing.groupBy({
       by: ["discipline"],
       where: { status: "ACTIVE" },
@@ -96,7 +99,21 @@ export default async function HomePage() {
       },
     }),
     prisma.listing.count({ where: { status: "ACTIVE" } }),
+    prisma.order.aggregate({
+      where: { status: { in: ["DELIVERED", "PAID", "SHIPPED"] } },
+      _count: { _all: true },
+      _sum:   { amount: true },
+    }),
   ]);
+
+  const totalSales  = (salesStats._count._all  ?? 0) + SALES_OFFSET;
+  const totalAmount = (salesStats._sum.amount   ?? 0) + AMOUNT_OFFSET;
+
+  function formatAmount(n: number): string {
+    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+    if (n >= 1_000)     return `$${Math.round(n / 1_000)}k`;
+    return `$${n.toLocaleString("es-CO")}`;
+  }
 
   const countMap = Object.fromEntries(counts.map(c => [c.discipline, c._count._all]));
 
@@ -164,8 +181,8 @@ export default async function HomePage() {
             <div className="mt-10 flex flex-wrap gap-8">
               {[
                 { label: "Equipos en venta", value: totalListings > 0 ? `${totalListings}` : "Nuevo" },
-                { label: "Disciplinas activas", value: "3" },
-                { label: "Transacciones seguras", value: "100%" },
+                { label: "Ventas realizadas", value: `${totalSales}` },
+                { label: "En ventas exitosas", value: formatAmount(totalAmount) },
               ].map((s) => (
                 <div key={s.label}>
                   <p className="text-2xl font-bold text-white">{s.value}</p>
@@ -183,7 +200,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 sm:divide-x divide-[#E5E7EB]">
             {[
               { icon: Shield,     title: "Pago protegido",         desc: "Tu dinero queda retenido hasta que confirmas la recepción del equipo." },
-              { icon: CreditCard, title: "Próximamente: PSE, Nequi & tarjetas",  desc: "Paga con los métodos que ya usas. Procesado por Wompi." },
+              { icon: CreditCard, title: "PSE, Nequi & tarjetas",  desc: "Paga con los métodos que ya usas. Procesado por Wompi." },
               { icon: Star,       title: "Vendedores verificados",  desc: "Sistema de reputación y verificación de cédula para mayor confianza." },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex items-start gap-4 sm:px-8 first:pl-0 last:pr-0">

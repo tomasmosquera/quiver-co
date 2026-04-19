@@ -87,13 +87,17 @@ export default async function AdminUsuariosPage() {
                   {VERIF_BADGE[user.verificationStatus] ?? VERIF_BADGE.NONE}
                 </td>
                 <td className="px-5 py-4">
-                  {user.verificationStatus === "PENDING" && user.verificationIdUrl ? (
-                    <VerificationActions userId={user.id} idUrl={user.verificationIdUrl} />
-                  ) : (
-                    <Link href={`/perfil/${user.id}`} className="text-xs text-[#3B82F6] hover:underline">
+                  <div className="flex items-center gap-3">
+                    {user.verificationStatus === "PENDING" && user.verificationIdUrl && (
+                      <VerificationActions userId={user.id} idUrl={user.verificationIdUrl} />
+                    )}
+                    <Link href={`/admin/usuarios/${user.id}/editar`} className="text-xs text-[#3B82F6] hover:underline">
+                      Editar
+                    </Link>
+                    <Link href={`/perfil/${user.id}`} className="text-xs text-[#6B7280] hover:underline">
                       Ver perfil
                     </Link>
-                  )}
+                  </div>
                 </td>
               </tr>
             ))}
