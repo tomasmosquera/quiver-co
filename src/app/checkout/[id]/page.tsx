@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { ChevronLeft, Shield, Banknote, Smartphone, CheckCircle, Copy } from "lucide-react";
+import { ChevronLeft, Shield, Banknote, Smartphone } from "lucide-react";
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
 import CheckoutFormClient from "./CheckoutFormClient";
 
@@ -29,7 +29,8 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
   });
 
   const buyer = await prisma.user.findUnique({
-    where: { id: session.user.id }
+    where: { id: session.user.id },
+    select: { name: true, phone: true, city: true },
   });
 
   if (!listing || listing.status !== "ACTIVE") {
@@ -181,12 +182,11 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                 listingTitle={listing.title}
                 subtotal={subtotal}
                 sellerId={listing.sellerId}
+                wompiPublicKey={process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY!}
                 buyer={buyer ? {
                   name: buyer.name,
                   phone: buyer.phone,
-                  address: buyer.address,
                   city: buyer.city,
-                  department: buyer.department,
                 } : null}
               />
             </div>

@@ -307,6 +307,10 @@ model Order {
   sellerBankAccountHolder String?
   sellerBankIdDoc         String?
 
+  paymentMethod           String  @default("manual") // "manual" | "wompi"
+  wompiReference          String? @unique
+  wompiTransactionId      String?
+
   @@map("orders")
 }
 
