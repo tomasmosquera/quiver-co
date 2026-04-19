@@ -17,7 +17,7 @@ export async function PATCH(
   const order = await prisma.order.findUnique({ where: { id } });
   if (!order) return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
 
-  const isAdmin  = session.user.email === ADMIN_EMAIL;
+  const userIsAdmin = isAdmin(session.user.email);
   const isBuyer  = order.buyerId  === session.user.id;
   const isSeller = order.sellerId === session.user.id;
 
@@ -32,11 +32,11 @@ export async function PATCH(
   }
 
   // Admins can cancel at any point except if already DELIVERED or CANCELLED
-  if (isAdmin && ["DELIVERED", "CANCELLED"].includes(order.status)) {
+  if (userIsAdmin && ["DELIVERED", "CANCELLED"].includes(order.status)) {
     return NextResponse.json({ error: "No se puede cancelar una orden ya entregada o cancelada" }, { status: 400 });
   }
 
-  if (!isAdmin && !isBuyer && !isSeller) {
+  if (!userIsAdmin && !isBuyer && !isSeller) {
     return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
   }
 
