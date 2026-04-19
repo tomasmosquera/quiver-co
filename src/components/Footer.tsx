@@ -8,7 +8,7 @@ export default function Footer() {
   const [copied, setCopied] = useState(false);
 
   function copyUrl() {
-    navigator.clipboard.writeText("https://quiver-co.vercel.app");
+    navigator.clipboard.writeText("https://quiverkite.com");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }

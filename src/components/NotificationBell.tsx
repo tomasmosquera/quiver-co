@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, MessageCircle, TrendingUp, ShoppingBag } from "lucide-react";
+import { Bell, MessageCircle, TrendingUp, ShoppingBag, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
 interface Notification {
   id: string;
-  type: "message" | "sale" | "purchase";
+  type: "message" | "sale" | "purchase" | "admin";
   title: string;
   body: string;
   href: string;
@@ -26,12 +26,14 @@ function saveSeenIds(ids: Set<string>) {
 function NotifIcon({ type }: { type: Notification["type"] }) {
   if (type === "message")  return <MessageCircle className="w-4 h-4 text-[#3B82F6]" />;
   if (type === "sale")     return <TrendingUp className="w-4 h-4 text-emerald-500" />;
+  if (type === "admin")    return <ShieldAlert className="w-4 h-4 text-white" />;
   return <ShoppingBag className="w-4 h-4 text-amber-500" />;
 }
 
 function NotifBg({ type }: { type: Notification["type"] }) {
   if (type === "message")  return "bg-blue-50";
   if (type === "sale")     return "bg-emerald-50";
+  if (type === "admin")    return "bg-[#111827]";
   return "bg-amber-50";
 }
 
@@ -115,22 +117,40 @@ export default function NotificationBell() {
           ) : (
             <>
               <div className="max-h-72 overflow-y-auto divide-y divide-[#F3F4F6]">
-                {notifications.slice(0, 5).map(n => (
-                  <Link
-                    key={n.id}
-                    href={n.href}
-                    onClick={() => setOpen(false)}
-                    className="flex items-start gap-3 px-4 py-3 hover:bg-[#F9FAFB] transition-colors"
-                  >
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${NotifBg({ type: n.type })}`}>
-                      <NotifIcon type={n.type} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#111827] leading-snug">{n.title}</p>
-                      <p className="text-xs text-[#6B7280] mt-0.5 leading-relaxed line-clamp-2">{n.body}</p>
-                    </div>
-                  </Link>
-                ))}
+                {(() => {
+                  const adminNotifs = notifications.filter(n => n.type === "admin");
+                  const userNotifs  = notifications.filter(n => n.type !== "admin");
+                  const items = [...adminNotifs, ...userNotifs].slice(0, 5);
+                  const firstUserIdx = items.findIndex(n => n.type !== "admin");
+                  return items.map((n, i) => (
+                    <>
+                      {i === firstUserIdx && adminNotifs.length > 0 && (
+                        <div key="divider" className="px-4 py-1.5 bg-[#F3F4F6]">
+                          <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Tus notificaciones</p>
+                        </div>
+                      )}
+                      {i === 0 && adminNotifs.length > 0 && (
+                        <div key="admin-label" className="px-4 py-1.5 bg-[#111827]">
+                          <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Panel admin</p>
+                        </div>
+                      )}
+                      <Link
+                        key={n.id}
+                        href={n.href}
+                        onClick={() => setOpen(false)}
+                        className={`flex items-start gap-3 px-4 py-3 transition-colors ${n.type === "admin" ? "bg-[#1F2937] hover:bg-[#374151]" : "hover:bg-[#F9FAFB]"}`}
+                      >
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${NotifBg({ type: n.type })}`}>
+                          <NotifIcon type={n.type} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className={`text-sm font-semibold leading-snug ${n.type === "admin" ? "text-white" : "text-[#111827]"}`}>{n.title}</p>
+                          <p className={`text-xs mt-0.5 leading-relaxed line-clamp-2 ${n.type === "admin" ? "text-[#9CA3AF]" : "text-[#6B7280]"}`}>{n.body}</p>
+                        </div>
+                      </Link>
+                    </>
+                  ));
+                })()}
               </div>
               <div className="border-t border-[#F3F4F6]">
                 <Link

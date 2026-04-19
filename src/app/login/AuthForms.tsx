@@ -157,7 +157,12 @@ export default function AuthForms() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-[#374151] mb-1">Contraseña</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-[#374151]">Contraseña</label>
+                <a href="/olvide-contrasena" className="text-xs text-[#3B82F6] hover:underline">
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}

@@ -113,7 +113,7 @@ export async function GET() {
 
   const notifications: {
     id: string;
-    type: "message" | "sale" | "purchase";
+    type: "message" | "sale" | "purchase" | "admin";
     title: string;
     body: string;
     href: string;
@@ -226,7 +226,7 @@ export async function GET() {
                                      `Transferir $${net} COP (−5%) a ${order.seller.name} por "${order.listing.title}".`;
     notifications.push({
       id: `admin-${order.id}-${order.status}`,
-      type: order.status === "PENDING" ? "purchase" : "sale",
+      type: "admin" as const,
       title,
       body,
       href: "/admin/orders",

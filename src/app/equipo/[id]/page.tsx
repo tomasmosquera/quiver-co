@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { type Metadata } from "next";
 import Link from "next/link";
 import {
   MapPin, Star, Shield, ChevronLeft,
@@ -74,6 +75,37 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       <p className="font-semibold text-[#111827] mt-0.5">{value}</p>
     </div>
   );
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const listing = await prisma.listing.findUnique({
+    where: { id },
+    include: { images: { orderBy: { order: "asc" }, take: 1 } },
+  });
+  if (!listing) return { title: "Anuncio no encontrado | Quiver Co." };
+
+  const discipline = DISCIPLINE_LABELS[listing.discipline] ?? listing.discipline;
+  const condition  = CONDITION_LABELS[listing.condition]  ?? listing.condition;
+  const price      = listing.price.toLocaleString("es-CO");
+  const description = `${condition} · ${listing.city} · $${price} COP — ${listing.description.slice(0, 140)}`;
+  const image = listing.images[0]?.url;
+
+  return {
+    title: `${listing.title} | ${discipline} | Quiver Co.`,
+    description,
+    openGraph: {
+      title: listing.title,
+      description,
+      ...(image && { images: [{ url: image, width: 1200, height: 630, alt: listing.title }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: listing.title,
+      description,
+      ...(image && { images: [image] }),
+    },
+  };
 }
 
 export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
