@@ -118,6 +118,7 @@ export default function VenderPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(EMPTY);
+  const [department, setDepartment] = useState("");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -717,7 +718,12 @@ export default function VenderPage() {
               {/* Ciudad */}
               <div>
                 <label className="block text-sm font-semibold text-[#374151] mb-1">Ciudad *</label>
-                <CityPicker value={form.city} onChange={v => set("city", v)} />
+                <CityPicker
+                  city={form.city}
+                  department={department}
+                  onCityChange={v => set("city", v)}
+                  onDepartmentChange={setDepartment}
+                />
               </div>
 
               </>}

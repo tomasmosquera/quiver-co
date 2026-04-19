@@ -1,7 +1,18 @@
+"use client";
+
 import Link from "next/link";
-import { Wind, Share2, MessageCircle, PlayCircle } from "lucide-react";
+import { Wind, Share2, MessageCircle, Check } from "lucide-react";
+import { useState } from "react";
 
 export default function Footer() {
+  const [copied, setCopied] = useState(false);
+
+  function copyUrl() {
+    navigator.clipboard.writeText("https://quiver-co.vercel.app");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
   return (
     <footer className="bg-[#111827] text-[#D1D5DB] mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
@@ -20,15 +31,21 @@ export default function Footer() {
               El mejor marketplace especializado de deportes acuáticos en Colombia.
             </p>
             <div className="flex gap-3">
-              {[Share2, MessageCircle, PlayCircle].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="w-9 h-9 bg-[#374151] hover:bg-[#3B82F6] rounded-lg flex items-center justify-center transition-colors"
-                >
-                  <Icon className="w-4 h-4 text-white" />
-                </a>
-              ))}
+              <button
+                onClick={copyUrl}
+                title={copied ? "¡Enlace copiado!" : "Copiar enlace"}
+                className="w-9 h-9 bg-[#374151] hover:bg-[#3B82F6] rounded-lg flex items-center justify-center transition-colors"
+              >
+                {copied ? <Check className="w-4 h-4 text-white" /> : <Share2 className="w-4 h-4 text-white" />}
+              </button>
+              <a
+                href="https://wa.me/573164780276"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 bg-[#374151] hover:bg-[#3B82F6] rounded-lg flex items-center justify-center transition-colors"
+              >
+                <MessageCircle className="w-4 h-4 text-white" />
+              </a>
             </div>
           </div>
 
@@ -82,31 +99,32 @@ export default function Footer() {
               Soporte
             </h4>
             <ul className="space-y-2.5">
-              {["Centro de ayuda", "Política de disputas", "Términos y condiciones", "Privacidad", "Contáctanos"].map(
-                (item) => (
-                  <li key={item}>
-                    <Link href="#" className="text-sm text-[#9CA3AF] hover:text-white transition-colors">
-                      {item}
-                    </Link>
-                  </li>
-                )
-              )}
+              {[
+                { label: "Centro de ayuda",          href: "/ayuda" },
+                { label: "Política de disputas",      href: "/disputas" },
+                { label: "Términos y condiciones",    href: "/terminos" },
+                { label: "Privacidad",                href: "/privacidad" },
+                { label: "Contáctanos",               href: "/contacto" },
+              ].map(({ label, href }) => (
+                <li key={label}>
+                  <Link href={href} className="text-sm text-[#9CA3AF] hover:text-white transition-colors">
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
         <div className="border-t border-[#374151] mt-10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[#6B7280]">
-            © 2026 Quiver Co. Todos los derechos reservados. Hecho en Colombia 🇨🇴
+            © 2026 Quiver Co. Todos los derechos reservados. Hecho en Colombia
           </p>
-          <div className="flex items-center gap-2">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Wompi_logo.svg/200px-Wompi_logo.svg.png"
-              alt="Wompi"
-              className="h-5 opacity-50"
-            />
-            <span className="text-xs text-[#6B7280]">Pagos seguros con Wompi</span>
-          </div>
+          <img
+            src="/marca-pais-colombia.png"
+            alt="Marca País Colombia"
+            className="h-10 opacity-80"
+          />
         </div>
       </div>
     </footer>

@@ -88,6 +88,7 @@ interface Props {
 export default function EditForm({ listingId, initial }: Props) {
   const router = useRouter();
   const [form, setForm] = useState(initial);
+  const [department, setDepartment] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -438,7 +439,12 @@ export default function EditForm({ listingId, initial }: Props) {
           {/* Ciudad */}
           <div>
             <label className="block text-sm font-semibold text-[#374151] mb-1">Ciudad *</label>
-            <CityPicker value={form.city} onChange={v => set("city", v)} />
+            <CityPicker
+              city={form.city}
+              department={department}
+              onCityChange={v => set("city", v)}
+              onDepartmentChange={setDepartment}
+            />
           </div>
 
           {/* Fotos */}
