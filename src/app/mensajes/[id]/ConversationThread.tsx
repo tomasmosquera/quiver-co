@@ -23,10 +23,7 @@ export default function ConversationThread({ conversationId, currentUserId, init
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Polling cada 5 segundos
   useEffect(() => {
@@ -86,7 +83,7 @@ export default function ConversationThread({ conversationId, currentUserId, init
   return (
     <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full px-4">
       {/* Mensajes */}
-      <div className="flex-1 py-6 space-y-4 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 py-6 space-y-4 overflow-y-auto">
         {messages.length === 0 && (
           <p className="text-center text-sm text-[#9CA3AF] mt-10">
             Sé el primero en escribir. Recuerda no compartir datos de contacto.

@@ -37,7 +37,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const img = conversation.listing.images[0]?.url;
 
   return (
-    <div className="bg-[#FAFAF8] min-h-screen flex flex-col">
+    <div className="bg-[#FAFAF8] h-[75vh] flex flex-col">
       {/* Header */}
       <div className="bg-white border-b border-[#E5E7EB] sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">

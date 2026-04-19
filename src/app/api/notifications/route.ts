@@ -125,15 +125,16 @@ export async function GET() {
     const conv = msgs[0].conversation;
     const other = conv.buyerId === userId ? conv.seller : conv.buyer;
     const count = msgs.length;
+    const latestMsg = msgs[msgs.length - 1];
     notifications.push({
-      id: `msg-${convId}`,
+      id: `msg-${convId}-${latestMsg.id}`,
       type: "message",
       title: `Mensaje de ${other.name}`,
       body: count === 1
         ? `Tienes 1 mensaje sin leer sobre "${conv.listing.title}"`
         : `Tienes ${count} mensajes sin leer sobre "${conv.listing.title}"`,
       href: `/mensajes/${convId}`,
-      createdAt: msgs[0].createdAt,
+      createdAt: latestMsg.createdAt,
     });
   }
 
