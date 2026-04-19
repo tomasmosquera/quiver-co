@@ -30,6 +30,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Oops, parece que este artículo ya no está disponible." }, { status: 400 });
     }
 
+    const existingOrder = await prisma.order.findFirst({
+      where: { listingId, status: { not: "CANCELLED" } },
+    });
+    if (existingOrder) {
+      return NextResponse.json({ error: "Este artículo ya tiene una orden activa." }, { status: 400 });
+    }
+
     // Usamos una transacción para asegurar consistencia
     const order = await prisma.$transaction(async (tx) => {
       // 1. Crear Orden

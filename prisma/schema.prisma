@@ -177,7 +177,7 @@ model Listing {
   images        ListingImage[]
   favoritedBy   Favorite[]
   conversations Conversation[]
-  order         Order?
+  orders        Order[]
 
   @@index([discipline])
   @@index([equipmentType])
@@ -277,7 +277,7 @@ model Order {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  listingId     String      @unique
+  listingId     String
   listing       Listing     @relation(fields: [listingId], references: [id])
 
   buyerId       String
