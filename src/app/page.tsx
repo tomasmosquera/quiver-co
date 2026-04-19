@@ -183,7 +183,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 sm:divide-x divide-[#E5E7EB]">
             {[
               { icon: Shield,     title: "Pago protegido",         desc: "Tu dinero queda retenido hasta que confirmas la recepción del equipo." },
-              { icon: CreditCard, title: "PSE, Nequi & tarjetas",  desc: "Próximamente: paga con los métodos que ya usas. Procesado por Wompi." },
+              { icon: CreditCard, title: "Próximamente: PSE, Nequi & tarjetas",  desc: "Paga con los métodos que ya usas. Procesado por Wompi." },
               { icon: Star,       title: "Vendedores verificados",  desc: "Sistema de reputación y verificación de cédula para mayor confianza." },
             ].map(({ icon: Icon, title, desc }) => (
               <div key={title} className="flex items-start gap-4 sm:px-8 first:pl-0 last:pr-0">

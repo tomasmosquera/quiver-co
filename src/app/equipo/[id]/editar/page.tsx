@@ -19,9 +19,9 @@ export default async function EditarPage({
     include: { images: { orderBy: { order: "asc" } } },
   });
 
-  const isAdmin = isAdmin(session.user.email);
+  const userIsAdmin = isAdmin(session.user.email);
   if (!listing || listing.status === "REMOVED") notFound();
-  if (!isAdmin && listing.sellerId !== session.user.id) notFound();
+  if (!userIsAdmin && listing.sellerId !== session.user.id) notFound();
 
   return (
     <EditForm

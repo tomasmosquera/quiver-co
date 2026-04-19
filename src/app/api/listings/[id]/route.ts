@@ -14,9 +14,9 @@ export async function PATCH(
 
   const { id } = await params;
 
-  const isAdmin = isAdmin(session.user.email);
+  const userIsAdmin = isAdmin(session.user.email);
   const existing = await prisma.listing.findUnique({ where: { id } });
-  if (!existing || (!isAdmin && existing.sellerId !== session.user.id)) {
+  if (!existing || (!userIsAdmin && existing.sellerId !== session.user.id)) {
     return NextResponse.json({ error: "No encontrado o sin permiso" }, { status: 403 });
   }
 

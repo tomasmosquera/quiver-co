@@ -15,17 +15,17 @@ export async function PATCH(
   const { id } = await params;
   const { status } = await req.json();
 
-  const isAdmin = isAdmin(session.user.email);
+  const userIsAdmin = isAdmin(session.user.email);
   const allowedOwner: ListingStatus[] = ["ACTIVE", "PAUSED", "SOLD"];
   const allowedAdmin: ListingStatus[] = ["ACTIVE", "PAUSED", "SOLD", "REMOVED"];
 
-  const allowed = isAdmin ? allowedAdmin : allowedOwner;
+  const allowed = userIsAdmin ? allowedAdmin : allowedOwner;
   if (!allowed.includes(status))
     return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
 
   const existing = await prisma.listing.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
-  if (!isAdmin && existing.sellerId !== session.user.id)
+  if (!userIsAdmin && existing.sellerId !== session.user.id)
     return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
 
   const listing = await prisma.listing.update({
