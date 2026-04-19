@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ShoppingBag, Menu, X, ChevronDown, Wind, User, MessageCircle, Heart, LogOut, Package } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, ChevronDown, Wind, User, MessageCircle, Heart, LogOut, Package, Bell } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import NavbarUser from "@/components/NavbarUser";
 import { useSession, signOut } from "next-auth/react";
@@ -387,10 +387,11 @@ export default function Navbar() {
                   </div>
                 </Link>
                 {[
-                  { label: "Mis anuncios",  href: "/cuenta/anuncios",  Icon: ShoppingBag },
-                  { label: "Compras",       href: "/cuenta/compras",   Icon: Package },
-                  { label: "Mensajes",      href: "/mensajes",         Icon: MessageCircle },
-                  { label: "Favoritos",     href: "/cuenta/favoritos", Icon: Heart },
+                  { label: "Mis anuncios",   href: "/cuenta/anuncios",  Icon: ShoppingBag },
+                  { label: "Compras",        href: "/cuenta/compras",   Icon: Package },
+                  { label: "Mensajes",       href: "/mensajes",         Icon: MessageCircle },
+                  { label: "Notificaciones", href: "/notificaciones",   Icon: Bell },
+                  { label: "Favoritos",      href: "/cuenta/favoritos", Icon: Heart },
                 ].map(({ label, href, Icon }) => (
                   <Link
                     key={href}

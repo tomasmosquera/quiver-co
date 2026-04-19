@@ -10,23 +10,15 @@ export default async function ComprasPage() {
   const session = await auth();
   if (!session?.user?.id) return redirect("/login");
 
-  const [orders, reviews] = await Promise.all([
-    prisma.order.findMany({
-      where: { buyerId: session.user.id },
-      include: {
-        listing: { include: { images: { orderBy: { order: "asc" }, take: 1 } } },
-        seller: { select: { name: true, phone: true, email: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.review.findMany({
-      where: { reviewerId: session.user.id },
-      select: { subjectId: true },
-    }),
-  ]);
-
-  // Set of sellerIds the buyer has already reviewed
-  const reviewedSellerIds = new Set(reviews.map((r: { subjectId: string }) => r.subjectId));
+  const orders = await prisma.order.findMany({
+    where: { buyerId: session.user.id },
+    include: {
+      listing: { include: { images: { orderBy: { order: "asc" }, take: 1 } } },
+      seller: { select: { name: true, phone: true, email: true } },
+      review: { select: { id: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   const statusLabel: Record<string, string> = {
     PENDING:   "Validando pago",
@@ -53,7 +45,7 @@ export default async function ComprasPage() {
       {orders.length > 0 ? (
         <div className="space-y-4">
           {orders.map((order: typeof orders[number]) => {
-            const hasReview = reviewedSellerIds.has(order.sellerId);
+            const hasReview = order.review !== null;
             return (
               <div key={order.id} className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
                 <div className="p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center border-b border-[#F3F4F6]">

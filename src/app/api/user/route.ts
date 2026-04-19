@@ -7,18 +7,19 @@ export async function PATCH(req: Request) {
   if (!session?.user?.id) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
   const body = await req.json();
-  const { name, phone, address, city, bio } = body;
+  const { name, phone, address, city, department, bio } = body;
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
     data: {
-      ...(name     !== undefined && { name: String(name).trim() || null }),
-      ...(phone    !== undefined && { phone: String(phone).trim() || null }),
-      ...(address  !== undefined && { address: String(address).trim() || null }),
-      ...(city     !== undefined && { city: String(city).trim() || null }),
-      ...(bio      !== undefined && { bio: String(bio).trim() || null }),
+      ...(name       !== undefined && { name: String(name).trim() || null }),
+      ...(phone      !== undefined && { phone: String(phone).trim() || null }),
+      ...(address    !== undefined && { address: String(address).trim() || null }),
+      ...(city       !== undefined && { city: String(city).trim() || null }),
+      ...(department !== undefined && { department: String(department).trim() || null }),
+      ...(bio        !== undefined && { bio: String(bio).trim() || null }),
     },
-    select: { id: true, name: true, phone: true, address: true, city: true, bio: true },
+    select: { id: true, name: true, phone: true, address: true, city: true, department: true, bio: true },
   });
 
   return NextResponse.json({ user });

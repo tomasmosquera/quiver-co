@@ -10,6 +10,7 @@ interface Props {
     phone: string;
     address: string;
     city: string;
+    department: string;
     bio: string;
   };
 }
@@ -73,8 +74,13 @@ export default function ProfileForm({ initial }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-[#374151] mb-1">Ciudad</label>
-        <CityPicker value={form.city} onChange={v => set("city", v)} />
+        <label className="block text-sm font-semibold text-[#374151] mb-1">Departamento y ciudad</label>
+        <CityPicker
+          department={form.department}
+          city={form.city}
+          onDepartmentChange={v => set("department", v)}
+          onCityChange={v => set("city", v)}
+        />
       </div>
 
       <div>
@@ -83,7 +89,7 @@ export default function ProfileForm({ initial }: Props) {
           type="text"
           value={form.address}
           onChange={e => set("address", e.target.value)}
-          placeholder="Ej: Cra 15 #93-40, Bogotá"
+          placeholder="Ej: Cra 15 #93-40, Apto 801"
           className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
         />
         <p className="text-xs text-[#9CA3AF] mt-1">Se autocompleta al momento de comprar</p>

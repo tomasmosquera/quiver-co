@@ -89,18 +89,17 @@ export async function GET() {
     }),
   ]);
 
-  // Si es admin: órdenes DELIVERED que necesitan transferencia (últimos 30 días)
-  const pendingTransfers = isAdmin
+  // Si es admin: todas las órdenes activas para seguimiento
+  const adminOrders = isAdmin
     ? await prisma.order.findMany({
-        where: {
-          status: "DELIVERED",
-          deliveredAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
-        },
+        where: { status: { in: ["PENDING", "PAID", "SHIPPED", "DELIVERED"] } },
         include: {
           listing: { select: { id: true, title: true } },
           seller:  { select: { name: true } },
+          buyer:   { select: { name: true } },
         },
-        orderBy: { deliveredAt: "desc" },
+        orderBy: { updatedAt: "desc" },
+        take: 50,
       })
     : [];
 
@@ -211,16 +210,27 @@ export async function GET() {
     });
   }
 
-  // Notificaciones para el admin: transferencias pendientes
-  for (const order of pendingTransfers) {
-    const amount = Math.round(order.amount * 0.95).toLocaleString("es-CO");
+  // Notificaciones para el admin: una por cada orden según su estado
+  for (const order of adminOrders) {
+    const amount = order.amount.toLocaleString("es-CO");
+    const net    = Math.round(order.amount * 0.95).toLocaleString("es-CO");
+    const title  =
+      order.status === "PENDING"   ? "Pago por confirmar" :
+      order.status === "PAID"      ? "Pago confirmado — en espera de envío" :
+      order.status === "SHIPPED"   ? "Orden enviada — en camino al comprador" :
+                                     "Entrega confirmada — transferir al vendedor";
+    const body   =
+      order.status === "PENDING"   ? `${order.buyer.name} compró "${order.listing.title}" ($${amount} COP). Confirma el pago.` :
+      order.status === "PAID"      ? `Pago de "${order.listing.title}" confirmado. El vendedor ${order.seller.name} debe enviar.` :
+      order.status === "SHIPPED"   ? `"${order.listing.title}" fue enviado. Esperando confirmación del comprador.` :
+                                     `Transferir $${net} COP (−5%) a ${order.seller.name} por "${order.listing.title}".`;
     notifications.push({
-      id: `transfer-${order.id}`,
-      type: "sale",
-      title: "Transferencia pendiente",
-      body: `Entregar $${amount} COP a ${order.seller.name} por "${order.listing.title}".`,
+      id: `admin-${order.id}-${order.status}`,
+      type: order.status === "PENDING" ? "purchase" : "sale",
+      title,
+      body,
       href: "/admin/orders",
-      createdAt: order.deliveredAt ?? order.updatedAt,
+      createdAt: order.updatedAt,
     });
   }
 

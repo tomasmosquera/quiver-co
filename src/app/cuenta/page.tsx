@@ -12,7 +12,7 @@ export default async function CuentaPage() {
     where: { id: session.user.id },
     select: {
       name: true, email: true, image: true, phone: true,
-      address: true, city: true, bio: true, verified: true, createdAt: true,
+      address: true, city: true, department: true, bio: true, verified: true, createdAt: true,
       _count: { select: { listings: true, favorites: true } },
     },
   });
@@ -65,11 +65,12 @@ export default async function CuentaPage() {
         </p>
         <ProfileForm
           initial={{
-            name:    user.name    ?? "",
-            phone:   user.phone   ?? "",
-            address: user.address ?? "",
-            city:    user.city    ?? "",
-            bio:     user.bio     ?? "",
+            name:       user.name       ?? "",
+            phone:      user.phone      ?? "",
+            address:    user.address    ?? "",
+            city:       user.city       ?? "",
+            department: user.department ?? "",
+            bio:        user.bio        ?? "",
           }}
         />
       </div>

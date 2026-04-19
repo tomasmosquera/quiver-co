@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, ShoppingBag, Heart, Settings, MessageCircle, Package, TrendingUp } from "lucide-react";
+import { User, LogOut, ShoppingBag, Heart, Settings, MessageCircle, Package, TrendingUp, Bell } from "lucide-react";
 
 export default function NavbarUser() {
   const { data: session, status } = useSession();
@@ -65,12 +65,13 @@ export default function NavbarUser() {
           </Link>
           <div className="py-1">
             {[
-              { label: "Mis anuncios",  href: "/cuenta/anuncios",  icon: ShoppingBag },
-              { label: "Compras",       href: "/cuenta/compras",   icon: Package },
-              { label: "Ventas",        href: "/cuenta/ventas",    icon: TrendingUp },
-              { label: "Mensajes",      href: "/mensajes",         icon: MessageCircle },
-              { label: "Favoritos",     href: "/cuenta/favoritos", icon: Heart },
-              { label: "Configuración", href: "/cuenta/config",    icon: Settings },
+              { label: "Mis anuncios",      href: "/cuenta/anuncios",   icon: ShoppingBag },
+              { label: "Compras",           href: "/cuenta/compras",    icon: Package },
+              { label: "Ventas",            href: "/cuenta/ventas",     icon: TrendingUp },
+              { label: "Mensajes",          href: "/mensajes",          icon: MessageCircle },
+              { label: "Notificaciones",    href: "/notificaciones",    icon: Bell },
+              { label: "Favoritos",         href: "/cuenta/favoritos",  icon: Heart },
+              { label: "Configuración",     href: "/cuenta/config",     icon: Settings },
             ].map(({ label, href, icon: Icon }) => (
               <Link
                 key={label}

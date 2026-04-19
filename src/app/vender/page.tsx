@@ -689,9 +689,13 @@ export default function VenderPage() {
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] text-xs">COP</span>
                 </div>
-                {form.price && !isNaN(Number(form.price)) && (
-                  <p className="text-xs text-[#6B7280] mt-1">
-                    ${Number(form.price).toLocaleString("es-CO")} COP
+                {form.price && !isNaN(Number(form.price)) && Number(form.price) > 0 && (
+                  <p className="text-xs text-[#6B7280] mt-1.5">
+                    Recibirás{" "}
+                    <span className="font-semibold text-emerald-600">
+                      ${Math.round(Number(form.price) * 0.95).toLocaleString("es-CO")} COP
+                    </span>{" "}
+                    — precio menos la comisión del 5% de Quiver.
                   </p>
                 )}
               </div>

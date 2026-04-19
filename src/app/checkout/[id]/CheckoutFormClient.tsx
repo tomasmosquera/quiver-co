@@ -5,25 +5,33 @@ import { CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { COLOMBIA, DEPARTMENTS } from "@/lib/colombia";
 
-export default function CheckoutFormClient({ 
-  listingId, 
-  listingTitle, 
+interface Buyer {
+  name?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  department?: string | null;
+}
+
+export default function CheckoutFormClient({
+  listingId,
+  listingTitle,
   subtotal,
   sellerId,
   buyer
-}: { 
-  listingId: string; 
-  listingTitle: string; 
+}: {
+  listingId: string;
+  listingTitle: string;
   subtotal: number;
   sellerId: string;
-  buyer: any;
+  buyer: Buyer | null;
 }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  
-  // States for dynamic dropdowns
-  const [department, setDepartment] = useState("");
-  const [city, setCity] = useState("");
+
+  // Pre-fill from user profile; user can still change them
+  const [department, setDepartment] = useState(buyer?.department ?? "");
+  const [city, setCity] = useState(buyer?.city ?? "");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -134,7 +142,7 @@ export default function CheckoutFormClient({
 
           <div>
             <label className="block text-xs font-semibold text-[#374151] mb-1">Dirección completa</label>
-            <input required type="text" name="buyerAddress" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Calle 123 #45-67 Apto 801, Edificio Mar" />
+            <input required type="text" name="buyerAddress" defaultValue={buyer?.address ?? ""} className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Calle 123 #45-67 Apto 801, Edificio Mar" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#374151] mb-1">Barrio <span className="text-[#9CA3AF] font-normal">(Opcional)</span></label>

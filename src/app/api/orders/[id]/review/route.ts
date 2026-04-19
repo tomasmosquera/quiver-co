@@ -21,11 +21,10 @@ export async function POST(
     return NextResponse.json({ error: "Solo puedes reseñar órdenes entregadas" }, { status: 400 });
   }
 
-  const existing = await prisma.review.findFirst({
-    where: { reviewerId: order.buyerId, subjectId: order.sellerId },
-  });
+  // One review per order
+  const existing = await prisma.review.findUnique({ where: { orderId: id } });
   if (existing) {
-    return NextResponse.json({ error: "Ya dejaste una reseña para este vendedor" }, { status: 409 });
+    return NextResponse.json({ error: "Ya dejaste una reseña para esta compra" }, { status: 409 });
   }
 
   const { rating, comment } = await req.json();
@@ -36,7 +35,8 @@ export async function POST(
   const review = await prisma.review.create({
     data: {
       reviewerId: order.buyerId,
-      subjectId: order.sellerId,
+      subjectId:  order.sellerId,
+      orderId:    id,
       rating,
       comment: comment || null,
     },

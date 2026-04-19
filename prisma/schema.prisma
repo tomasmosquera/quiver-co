@@ -77,6 +77,7 @@ model User {
   phone         String?
   address       String?
   city          String?
+  department    String?
   bio           String?
   verified      Boolean   @default(false)
   createdAt     DateTime  @default(now())
@@ -255,6 +256,9 @@ model Review {
   subjectId  String
   subject    User     @relation("ReviewsReceived", fields: [subjectId],  references: [id])
 
+  orderId    String?  @unique
+  order      Order?   @relation(fields: [orderId], references: [id])
+
   @@map("reviews")
 }
 
@@ -287,6 +291,7 @@ model Order {
   deliveredAt      DateTime?
   deliveryDeadline DateTime?
   shippingProofUrl String?
+  review           Review?
 
   @@map("orders")
 }

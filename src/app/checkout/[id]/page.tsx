@@ -6,6 +6,13 @@ import { ChevronLeft, Shield, Banknote, Smartphone, CheckCircle, Copy } from "lu
 import CopyToClipboardButton from "@/components/CopyToClipboardButton";
 import CheckoutFormClient from "./CheckoutFormClient";
 
+const DISCIPLINE_LABELS: Record<string, string> = {
+  KITESURF: "Kitesurf",
+  KITEFOIL: "Kitefoil",
+  WINGFOIL: "Wingfoil",
+  SNOWKITE: "Snowkite",
+};
+
 export default async function CheckoutPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
@@ -139,7 +146,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                     <p className="text-xs text-[#6B7280] mt-1">Vendido por: {listing.seller.name}</p>
                     {listing.discipline && (
                       <span className="inline-block mt-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-[#3B82F6]">
-                        {listing.discipline}
+                        {DISCIPLINE_LABELS[listing.discipline] ?? listing.discipline}
                       </span>
                     )}
                   </div>
@@ -169,12 +176,18 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                 </div>
               </div>
               
-              <CheckoutFormClient 
-                listingId={listing.id} 
-                listingTitle={listing.title} 
-                subtotal={subtotal} 
+              <CheckoutFormClient
+                listingId={listing.id}
+                listingTitle={listing.title}
+                subtotal={subtotal}
                 sellerId={listing.sellerId}
-                buyer={buyer}
+                buyer={buyer ? {
+                  name: buyer.name,
+                  phone: buyer.phone,
+                  address: buyer.address,
+                  city: buyer.city,
+                  department: buyer.department,
+                } : null}
               />
             </div>
           </div>
