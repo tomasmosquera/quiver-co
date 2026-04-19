@@ -113,6 +113,9 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const session = await auth();
 
+  const { getTRM, toCOP, formatPrice } = await import("@/lib/trm");
+  const { rate: trm } = await getTRM();
+
   const listing = await prisma.listing.findUnique({
     where: { id },
     include: {
@@ -297,10 +300,25 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
             {/* Precio */}
             <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 sticky top-24">
-              <p className="text-3xl font-bold text-[#111827]">
-                ${listing.price.toLocaleString("es-CO")}
-                <span className="text-base font-normal text-[#9CA3AF] ml-1">COP</span>
-              </p>
+              {(listing as any).currency === "USD" ? (
+                <div>
+                  <p className="text-3xl font-bold text-[#111827]">
+                    USD ${listing.price.toLocaleString("en-US")}
+                  </p>
+                  <p className="text-sm text-[#6B7280] mt-1">
+                    ≈ ${toCOP(listing.price, "USD", trm).toLocaleString("es-CO")} COP
+                    <span className="ml-1 text-xs">(TRM sugerida: ${trm.toLocaleString("es-CO")})</span>
+                  </p>
+                  <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 leading-relaxed">
+                    <span className="font-semibold">Acuerdo de tasa requerido.</span> El precio está en USD. La TRM mostrada es referencial — comprador y vendedor deben acordar la tasa de cambio antes de cerrar el trato. El pago se realizará en COP.
+                  </div>
+                </div>
+              ) : (
+                <p className="text-3xl font-bold text-[#111827]">
+                  ${listing.price.toLocaleString("es-CO")}
+                  <span className="text-base font-normal text-[#9CA3AF] ml-1">COP</span>
+                </p>
+              )}
 
               {isOwner ? (
                 <div className="mt-4 space-y-2">

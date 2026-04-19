@@ -79,6 +79,9 @@ export default async function HomePage() {
   const session = await auth();
   const userId = session?.user?.id;
 
+  const { getTRM, toCOP } = await import("@/lib/trm");
+  const { rate: trm } = await getTRM();
+
   const SALES_OFFSET  = 21;
   const AMOUNT_OFFSET = 56_531_000;
 
@@ -352,10 +355,17 @@ export default async function HomePage() {
                     <h3 className="text-[#111827] font-semibold text-sm line-clamp-2 leading-snug group-hover:text-[#3B82F6] transition-colors">
                       {listing.title}
                     </h3>
-                    <p className="text-[#111827] font-bold text-xl mt-auto">
-                      ${listing.price.toLocaleString("es-CO")}
-                      <span className="text-xs text-[#9CA3AF] font-normal ml-1">COP</span>
-                    </p>
+                    {(listing as any).currency === "USD" ? (
+                      <div className="mt-auto">
+                        <p className="text-[#111827] font-bold text-xl">USD ${listing.price.toLocaleString("en-US")}</p>
+                        <p className="text-xs text-[#6B7280]">≈ ${toCOP(listing.price, "USD", trm).toLocaleString("es-CO")} COP</p>
+                      </div>
+                    ) : (
+                      <p className="text-[#111827] font-bold text-xl mt-auto">
+                        ${listing.price.toLocaleString("es-CO")}
+                        <span className="text-xs text-[#9CA3AF] font-normal ml-1">COP</span>
+                      </p>
+                    )}
                     <div className="flex items-center justify-between pt-2 border-t border-[#F3F4F6]">
                       <div className="flex items-center gap-1 text-xs text-[#6B7280]">
                         <MapPin className="w-3.5 h-3.5 shrink-0" />

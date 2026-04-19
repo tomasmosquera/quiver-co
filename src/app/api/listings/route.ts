@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { title, description, price, discipline, equipmentType, condition, brand, size, city, images, metadata } = body;
+  const { title, description, price, currency, discipline, equipmentType, condition, brand, size, city, images, metadata } = body;
 
   if (!title || !description || !price || !discipline || !equipmentType || !condition || !city) {
     return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       title,
       description,
       price: parseInt(price),
+      currency: currency === "USD" ? "USD" : "COP",
       discipline: discipline as Discipline,
       equipmentType: equipmentType as EquipmentType,
       condition: condition as Condition,

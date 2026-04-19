@@ -21,7 +21,7 @@ export async function PATCH(
   }
 
   const body = await req.json();
-  const { title, description, price, discipline, equipmentType, condition, brand, size, city, images, metadata } = body;
+  const { title, description, price, currency, discipline, equipmentType, condition, brand, size, city, images, metadata } = body;
 
   if (!title || !description || !price || !discipline || !equipmentType || !condition || !city) {
     return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
@@ -36,6 +36,7 @@ export async function PATCH(
       title,
       description,
       price: parseInt(price),
+      currency: currency === "USD" ? "USD" : "COP",
       discipline,
       equipmentType,
       condition,

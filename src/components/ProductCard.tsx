@@ -6,6 +6,8 @@ export interface Product {
   id: string;
   title: string;
   price: number;
+  currency?: string;
+  priceCOP?: number;  // equivalente COP si la moneda es USD
   condition: "Nuevo" | "Como nuevo" | "Usado";
   brand: string;
   size?: string;
@@ -82,10 +84,21 @@ export default function ProductCard({ product }: { product: Product }) {
           {product.title}
         </h3>
 
-        <p className="text-[#111827] font-bold text-xl mt-auto">
-          ${product.price.toLocaleString("es-CO")}
-          <span className="text-xs text-[#9CA3AF] font-normal ml-1">COP</span>
-        </p>
+        {product.currency === "USD" ? (
+          <div className="mt-auto">
+            <p className="text-[#111827] font-bold text-xl">
+              USD ${product.price.toLocaleString("en-US")}
+            </p>
+            {product.priceCOP && (
+              <p className="text-xs text-[#6B7280]">≈ ${product.priceCOP.toLocaleString("es-CO")} COP</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-[#111827] font-bold text-xl mt-auto">
+            ${product.price.toLocaleString("es-CO")}
+            <span className="text-xs text-[#9CA3AF] font-normal ml-1">COP</span>
+          </p>
+        )}
 
         {/* Seller & location */}
         <div className="flex items-center justify-between pt-2 border-t border-[#F3F4F6]">

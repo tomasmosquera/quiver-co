@@ -165,6 +165,7 @@ model Listing {
   size          String?
   city          String
   metadata      Json?         // Campos extra según disciplina/tipo
+  currency      String        @default("COP") // "COP" | "USD"
   status        ListingStatus @default(ACTIVE)
   featured      Boolean       @default(false)
   views         Int           @default(0)

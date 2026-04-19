@@ -37,8 +37,12 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     notFound();
   }
 
-  // Costos
-  const subtotal = listing.price;
+  const { getTRM, toCOP } = await import("@/lib/trm");
+  const { rate: trm } = await getTRM();
+
+  const currency = (listing as any).currency ?? "COP";
+  const subtotal = toCOP(listing.price, currency, trm); // siempre en COP para el pago
+  const isUSD = currency === "USD";
 
   return (
     <div className="bg-[#FAFAF8] min-h-screen py-10">
@@ -155,9 +159,14 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
               </div>
 
               <div className="p-6 md:p-8 bg-[#F9FAFB] space-y-4">
+                {isUSD && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 leading-relaxed">
+                    Este artículo está publicado en USD. El monto a pagar es el equivalente en COP usando la TRM del día (${trm.toLocaleString("es-CO")} COP/USD). Confirma la tasa con el vendedor antes de pagar.
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6B7280]">Precio del equipo</span>
-                  <span className="font-medium text-[#111827]">${subtotal.toLocaleString("es-CO")}</span>
+                  <span className="font-medium text-[#111827]">${subtotal.toLocaleString("es-CO")} COP{isUSD ? ` (USD $${(listing as any).price.toLocaleString("en-US")})` : ""}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6B7280]">Protección de compra (Escrow)</span>

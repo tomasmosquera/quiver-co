@@ -247,6 +247,9 @@ export default async function EquiposPage({
   const userId = session?.user?.id;
   const params = await searchParams;
 
+  const { getTRM, toCOP } = await import("@/lib/trm");
+  const { rate: trm } = await getTRM();
+
   const {
     seccion = "", tipo = "", marca = "", condicion = "", orden = "reciente",
     q = "", precioMin = "", precioMax = "",
@@ -838,10 +841,17 @@ export default async function EquiposPage({
                           {listing.title}
                         </h3>
 
-                        <p className="text-[#111827] font-bold text-xl mt-auto">
-                          ${listing.price.toLocaleString("es-CO")}
-                          <span className="text-xs text-[#9CA3AF] font-normal ml-1">COP</span>
-                        </p>
+                        {(listing as any).currency === "USD" ? (
+                          <div className="mt-auto">
+                            <p className="text-[#111827] font-bold text-xl">USD ${listing.price.toLocaleString("en-US")}</p>
+                            <p className="text-xs text-[#6B7280]">≈ ${toCOP(listing.price, "USD", trm).toLocaleString("es-CO")} COP</p>
+                          </div>
+                        ) : (
+                          <p className="text-[#111827] font-bold text-xl mt-auto">
+                            ${listing.price.toLocaleString("es-CO")}
+                            <span className="text-xs text-[#9CA3AF] font-normal ml-1">COP</span>
+                          </p>
+                        )}
 
                         <div className="flex items-center justify-between pt-2 border-t border-[#F3F4F6]">
                           <div className="flex items-center gap-1 text-xs text-[#6B7280]">
