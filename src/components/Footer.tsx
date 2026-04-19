@@ -41,9 +41,9 @@ export default function Footer() {
               {[
                 { label: "Comprar equipos",       href: "/equipos" },
                 { label: "Vender mi equipo",       href: "/vender" },
-                { label: "Cómo funciona",          href: "#" },
-                { label: "Tarifas y comisiones",   href: "#" },
-                { label: "Protección al comprador",href: "#" },
+                { label: "Cómo funciona",          href: "/como-funciona" },
+                { label: "Tarifas y comisiones",   href: "/tarifas" },
+                { label: "Protección al comprador",href: "/proteccion-comprador" },
               ].map((item) => (
                 <li key={item.label}>
                   <Link href={item.href} className="text-sm text-[#9CA3AF] hover:text-white transition-colors">
