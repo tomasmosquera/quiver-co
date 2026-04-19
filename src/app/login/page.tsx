@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Wind } from "lucide-react";
 import Link from "next/link";
 import AuthForms from "./AuthForms";
@@ -23,7 +24,9 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <AuthForms />
+        <Suspense fallback={<div className="h-64 bg-white border border-[#E5E7EB] rounded-2xl animate-pulse" />}>
+          <AuthForms />
+        </Suspense>
 
         <p className="text-center text-xs text-[#9CA3AF] mt-6">
           Al continuar, aceptas nuestros{" "}
