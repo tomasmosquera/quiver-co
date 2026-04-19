@@ -252,14 +252,16 @@ export default function VenderPage() {
 
   async function uploadImages(files: FileList) {
     setUploading(true);
-    const urls: string[] = [];
-    for (const file of Array.from(files)) {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (data.url) urls.push(data.url);
-    }
+    const uploads = await Promise.all(
+      Array.from(files).map(async file => {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        return data.url as string | undefined;
+      })
+    );
+    const urls = uploads.filter(Boolean) as string[];
     set("images", [...form.images, ...urls]);
     setUploading(false);
   }

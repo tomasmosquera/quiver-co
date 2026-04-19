@@ -8,13 +8,19 @@ export default async function AdminResenasPage() {
   const session = await auth();
   if (!isAdmin(session?.user?.email)) redirect("/");
 
-  const reviews = await prisma.review.findMany({
-    include: {
-      reviewer: { select: { name: true, email: true } },
-      subject:  { select: { name: true, email: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [reviews, users] = await Promise.all([
+    prisma.review.findMany({
+      include: {
+        reviewer: { select: { name: true, email: true } },
+        subject:  { select: { name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.user.findMany({
+      select: { id: true, name: true, email: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   const avg = reviews.length > 0
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
@@ -30,7 +36,7 @@ export default async function AdminResenasPage() {
           </p>
         </div>
       </div>
-      <ReviewsClient reviews={reviews} />
+      <ReviewsClient reviews={reviews} users={users} />
     </div>
   );
 }

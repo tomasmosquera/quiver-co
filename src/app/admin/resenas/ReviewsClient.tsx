@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Star, Pencil, Trash2, X, Check, Loader2, Search } from "lucide-react";
+import { Star, Pencil, Trash2, X, Check, Loader2, Search, Plus } from "lucide-react";
 
 type Review = {
   id: string;
@@ -121,8 +121,103 @@ function ReviewRow({ review }: { review: Review }) {
   );
 }
 
-export default function ReviewsClient({ reviews }: { reviews: Review[] }) {
+type User = { id: string; name: string | null; email: string };
+
+function CreateReviewModal({ users, onClose }: { users: User[]; onClose: () => void }) {
+  const router = useRouter();
+  const [reviewerId, setReviewerId] = useState("");
+  const [subjectId, setSubjectId] = useState("");
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!reviewerId || !subjectId) return alert("Selecciona revisor y sujeto");
+    if (reviewerId === subjectId) return alert("El revisor y el sujeto no pueden ser el mismo usuario");
+    setSaving(true);
+    const res = await fetch("/api/admin/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reviewerId, subjectId, rating, comment }),
+    });
+    setSaving(false);
+    if (res.ok) { onClose(); router.refresh(); }
+    else { const d = await res.json(); alert(d.error ?? "Error al crear"); }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#F3F4F6]">
+          <h2 className="text-base font-bold text-[#111827]">Nueva reseña</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#F3F4F6] text-[#6B7280]"><X className="w-4 h-4" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-[#374151] mb-1">Quién escribe la reseña</label>
+            <select
+              value={reviewerId}
+              onChange={e => setReviewerId(e.target.value)}
+              required
+              className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/30"
+            >
+              <option value="">— Seleccionar usuario —</option>
+              {users.map(u => (
+                <option key={u.id} value={u.id}>{u.name ?? u.email} ({u.email})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#374151] mb-1">A quién se le hace la reseña</label>
+            <select
+              value={subjectId}
+              onChange={e => setSubjectId(e.target.value)}
+              required
+              className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/30"
+            >
+              <option value="">— Seleccionar usuario —</option>
+              {users.map(u => (
+                <option key={u.id} value={u.id}>{u.name ?? u.email} ({u.email})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#374151] mb-1">Calificación</label>
+            <StarPicker value={rating} onChange={setRating} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#374151] mb-1">Comentario (opcional)</label>
+            <textarea
+              rows={3}
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              placeholder="Escribe un comentario..."
+              className="w-full border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/30 resize-none"
+            />
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#111827] hover:bg-[#374151] disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-colors"
+            >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              Crear reseña
+            </button>
+            <button type="button" onClick={onClose} className="px-4 py-2 border border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#374151] text-xs font-semibold rounded-xl transition-colors">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function ReviewsClient({ reviews, users }: { reviews: Review[]; users: User[] }) {
   const [search, setSearch] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
 
   const q = search.toLowerCase().trim();
   const filtered = reviews.filter(r => {
@@ -138,15 +233,24 @@ export default function ReviewsClient({ reviews }: { reviews: Review[] }) {
 
   return (
     <div className="space-y-5">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-        <input
-          type="text"
-          placeholder="Buscar por usuario o comentario..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/30 bg-white"
-        />
+      {showCreate && <CreateReviewModal users={users} onClose={() => setShowCreate(false)} />}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
+          <input
+            type="text"
+            placeholder="Buscar por usuario o comentario..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/30 bg-white"
+          />
+        </div>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-[#111827] hover:bg-[#374151] text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
+        >
+          <Plus className="w-4 h-4" /> Nueva reseña
+        </button>
       </div>
 
       {filtered.length === 0 ? (
