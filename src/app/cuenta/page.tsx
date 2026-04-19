@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Shield } from "lucide-react";
 import ProfileForm from "@/components/ProfileForm";
+import VerificationRequest from "@/components/VerificationRequest";
 
 export default async function CuentaPage() {
   const session = await auth();
@@ -13,7 +14,9 @@ export default async function CuentaPage() {
       where: { id: session.user.id },
       select: {
         name: true, email: true, image: true, phone: true,
-        address: true, city: true, department: true, bio: true, verified: true, createdAt: true,
+        address: true, city: true, department: true, bio: true,
+        verified: true, verificationStatus: true, verificationIdUrl: true,
+        createdAt: true,
         _count: { select: { listings: true, favorites: true } },
       },
     }),
@@ -67,6 +70,12 @@ export default async function CuentaPage() {
           </div>
         ))}
       </div>
+
+      {/* Verificación */}
+      <VerificationRequest
+        status={user.verificationStatus}
+        idUrl={user.verificationIdUrl ?? null}
+      />
 
       {/* Formulario */}
       <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">

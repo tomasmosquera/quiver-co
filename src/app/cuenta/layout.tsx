@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   User, ShoppingBag, Package, TrendingUp,
-  Heart, MessageCircle, Bell,
+  Heart, MessageCircle, Bell, Settings,
 } from "lucide-react";
 
 const NAV = [
@@ -15,6 +15,7 @@ const NAV = [
   { label: "Mensajes",        href: "/cuenta/mensajes",        icon: MessageCircle },
   { label: "Notificaciones",  href: "/cuenta/notificaciones",  icon: Bell },
   { label: "Favoritos",       href: "/cuenta/favoritos",       icon: Heart },
+  { label: "Configuración",   href: "/cuenta/config",          icon: Settings },
 ];
 
 export default function CuentaLayout({ children }: { children: React.ReactNode }) {

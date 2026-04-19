@@ -368,7 +368,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 {[
                   ["🔒", "Pago protegido con escrow"],
                   ["↩️", "Política de disputas incluida"],
-                  ["✓",  "Vendedor verificado"],
+                  ...(listing.seller.verified ? [["✓", "Vendedor verificado"]] : []),
                 ].map(([icon, text]) => (
                   <div key={text} className="flex items-center gap-2 text-xs text-[#6B7280]">
                     <span>{icon}</span> {text}
