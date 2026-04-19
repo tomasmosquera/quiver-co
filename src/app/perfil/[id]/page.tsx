@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
-import { Shield, Star, Calendar, MapPin } from "lucide-react";
+import { ShieldCheck, ShieldOff, Star, Calendar, MapPin } from "lucide-react";
 
 export default async function SellerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -58,10 +58,20 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
             </div>
 
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] flex items-center justify-center md:justify-start gap-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#111827]">
                 {seller.name}
-                {seller.verified && <Shield className="w-6 h-6 text-[#3B82F6]" />}
               </h1>
+              <div className="mt-2">
+                {seller.verified ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-full">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Identidad verificada
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F3F4F6] border border-[#E5E7EB] text-[#9CA3AF] text-xs font-semibold rounded-full">
+                    <ShieldOff className="w-3.5 h-3.5" /> No verificado
+                  </span>
+                )}
+              </div>
               
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 mt-3 text-sm text-[#4B5563]">
                 <div className="flex items-center gap-1">
@@ -121,7 +131,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
                     size: l.size || undefined,
                     location: l.city,
                     discipline: l.discipline.charAt(0) + l.discipline.slice(1).toLowerCase(),
-                    image: l.images[0]?.url || "",
+                    image: l.images[0]?.url || undefined,
                     seller: { name: l.seller.name || "Usuario", rating: 5, verified: l.seller.verified },
                   }}
                 />
@@ -202,7 +212,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
                     size: l.size || undefined,
                     location: l.city,
                     discipline: l.discipline.charAt(0) + l.discipline.slice(1).toLowerCase(),
-                    image: l.images[0]?.url || "",
+                    image: l.images[0]?.url || undefined,
                     seller: { name: l.seller.name || "Usuario", rating: 5, verified: l.seller.verified },
                   }}
                 />

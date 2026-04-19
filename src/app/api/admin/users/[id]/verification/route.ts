@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
-const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (session?.user?.email !== ADMIN_EMAIL) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  if (!isAdmin(session?.user?.email)) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const { id } = await params;
   const { action } = await req.json(); // "approve" | "reject"

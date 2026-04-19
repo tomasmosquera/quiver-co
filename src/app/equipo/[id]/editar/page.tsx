@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import EditForm from "./EditForm";
 
 export default async function EditarPage({
@@ -18,7 +19,7 @@ export default async function EditarPage({
     include: { images: { orderBy: { order: "asc" } } },
   });
 
-  const isAdmin = session.user.email === "tmosquera93@gmail.com";
+  const isAdmin = isAdmin(session.user.email);
   if (!listing || listing.status === "REMOVED") notFound();
   if (!isAdmin && listing.sellerId !== session.user.id) notFound();
 

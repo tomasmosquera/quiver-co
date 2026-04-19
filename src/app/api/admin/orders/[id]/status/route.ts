@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
-const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   PENDING:   ["PAID", "CANCELLED"],
@@ -17,7 +17,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (session?.user?.email !== ADMIN_EMAIL) {
+  if (!isAdmin(session?.user?.email)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 

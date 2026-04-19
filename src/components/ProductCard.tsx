@@ -11,7 +11,7 @@ export interface Product {
   size?: string;
   location: string;
   discipline: string;
-  image: string;
+  image?: string;
   seller: { name: string; rating: number; verified: boolean };
   featured?: boolean;
   isSaved?: boolean;
@@ -42,11 +42,15 @@ export default function ProductCard({ product }: { product: Product }) {
     >
       {/* Image */}
       <div className="relative aspect-[4/3] bg-[#F9FAFB] overflow-hidden">
-        <img
-          src={product.image}
-          alt={product.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-xs text-[#9CA3AF]">Sin foto</div>
+        )}
         {product.featured && (
           <span className="absolute top-3 left-3 bg-[#3B82F6] text-white text-xs font-semibold px-2.5 py-1 rounded-full">
             Destacado

@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import ListingStatusToggle from "./ListingStatusToggle";
 import DeleteListingButton from "./DeleteListingButton";
 
-const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
 const STATUS_COLOR: Record<string, string> = {
   ACTIVE:  "bg-emerald-50 text-emerald-700",
@@ -31,7 +31,7 @@ const DISCIPLINE_LABEL: Record<string, string> = {
 
 export default async function AdminAnunciosPage() {
   const session = await auth();
-  if (session?.user?.email !== ADMIN_EMAIL) redirect("/");
+  if (!isAdmin(session?.user?.email)) redirect("/");
 
   const listings = await prisma.listing.findMany({
     include: {

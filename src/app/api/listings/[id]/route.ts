@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
 export async function PATCH(
@@ -13,7 +14,7 @@ export async function PATCH(
 
   const { id } = await params;
 
-  const isAdmin = session.user.email === "tmosquera93@gmail.com";
+  const isAdmin = isAdmin(session.user.email);
   const existing = await prisma.listing.findUnique({ where: { id } });
   if (!existing || (!isAdmin && existing.sellerId !== session.user.id)) {
     return NextResponse.json({ error: "No encontrado o sin permiso" }, { status: 403 });
@@ -63,7 +64,7 @@ export async function DELETE(
 
   const { id } = await params;
 
-  const isAdmin2 = session.user.email === "tmosquera93@gmail.com";
+  const isAdmin2 = isAdmin(session.user.email);
   const existing = await prisma.listing.findUnique({ where: { id } });
   if (!existing || (!isAdmin2 && existing.sellerId !== session.user.id)) {
     return NextResponse.json({ error: "No encontrado o sin permiso" }, { status: 403 });

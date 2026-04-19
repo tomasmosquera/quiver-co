@@ -68,11 +68,11 @@ export default function VerificationRequest({ status, idUrl }: Props) {
           <p className="text-sm font-bold text-amber-800">Verificación en revisión</p>
           <p className="text-xs text-amber-700 mt-0.5">Recibimos tu cédula. Te notificaremos cuando la revisemos (24–48h).</p>
         </div>
-        {idUrl && (
+        {idUrl ? (
           <a href={idUrl} target="_blank" rel="noopener noreferrer" className="ml-auto shrink-0">
             <img src={idUrl} alt="Cédula" className="w-12 h-12 object-cover rounded-lg border border-amber-200" />
           </a>
-        )}
+        ) : null}
       </div>
     );
   }
@@ -128,6 +128,7 @@ function UploadArea({ inputRef, preview, uploading, uploadedUrl, error, onFile, 
         className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#E5E7EB] hover:border-[#3B82F6] rounded-xl py-6 transition-colors"
       >
         {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="Vista previa" className="h-24 object-contain rounded-lg" />
         ) : (
           <>

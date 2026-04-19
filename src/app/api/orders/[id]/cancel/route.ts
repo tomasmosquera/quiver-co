@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
-const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
 export async function PATCH(
   _req: NextRequest,

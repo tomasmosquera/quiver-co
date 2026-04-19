@@ -1,13 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import OrdersClient from "./OrdersClient";
 
-const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
 export default async function AdminOrdenesPage() {
   const session = await auth();
-  if (session?.user?.email !== ADMIN_EMAIL) redirect("/");
+  if (!isAdmin(session?.user?.email)) redirect("/");
 
   const orders = await prisma.order.findMany({
     include: {

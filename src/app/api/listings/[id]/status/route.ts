@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { ListingStatus } from "@prisma/client";
 
@@ -14,7 +15,7 @@ export async function PATCH(
   const { id } = await params;
   const { status } = await req.json();
 
-  const isAdmin = session.user.email === "tmosquera93@gmail.com";
+  const isAdmin = isAdmin(session.user.email);
   const allowedOwner: ListingStatus[] = ["ACTIVE", "PAUSED", "SOLD"];
   const allowedAdmin: ListingStatus[] = ["ACTIVE", "PAUSED", "SOLD", "REMOVED"];
 

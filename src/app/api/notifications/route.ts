@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
-const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ notifications: [] });
 
   const userId = session.user.id;
-  const isAdmin = session.user.email === ADMIN_EMAIL;
+  const userIsAdmin = isAdmin(session.user.email);
 
   // Auto-deliver orders past deadline
   await prisma.order.updateMany({
@@ -90,7 +90,7 @@ export async function GET() {
   ]);
 
   // Si es admin: todas las órdenes activas para seguimiento
-  const adminOrders = isAdmin
+  const adminOrders = userIsAdmin
     ? await prisma.order.findMany({
         where: { status: { in: ["PENDING", "PAID", "SHIPPED", "DELIVERED"] } },
         include: {

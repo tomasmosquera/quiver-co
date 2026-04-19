@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ShoppingCart, Package, Users, TrendingUp, Clock, CheckCircle, Truck, AlertCircle } from "lucide-react";
 
-const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
 export default async function AdminPage() {
   const session = await auth();
-  if (session?.user?.email !== ADMIN_EMAIL) redirect("/");
+  if (!isAdmin(session?.user?.email)) redirect("/");
 
   const [
     totalUsers,

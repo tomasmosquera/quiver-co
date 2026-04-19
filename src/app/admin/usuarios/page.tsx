@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ShieldCheck, ShieldAlert, Shield } from "lucide-react";
 import VerificationActions from "./VerificationActions";
 
-const ADMIN_EMAIL = "tmosquera93@gmail.com";
 
 const VERIF_BADGE: Record<string, React.ReactNode> = {
   APPROVED: <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full"><ShieldCheck className="w-3 h-3" /> Verificado</span>,
@@ -16,7 +16,7 @@ const VERIF_BADGE: Record<string, React.ReactNode> = {
 
 export default async function AdminUsuariosPage() {
   const session = await auth();
-  if (session?.user?.email !== ADMIN_EMAIL) redirect("/");
+  if (!isAdmin(session?.user?.email)) redirect("/");
 
   const users = await prisma.user.findMany({
     include: {
