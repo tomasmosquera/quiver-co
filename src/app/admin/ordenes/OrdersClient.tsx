@@ -137,9 +137,8 @@ function OrderRow({ order }: { order: Order }) {
             <span className="mx-1.5">·</span>
             Vendedor: <span className="font-medium text-[#374151]">{order.seller.name}</span>
           </p>
-          <div className="flex items-center gap-3 mt-1">
+          <div className="flex flex-wrap items-center gap-2 mt-1">
             <p className="text-base font-bold text-[#111827]">${order.amount.toLocaleString("es-CO")} COP</p>
-            {/* WhatsApp rápido al comprador */}
             {buyerWa && (
               <a
                 href={waLink(buyerWa, `Hola ${order.buyerName}, soy Quiver Co. Te contacto sobre tu orden de "${order.listing.title}".`)}
@@ -148,7 +147,18 @@ function OrderRow({ order }: { order: Order }) {
                 title="WhatsApp comprador"
                 className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-lg transition-colors"
               >
-                <MessageCircle className="w-3.5 h-3.5" /> {order.buyerPhone}
+                <MessageCircle className="w-3.5 h-3.5" /> Comprador {order.buyerPhone}
+              </a>
+            )}
+            {order.seller.phone && (
+              <a
+                href={waLink(order.seller.phone, `Hola ${order.seller.name}, soy Quiver Co. Te contacto sobre la venta de "${order.listing.title}".`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="WhatsApp vendedor"
+                className="flex items-center gap-1 text-xs text-blue-700 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-lg transition-colors"
+              >
+                <MessageCircle className="w-3.5 h-3.5" /> Vendedor {order.seller.phone}
               </a>
             )}
           </div>

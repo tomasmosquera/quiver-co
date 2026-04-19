@@ -5,19 +5,37 @@ import Link from "next/link";
 import { Package, MapPin, Phone, ChevronRight } from "lucide-react";
 import OrderTimeline from "@/components/OrderTimeline";
 import OrderActions from "@/components/OrderActions";
+import SellerProfileForm from "@/components/SellerProfileForm";
 
 export default async function VentasPage() {
   const session = await auth();
   if (!session?.user?.id) return redirect("/login");
 
-  const orders = await prisma.order.findMany({
-    where: { sellerId: session.user.id },
-    include: {
-      listing: { include: { images: { orderBy: { order: "asc" }, take: 1 } } },
-      buyer: { select: { name: true, email: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const [orders, seller] = await Promise.all([
+    prisma.order.findMany({
+      where: { sellerId: session.user.id },
+      include: {
+        listing: { include: { images: { orderBy: { order: "asc" }, take: 1 } } },
+        buyer: { select: { name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        name: true, phone: true, department: true, city: true, address: true,
+        bankName: true, bankAccountType: true, bankAccountNumber: true,
+        bankAccountHolder: true, bankIdDoc: true,
+      },
+    }),
+  ]);
+
+  const hasActiveOrders = orders.some(o => o.status !== "CANCELLED");
+  const sellerProfileComplete = !!(
+    seller?.name && seller?.phone && seller?.department && seller?.city &&
+    seller?.address && seller?.bankName && seller?.bankAccountType &&
+    seller?.bankAccountNumber && seller?.bankAccountHolder && seller?.bankIdDoc
+  );
 
   const statusLabel: Record<string, string> = {
     PENDING:   "Esperando validación",
@@ -40,6 +58,21 @@ export default async function VentasPage() {
         <h1 className="text-xl font-bold text-[#111827]">Mis ventas</h1>
         <p className="text-sm text-[#6B7280] mt-1">Órdenes de compra y seguimiento de despachos.</p>
       </div>
+
+      {hasActiveOrders && !sellerProfileComplete && (
+        <SellerProfileForm initial={{
+          name: seller?.name ?? "",
+          phone: seller?.phone ?? "",
+          department: seller?.department ?? "",
+          city: seller?.city ?? "",
+          address: seller?.address ?? "",
+          bankName: seller?.bankName ?? "",
+          bankAccountType: seller?.bankAccountType ?? "",
+          bankAccountNumber: seller?.bankAccountNumber ?? "",
+          bankAccountHolder: seller?.bankAccountHolder ?? "",
+          bankIdDoc: seller?.bankIdDoc ?? "",
+        }} />
+      )}
 
       {orders.length > 0 ? (
         <div className="space-y-4">

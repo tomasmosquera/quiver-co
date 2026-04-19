@@ -230,7 +230,7 @@ export async function GET() {
       type: "admin" as const,
       title,
       body,
-      href: "/admin/orders",
+      href: "/admin/ordenes",
       createdAt: order.updatedAt,
     });
   }

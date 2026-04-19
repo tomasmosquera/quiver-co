@@ -80,6 +80,11 @@ model User {
   city          String?
   department    String?
   bio           String?
+  bankName          String?
+  bankAccountType   String?   // "ahorros" | "corriente"
+  bankAccountNumber String?
+  bankAccountHolder String?
+  bankIdDoc         String?   // cédula del titular de la cuenta
   verified      Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

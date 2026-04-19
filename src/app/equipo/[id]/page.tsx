@@ -5,12 +5,13 @@ import { type Metadata } from "next";
 import Link from "next/link";
 import {
   MapPin, Star, Shield, ChevronLeft,
-  Share2, Eye, Calendar,
+  Eye, Calendar,
 } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import ExpandableImage from "@/components/ExpandableImage";
 import FavoriteButton from "@/components/FavoriteButton";
 import ContactButton from "@/components/ContactButton";
+import ShareButton from "@/components/ShareButton";
 
 const DISCIPLINE_LABELS: Record<string, string> = {
   KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
@@ -313,9 +314,38 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                     Editar anuncio
                   </Link>
                 </div>
+              ) : listing.status === "SOLD" ? (
+                <div className="mt-4 space-y-3">
+                  <div className="w-full flex items-center justify-center py-3.5 bg-[#F3F4F6] text-[#9CA3AF] font-bold rounded-xl text-sm cursor-default">
+                    Vendido
+                  </div>
+                  <p className="text-xs text-center text-[#9CA3AF]">Este equipo ya fue vendido. Mira otros anuncios similares.</p>
+                  <Link
+                    href="/equipos"
+                    className="w-full flex items-center justify-center py-2.5 border border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#374151] font-semibold rounded-xl transition-colors text-sm"
+                  >
+                    Ver más equipos
+                  </Link>
+                  <ShareButton />
+                </div>
+              ) : listing.status === "PAUSED" ? (
+                <div className="mt-4 space-y-3">
+                  <div className="w-full flex items-center justify-center py-3.5 bg-[#FEF3C7] text-[#92400E] font-bold rounded-xl text-sm cursor-default">
+                    Anuncio pausado
+                  </div>
+                  <p className="text-xs text-center text-[#9CA3AF]">El vendedor pausó este anuncio temporalmente. Puedes guardarlo y volver más tarde.</p>
+                  <div className="flex gap-2">
+                    <FavoriteButton
+                      listingId={listing.id}
+                      initiallySaved={session?.user?.id ? listing.favoritedBy.length > 0 : false}
+                      variant="button"
+                    />
+                    <ShareButton />
+                  </div>
+                </div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  <Link 
+                  <Link
                     href={`/checkout/${listing.id}`}
                     className="w-full flex items-center justify-center py-3.5 bg-[#111827] hover:bg-[#374151] text-white font-bold rounded-xl transition-colors text-sm"
                   >
@@ -323,14 +353,12 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                   </Link>
                   <ContactButton listingId={listing.id} isLoggedIn={!!session?.user?.id} />
                   <div className="flex gap-2">
-                    <FavoriteButton 
-                      listingId={listing.id} 
-                      initiallySaved={session?.user?.id ? listing.favoritedBy.length > 0 : false} 
-                      variant="button" 
+                    <FavoriteButton
+                      listingId={listing.id}
+                      initiallySaved={session?.user?.id ? listing.favoritedBy.length > 0 : false}
+                      variant="button"
                     />
-                    <button className="flex-1 py-2.5 border border-[#E5E7EB] rounded-xl hover:bg-[#F9FAFB] transition-colors flex items-center justify-center gap-1.5 text-sm text-[#374151]">
-                      <Share2 className="w-4 h-4" /> Compartir
-                    </button>
+                    <ShareButton />
                   </div>
                 </div>
               )}
