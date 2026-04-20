@@ -183,30 +183,30 @@ export default function CheckoutFormClient({
         <button
           type="submit"
           disabled={loading}
-          onClick={() => setPaymentMethod("wompi")}
-          className="w-full flex items-center justify-center gap-2 py-4 bg-[#111827] hover:bg-[#374151] disabled:opacity-50 text-white font-bold rounded-xl transition-colors shadow-sm"
+          onClick={() => setPaymentMethod("manual")}
+          className="w-full flex items-center justify-center gap-2 py-4 bg-[#25D366] hover:bg-[#1DA851] disabled:opacity-50 text-white font-bold rounded-xl transition-colors shadow-sm"
         >
-          <CreditCard className="w-5 h-5" />
-          {loading && paymentMethod === "wompi" ? "Preparando pago..." : "Pagar con tarjeta / PSE / Nequi"}
+          <CheckCircle className="w-5 h-5" />
+          {loading && paymentMethod === "manual" ? "Procesando..." : "Ya transferí, enviar comprobante"}
         </button>
-        <p className="text-center text-xs text-[#9CA3AF]">Procesado de forma segura por Wompi.</p>
+        <p className="text-center text-xs text-[#9CA3AF]">Serás redirigido a WhatsApp para enviar el pantallazo.</p>
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-[#E5E7EB]" />
-          <span className="text-xs text-[#9CA3AF]">o si prefieres transferencia manual</span>
+          <span className="text-xs text-[#9CA3AF]">o paga en línea con Wompi</span>
           <div className="flex-1 h-px bg-[#E5E7EB]" />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          onClick={() => setPaymentMethod("manual")}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-[#25D366] hover:bg-[#1DA851] disabled:opacity-50 text-white font-bold rounded-xl transition-colors shadow-sm"
+          onClick={() => setPaymentMethod("wompi")}
+          className="w-full flex items-center justify-center gap-2 py-3 bg-[#111827] hover:bg-[#374151] disabled:opacity-50 text-white font-bold rounded-xl transition-colors shadow-sm"
         >
-          <CheckCircle className="w-5 h-5" />
-          {loading && paymentMethod === "manual" ? "Procesando..." : "Ya transferí, enviar comprobante"}
+          <CreditCard className="w-5 h-5" />
+          {loading && paymentMethod === "wompi" ? "Preparando pago..." : "Pagar con tarjeta / PSE / Nequi"}
         </button>
-        <p className="text-center text-xs text-[#9CA3AF]">Serás redirigido a WhatsApp para enviar el pantallazo.</p>
+        <p className="text-center text-xs text-[#9CA3AF]">Procesado de forma segura por Wompi.</p>
       </div>
     </form>
   );
