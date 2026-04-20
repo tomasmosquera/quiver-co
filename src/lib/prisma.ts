@@ -9,10 +9,7 @@ function createPrismaClient(): PrismaClient {
     // Neon serverless (HTTP) — used in production on Vercel
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PrismaNeon } = require("@prisma/adapter-neon");
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { neon } = require("@neondatabase/serverless");
-    const sql = neon(connectionString);
-    const adapter = new PrismaNeon(sql);
+    const adapter = new PrismaNeon({ connectionString });
     return new PrismaClient({ adapter });
   }
 
