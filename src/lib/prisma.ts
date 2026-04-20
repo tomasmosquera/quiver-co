@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+const globalForPrisma = globalThis as unknown as { _prismaClient: PrismaClient | undefined };
 
 function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL ?? "";
@@ -16,7 +16,7 @@ function createPrismaClient(): PrismaClient {
     return new PrismaClient({ adapter });
   }
 
-  // Standard PostgreSQL via TCP — fallback local
+  // Standard PostgreSQL via TCP — local dev
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Pool } = require("pg");
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -26,9 +26,16 @@ function createPrismaClient(): PrismaClient {
   return new PrismaClient({ adapter });
 }
 
-export const prisma: PrismaClient =
-  globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+function getClient(): PrismaClient {
+  if (!globalForPrisma._prismaClient) {
+    globalForPrisma._prismaClient = createPrismaClient();
+  }
+  return globalForPrisma._prismaClient;
 }
+
+// Proxy so the client is only instantiated on first actual use (env vars are ready by then)
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_, prop: string) {
+    return (getClient() as any)[prop];
+  },
+});
