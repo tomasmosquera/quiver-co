@@ -18,11 +18,18 @@ export async function POST(req: NextRequest) {
   if (!listing || listing.status !== "ACTIVE")
     return NextResponse.json({ error: "Artículo no disponible" }, { status: 400 });
 
-  const existingOrder = await prisma.order.findFirst({
-    where: { listingId, status: { not: "CANCELLED" } },
+  // Bloquear si ya existe una orden PAID (pago confirmado)
+  const paidOrder = await prisma.order.findFirst({
+    where: { listingId, status: "PAID" },
   });
-  if (existingOrder)
-    return NextResponse.json({ error: "Este artículo ya tiene una orden activa" }, { status: 400 });
+  if (paidOrder)
+    return NextResponse.json({ error: "Este artículo ya fue vendido" }, { status: 400 });
+
+  // Cancelar órdenes PENDING anteriores del mismo listing (pagos abandonados)
+  await prisma.order.updateMany({
+    where: { listingId, status: "PENDING" },
+    data: { status: "CANCELLED" },
+  });
 
   // Generar referencia única
   const reference = `QVR-${listingId.slice(0, 8)}-${Date.now()}`;
@@ -35,28 +42,23 @@ export async function POST(req: NextRequest) {
   const signature = crypto.createHash("sha256").update(signatureString).digest("hex");
 
   // Crear la orden en estado PENDING con la referencia Wompi
-  await prisma.$transaction([
-    prisma.order.create({
-      data: {
-        listingId,
-        buyerId: session.user!.id!,
-        sellerId,
-        amount,
-        status: "PENDING",
-        paymentMethod: "wompi",
-        wompiReference: reference,
-        buyerName,
-        buyerIdDoc,
-        buyerPhone,
-        buyerCity,
-        buyerAddress,
-      },
-    }),
-    prisma.listing.update({
-      where: { id: listingId },
-      data: { status: "SOLD" },
-    }),
-  ]);
+  // El listing se mantiene ACTIVE hasta que el webhook confirme el pago aprobado
+  await prisma.order.create({
+    data: {
+      listingId,
+      buyerId: session.user!.id!,
+      sellerId,
+      amount,
+      status: "PENDING",
+      paymentMethod: "wompi",
+      wompiReference: reference,
+      buyerName,
+      buyerIdDoc,
+      buyerPhone,
+      buyerCity,
+      buyerAddress,
+    },
+  });
 
   return NextResponse.json({ reference, signature, amountInCents, currency });
 }

@@ -28,26 +28,26 @@ export async function POST(req: NextRequest) {
     if (status === "APPROVED") {
       const order = await prisma.order.findUnique({ where: { wompiReference: reference } });
       if (order && order.status === "PENDING") {
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { status: "PAID", wompiTransactionId: transactionId },
-        });
+        await prisma.$transaction([
+          prisma.order.update({
+            where: { id: order.id },
+            data: { status: "PAID", wompiTransactionId: transactionId },
+          }),
+          prisma.listing.update({
+            where: { id: order.listingId },
+            data: { status: "SOLD" },
+          }),
+        ]);
       }
     }
 
     if (status === "DECLINED" || status === "VOIDED" || status === "ERROR") {
       const order = await prisma.order.findUnique({ where: { wompiReference: reference } });
       if (order && order.status === "PENDING") {
-        await prisma.$transaction([
-          prisma.order.update({
-            where: { id: order.id },
-            data: { status: "CANCELLED", wompiTransactionId: transactionId },
-          }),
-          prisma.listing.update({
-            where: { id: order.listingId },
-            data: { status: "ACTIVE" },
-          }),
-        ]);
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { status: "CANCELLED", wompiTransactionId: transactionId },
+        });
       }
     }
   }
