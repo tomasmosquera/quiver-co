@@ -9,7 +9,10 @@ import WompiWidget from "@/components/WompiWidget";
 interface Buyer {
   name?: string | null;
   phone?: string | null;
+  idDoc?: string | null;
   city?: string | null;
+  department?: string | null;
+  address?: string | null;
 }
 
 interface WompiData {
@@ -39,7 +42,7 @@ export default function CheckoutFormClient({
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [department, setDepartment] = useState("");
+  const [department, setDepartment] = useState(buyer?.department ?? "");
   const [city, setCity] = useState(buyer?.city ?? "");
 
   function getFormData() {
@@ -144,7 +147,7 @@ export default function CheckoutFormClient({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#374151] mb-1">Cédula</label>
-              <input required type="text" name="buyerIdDoc" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="123456789" />
+              <input required type="text" name="buyerIdDoc" defaultValue={buyer?.idDoc ?? ""} className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="123456789" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-[#374151] mb-1">Celular</label>
@@ -169,7 +172,7 @@ export default function CheckoutFormClient({
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#374151] mb-1">Dirección completa</label>
-            <input required type="text" name="buyerAddress" className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Calle 123 #45-67 Apto 801" />
+            <input required type="text" name="buyerAddress" defaultValue={buyer?.address ?? ""} className="w-full border border-[#E5E7EB] rounded-lg px-3 py-2 text-sm focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] outline-none" placeholder="Calle 123 #45-67 Apto 801" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-[#374151] mb-1">Barrio <span className="text-[#9CA3AF] font-normal">(Opcional)</span></label>

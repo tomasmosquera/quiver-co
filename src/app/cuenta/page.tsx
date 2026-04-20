@@ -10,16 +10,22 @@ export default async function CuentaPage() {
   if (!session?.user?.id) redirect("/login");
 
   const [user, ratingAgg] = await Promise.all([
-    prisma.user.findUnique({
+    (prisma.user.findUnique as any)({
       where: { id: session.user.id },
       select: {
-        name: true, email: true, image: true, phone: true,
+        name: true, email: true, image: true, phone: true, idDoc: true,
         address: true, city: true, department: true, bio: true,
         verified: true, verificationStatus: true, verificationIdUrl: true,
         createdAt: true,
         _count: { select: { listings: true, favorites: true } },
       },
-    }),
+    }) as Promise<{
+      name: string | null; email: string; image: string | null;
+      phone: string | null; idDoc: string | null;
+      address: string | null; city: string | null; department: string | null; bio: string | null;
+      verified: boolean; verificationStatus: string; verificationIdUrl: string | null;
+      createdAt: Date; _count: { listings: number; favorites: number };
+    } | null>,
     prisma.review.aggregate({
       where: { subjectId: session.user.id },
       _avg: { rating: true },
@@ -87,6 +93,7 @@ export default async function CuentaPage() {
           initial={{
             name:       user.name       ?? "",
             phone:      user.phone      ?? "",
+            idDoc:      user.idDoc      ?? "",
             address:    user.address    ?? "",
             city:       user.city       ?? "",
             department: user.department ?? "",

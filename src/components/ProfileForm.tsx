@@ -8,6 +8,7 @@ interface Props {
   initial: {
     name: string;
     phone: string;
+    idDoc: string;
     address: string;
     city: string;
     department: string;
@@ -58,6 +59,18 @@ export default function ProfileForm({ initial }: Props) {
             placeholder="Tu nombre"
             className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-[#374151] mb-1">Cédula de ciudadanía</label>
+          <input
+            type="text"
+            value={form.idDoc}
+            onChange={e => set("idDoc", e.target.value)}
+            placeholder="Ej: 1144061268"
+            className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+          />
+          <p className="text-xs text-[#9CA3AF] mt-1">Se usa para verificación y compras</p>
         </div>
 
         <div>

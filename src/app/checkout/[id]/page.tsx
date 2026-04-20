@@ -28,10 +28,10 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     },
   });
 
-  const buyer = await prisma.user.findUnique({
+  const buyer = await (prisma.user.findUnique as any)({
     where: { id: session.user.id },
-    select: { name: true, phone: true, city: true },
-  });
+    select: { name: true, phone: true, idDoc: true, city: true, department: true, address: true },
+  }) as { name: string | null; phone: string | null; idDoc: string | null; city: string | null; department: string | null; address: string | null } | null;
 
   if (!listing || listing.status !== "ACTIVE") {
     notFound();
@@ -193,9 +193,12 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                 sellerId={listing.sellerId}
                 wompiPublicKey={process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY!}
                 buyer={buyer ? {
-                  name: buyer.name,
-                  phone: buyer.phone,
-                  city: buyer.city,
+                  name:       buyer.name,
+                  phone:      buyer.phone,
+                  idDoc:      buyer.idDoc,
+                  city:       buyer.city,
+                  department: buyer.department,
+                  address:    buyer.address,
                 } : null}
               />
             </div>

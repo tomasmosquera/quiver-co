@@ -76,6 +76,7 @@ model User {
   image         String?
   password      String?
   phone         String?
+  idDoc         String?
   address       String?
   city          String?
   department    String?
