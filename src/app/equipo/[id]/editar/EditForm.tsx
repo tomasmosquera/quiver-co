@@ -429,6 +429,7 @@ export default function EditForm({ listingId, initial }: Props) {
                   type="number"
                   value={form.price}
                   onChange={e => set("price", e.target.value)}
+                  onWheel={e => (e.target as HTMLInputElement).blur()}
                   min={0}
                   className="w-full pl-8 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
                 />

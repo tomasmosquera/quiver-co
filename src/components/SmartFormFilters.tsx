@@ -3,96 +3,34 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export type TextFilterKey = "referencia" | "tamanio" | "anio" | "largoLineas";
+export type TextFilterKey = "largoLineas";
 
-const YEARS = Array.from(
-  { length: new Date().getFullYear() - 2014 },
-  (_, i) => String(new Date().getFullYear() - i)
-);
 const LINE_LENGTHS = ["18m", "20m", "22m", "24m", "27m", "Mixtas"];
 
 interface Props {
   activeFilters: TextFilterKey[];
-  referencia: string;
-  tamanio: string;
-  anio: string;
   largoLineas: string;
   baseParams: Record<string, string>;
-  tamanioLabel?: string;
 }
 
 export default function SmartFormFilters({
   activeFilters,
-  referencia,
-  tamanio,
-  anio,
   largoLineas,
   baseParams,
-  tamanioLabel = "Tamaño",
 }: Props) {
   const router = useRouter();
-  const [vals, setVals] = useState({ referencia, tamanio, anio, largoLineas });
+  const [vals, setVals] = useState({ largoLineas });
 
   function apply() {
     const params = new URLSearchParams(baseParams);
-    if (vals.referencia && activeFilters.includes("referencia")) params.set("referencia", vals.referencia); else params.delete("referencia");
-    if (vals.tamanio && activeFilters.includes("tamanio")) params.set("tamanio", vals.tamanio); else params.delete("tamanio");
-    if (vals.anio && activeFilters.includes("anio")) params.set("anio", vals.anio); else params.delete("anio");
     if (vals.largoLineas && activeFilters.includes("largoLineas")) params.set("largoLineas", vals.largoLineas); else params.delete("largoLineas");
     router.push(`/equipos?${params.toString()}`);
   }
-
-  const hasValues = vals.referencia || vals.tamanio || vals.anio || vals.largoLineas;
 
   if (activeFilters.length === 0) return null;
 
   return (
     <div className="space-y-4">
-
-      {/* Referencia */}
-      {activeFilters.includes("referencia") && (
-        <div>
-          <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">Referencia</h3>
-          <input
-            type="text"
-            value={vals.referencia}
-            onChange={e => setVals(v => ({ ...v, referencia: e.target.value }))}
-            onKeyDown={e => e.key === "Enter" && apply()}
-            placeholder="Ej: Vegas, Naim..."
-            className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
-          />
-        </div>
-      )}
-
-      {/* Tamaño / Talla */}
-      {activeFilters.includes("tamanio") && (
-        <div>
-          <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">{tamanioLabel}</h3>
-          <input
-            type="text"
-            value={vals.tamanio}
-            onChange={e => setVals(v => ({ ...v, tamanio: e.target.value }))}
-            onKeyDown={e => e.key === "Enter" && apply()}
-            placeholder="Ej: 12, 54cm, M..."
-            className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
-          />
-        </div>
-      )}
-
-      {/* Año */}
-      {activeFilters.includes("anio") && (
-        <div>
-          <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">Año</h3>
-          <select
-            value={vals.anio}
-            onChange={e => setVals(v => ({ ...v, anio: e.target.value }))}
-            className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6] bg-white"
-          >
-            <option value="">Cualquier año</option>
-            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-        </div>
-      )}
 
       {/* Largo de líneas */}
       {activeFilters.includes("largoLineas") && (
@@ -117,7 +55,7 @@ export default function SmartFormFilters({
         </div>
       )}
 
-      {hasValues && (
+      {vals.largoLineas && (
         <button
           type="button"
           onClick={apply}

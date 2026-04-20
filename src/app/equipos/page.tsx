@@ -6,6 +6,9 @@ import SortSelect from "@/components/SortSelect";
 import MobileFilters from "@/components/MobileFilters";
 import SmartFormFilters, { type TextFilterKey } from "@/components/SmartFormFilters";
 import CityFilterClient from "@/components/CityFilterClient";
+import SizeFilterClient from "@/components/SizeFilterClient";
+import YearFilterClient from "@/components/YearFilterClient";
+import ReferenciaFilterClient from "@/components/ReferenciaFilterClient";
 import { auth } from "@/lib/auth";
 
 /* ─── Datos estáticos ─── */
@@ -81,8 +84,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       { kind: "toggle", key: "incluyeMaleta",   label: "Incluye maleta",  onLabel: "Con maleta" },
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones",    onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Tamaño (m²)",
+    textFilters: [],
   },
   "KITEFOIL:COMETA": {
     linkFilters: [
@@ -90,16 +92,14 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       { kind: "toggle", key: "incluyeMaleta",   label: "Incluye maleta",  onLabel: "Con maleta" },
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones",    onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Tamaño (m)",
+    textFilters: [],
   },
   "WINGFOIL:WING": {
     linkFilters: [
       { kind: "toggle", key: "incluyeLeash",    label: "Incluye leash",   onLabel: "Con leash" },
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones",    onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Tamaño (m²)",
+    textFilters: [],
   },
   "KITESURF:TABLA": {
     linkFilters: [
@@ -110,8 +110,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       ]},
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Tamaño (cm)",
+    textFilters: [],
   },
   "KITEFOIL:TABLA": {
     linkFilters: [
@@ -120,8 +119,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       ]},
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Tamaño (cm)",
+    textFilters: [],
   },
   "WINGFOIL:TABLA": {
     linkFilters: [
@@ -131,22 +129,19 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       ]},
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Tamaño (cm)",
+    textFilters: [],
   },
   "KITESURF:BARRA_LINEAS": {
     linkFilters: [
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio", "largoLineas"],
-    tamanioLabel: "Tamaño barra (cm)",
+    textFilters: ["largoLineas"],
   },
   "KITEFOIL:BARRA_LINEAS": {
     linkFilters: [
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio", "largoLineas"],
-    tamanioLabel: "Tamaño barra (cm)",
+    textFilters: ["largoLineas"],
   },
   "WINGFOIL:LEASH": {
     linkFilters: [
@@ -157,8 +152,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       ]},
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio"],
-    tamanioLabel: "Largo del leash",
+    textFilters: [],
   },
   "KITESURF:ARNES": {
     linkFilters: [
@@ -168,8 +162,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       ]},
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Talla",
+    textFilters: [],
   },
   "KITEFOIL:ARNES": {
     linkFilters: [
@@ -179,8 +172,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       ]},
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Talla",
+    textFilters: [],
   },
   "WINGFOIL:ARNES": {
     linkFilters: [
@@ -190,8 +182,7 @@ const SMART_FILTER_CONFIG: Record<string, SmartConfig> = {
       ]},
       { kind: "toggle", key: "sinReparaciones", label: "Reparaciones", onLabel: "Sin reparaciones" },
     ],
-    textFilters: ["referencia", "tamanio", "anio"],
-    tamanioLabel: "Talla",
+    textFilters: [],
   },
 };
 
@@ -271,10 +262,24 @@ export default async function EquiposPage({
   if (ciudad)   conditions.push({ city: { equals: ciudad, mode: "insensitive" } });
   if (tamanio)  conditions.push({ size: { contains: tamanio, mode: "insensitive" } });
   if (precioMin || precioMax) {
-    const priceFilter: Record<string, number> = {};
-    if (precioMin) priceFilter.gte = parseInt(precioMin);
-    if (precioMax) priceFilter.lte = parseInt(precioMax);
-    conditions.push({ price: priceFilter });
+    const minCOP = precioMin ? parseInt(precioMin) : null;
+    const maxCOP = precioMax ? parseInt(precioMax) : null;
+    // Filtro para anuncios en COP (o sin moneda especificada)
+    const copFilter: Record<string, number> = {};
+    if (minCOP !== null) copFilter.gte = minCOP;
+    if (maxCOP !== null) copFilter.lte = maxCOP;
+    // Filtro para anuncios en USD: convertir el rango COP a USD usando TRM
+    const usdFilter: Record<string, number> = {};
+    if (minCOP !== null) usdFilter.gte = Math.floor(minCOP / trm);
+    if (maxCOP !== null) usdFilter.lte = Math.ceil(maxCOP / trm);
+    conditions.push({
+      OR: [
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        { AND: [{ currency: { not: "USD" } } as any, { price: copFilter }] },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        { AND: [{ currency: "USD" } as any, { price: usdFilter }] },
+      ],
+    });
   }
 
   // Filtros de metadata
@@ -293,9 +298,13 @@ export default async function EquiposPage({
     conditions.push({ metadata: { path: ["lineLength"], equals: largoLineas } });
   }
   if (incluyeBarra === "si")    conditions.push({ metadata: { path: ["includesBar"],  equals: true } });
+  if (incluyeBarra === "no")    conditions.push({ metadata: { path: ["includesBar"],  equals: false } });
   if (incluyeMaleta === "si")   conditions.push({ metadata: { path: ["includesBag"],  equals: true } });
-  if (incluyeLeash === "si")    conditions.push({ metadata: { path: ["includesBar"],  equals: true } });
+  if (incluyeMaleta === "no")   conditions.push({ metadata: { path: ["includesBag"],  equals: false } });
+  if (incluyeLeash === "si")    conditions.push({ metadata: { path: ["includesLeash"], equals: true } });
+  if (incluyeLeash === "no")    conditions.push({ metadata: { path: ["includesLeash"], equals: false } });
   if (sinReparaciones === "si") conditions.push({ metadata: { path: ["hasRepairs"],   equals: false } });
+  if (sinReparaciones === "no") conditions.push({ metadata: { path: ["hasRepairs"],   equals: true } });
 
   const where = { AND: conditions };
 
@@ -319,7 +328,10 @@ export default async function EquiposPage({
   const conditionsForCities = conditions.filter(c => !("city" in c));
   const whereForCities = { AND: conditionsForCities };
 
-  const [listings, total, brandGroups, cityGroups] = await Promise.all([
+  // Para el agrupado de tamaños, excluir el filtro de tamaño
+  const conditionsForSizes = conditions.filter(c => !("size" in c));
+
+  const [listings, total, brandGroups, cityGroups, sizeGroups, disciplineGroups, typeGroups, conditionGroups] = await Promise.all([
     prisma.listing.findMany({
       where,
       orderBy,
@@ -342,7 +354,114 @@ export default async function EquiposPage({
       _count: { city: true },
       orderBy: { _count: { city: "desc" } },
     }),
+    prisma.listing.groupBy({
+      by: ["size"],
+      where: { AND: [...conditionsForSizes, { size: { not: null } }] },
+      _count: { size: true },
+    }),
+    // Conteos por disciplina (sin filtro de disciplina)
+    prisma.listing.groupBy({
+      by: ["discipline"],
+      where: { AND: conditions.filter(c => !("discipline" in c)) },
+      _count: { discipline: true },
+    }),
+    // Conteos por tipo de equipo (sin filtro de tipo)
+    prisma.listing.groupBy({
+      by: ["equipmentType"],
+      where: { AND: conditions.filter(c => !("equipmentType" in c)) },
+      _count: { equipmentType: true },
+    }),
+    // Conteos por condición (sin filtro de condición)
+    prisma.listing.groupBy({
+      by: ["condition"],
+      where: { AND: conditions.filter(c => !("condition" in c)) },
+      _count: { condition: true },
+    }),
   ]);
+
+  /* ─── Mapas de conteo para sección / equipo / estado ─── */
+
+  const disciplineCountMap = new Map(disciplineGroups.map(g => {
+    // La DB guarda WATERWEAR para "Accesorios"
+    const key = Object.entries(SECCION_TO_DB).find(([, v]) => v === g.discipline)?.[0] ?? g.discipline;
+    return [key, g._count.discipline];
+  }));
+  const typeCountMap = new Map(typeGroups.map(g => [g.equipmentType as string, g._count.equipmentType]));
+  const conditionCountMap = new Map(conditionGroups.map(g => [g.condition as string, g._count.condition]));
+
+  /* ─── Años (raw query sobre metadata JSON) ─── */
+
+  // Construimos un WHERE simple compatible con la consulta raw
+  const disciplineFilter = seccion && VALID_DISCIPLINES.includes(seccion)
+    ? `AND discipline = '${SECCION_TO_DB[seccion] ?? seccion}'` : "";
+  const tipoFilter = tipo ? `AND "equipmentType" = '${tipo}'` : "";
+
+  const yearRows = await prisma.$queryRawUnsafe<{ year: string; cnt: bigint }[]>(`
+    SELECT metadata->>'year' AS year, COUNT(*) AS cnt
+    FROM listings
+    WHERE status = 'ACTIVE'
+      AND metadata->>'year' IS NOT NULL
+      AND metadata->>'year' != ''
+      ${disciplineFilter}
+      ${tipoFilter}
+    GROUP BY metadata->>'year'
+  `);
+
+  /* ─── Referencias (primera palabra del campo reference en metadata) ─── */
+
+  const referenciaRows = await prisma.$queryRawUnsafe<{ ref: string; cnt: bigint }[]>(`
+    SELECT split_part(metadata->>'reference', ' ', 1) AS ref, COUNT(*) AS cnt
+    FROM listings
+    WHERE status = 'ACTIVE'
+      AND metadata->>'reference' IS NOT NULL
+      AND metadata->>'reference' != ''
+      ${disciplineFilter}
+      ${tipoFilter}
+    GROUP BY split_part(metadata->>'reference', ' ', 1)
+    ORDER BY cnt DESC
+  `);
+
+  const allReferenciasList = referenciaRows
+    .filter(r => r.ref && r.ref.trim() !== "")
+    .map(r => ({ name: r.ref.trim(), count: Number(r.cnt) }));
+
+  const top5Referencias = allReferenciasList.slice(0, 5);
+
+  const allReferenciasAlpha = [...allReferenciasList].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+
+  /* ─── Conteos de toggles (barra, maleta, leash, reparaciones) ─── */
+  // Solo aplica cuando hay seccion+tipo seleccionados
+  type ToggleCount = { val: string; cnt: bigint };
+  const baseToggleWhere = `status = 'ACTIVE' ${disciplineFilter} ${tipoFilter}`;
+
+  const [barraRows, maletaRows, leashRows, repRows] = seccion && tipo
+    ? await Promise.all([
+        prisma.$queryRawUnsafe<ToggleCount[]>(`SELECT (metadata->>'includesBar') AS val, COUNT(*) AS cnt FROM listings WHERE ${baseToggleWhere} AND metadata->>'includesBar' IS NOT NULL GROUP BY val`),
+        prisma.$queryRawUnsafe<ToggleCount[]>(`SELECT (metadata->>'includesBag') AS val, COUNT(*) AS cnt FROM listings WHERE ${baseToggleWhere} AND metadata->>'includesBag' IS NOT NULL GROUP BY val`),
+        prisma.$queryRawUnsafe<ToggleCount[]>(`SELECT (metadata->>'includesLeash') AS val, COUNT(*) AS cnt FROM listings WHERE ${baseToggleWhere} AND metadata->>'includesLeash' IS NOT NULL GROUP BY val`),
+        prisma.$queryRawUnsafe<ToggleCount[]>(`SELECT (metadata->>'hasRepairs') AS val, COUNT(*) AS cnt FROM listings WHERE ${baseToggleWhere} AND metadata->>'hasRepairs' IS NOT NULL GROUP BY val`),
+      ])
+    : [[], [], [], []];
+
+  // Mapas: true/false string → count
+  const toToggleMap = (rows: ToggleCount[]) =>
+    new Map(rows.map(r => [r.val, Number(r.cnt)]));
+
+  const barraMap  = toToggleMap(barraRows);
+  const maletaMap = toToggleMap(maletaRows);
+  const leashMap  = toToggleMap(leashRows);
+  const repMap    = toToggleMap(repRows);
+
+  // Por cada toggle key: { si: count, no: count }
+  const toggleCounts: Record<string, { si: number; no: number }> = {
+    incluyeBarra:    { si: barraMap.get("true")  ?? 0, no: barraMap.get("false")  ?? 0 },
+    incluyeMaleta:   { si: maletaMap.get("true") ?? 0, no: maletaMap.get("false") ?? 0 },
+    incluyeLeash:    { si: leashMap.get("true")  ?? 0, no: leashMap.get("false")  ?? 0 },
+    // sinReparaciones=si → hasRepairs=false, sinReparaciones=no → hasRepairs=true
+    sinReparaciones: { si: repMap.get("false")   ?? 0, no: repMap.get("true")     ?? 0 },
+  };
 
   /* ─── Marcas ─── */
 
@@ -394,6 +513,43 @@ export default async function EquiposPage({
 
   const top5Cities = allCitiesList.slice(0, 5);
   const allCitiesSorted = [...allCitiesList].sort((a, b) => a.name.localeCompare(b.name));
+
+  /* ─── Años ─── */
+
+  const allYearsList = yearRows
+    .map(r => ({ name: r.year, count: Number(r.cnt) }))
+    .sort((a, b) => Number(b.name) - Number(a.name)); // más reciente primero
+
+  const top10Years = [...allYearsList]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+    .sort((a, b) => Number(b.name) - Number(a.name)); // más reciente primero
+
+  /* ─── Tamaños ─── */
+
+  // Ordenar tamaños numéricamente (ej: "9", "10", "12") y luego los no numéricos alfabéticamente
+  const allSizesList = sizeGroups
+    .filter(g => g.size)
+    .map(g => ({ name: g.size!, count: g._count.size }))
+    .sort((a, b) => {
+      const na = parseFloat(a.name);
+      const nb = parseFloat(b.name);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      if (!isNaN(na)) return -1;
+      if (!isNaN(nb)) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+  // Top 10 por cantidad de anuncios, luego reordenados de menor a mayor
+  const top10Sizes = [...allSizesList]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+    .sort((a, b) => {
+      const na = parseFloat(a.name);
+      const nb = parseFloat(b.name);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return a.name.localeCompare(b.name);
+    });
 
   /* ─── buildUrl ─── */
 
@@ -559,19 +715,27 @@ export default async function EquiposPage({
                   <Wind className="w-3.5 h-3.5 text-[#3B82F6]" /> Sección
                 </h3>
                 <div className="space-y-1">
-                  {DISCIPLINES.map((d) => (
-                    <Link
-                      key={d.value}
-                      href={buildUrl({ seccion: d.value, tipo: "", subtipo: "", incluyeBarra: "", incluyeMaleta: "", incluyeLeash: "", sinReparaciones: "", anio: "", tamanio: "", referencia: "", largoLineas: "" })}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                        seccion === d.value
-                          ? "bg-[#111827] text-white font-semibold"
-                          : "text-[#374151] hover:bg-[#F9FAFB]"
-                      }`}
-                    >
-                      {d.label}
-                    </Link>
-                  ))}
+                  {DISCIPLINES.filter(d => !seccion || d.value === "" || d.value === seccion).map((d) => {
+                    const count = d.value ? disciplineCountMap.get(d.value) : undefined;
+                    return (
+                      <Link
+                        key={d.value}
+                        href={buildUrl({ seccion: d.value, tipo: "", subtipo: "", incluyeBarra: "", incluyeMaleta: "", incluyeLeash: "", sinReparaciones: "", anio: "", tamanio: "", referencia: "", largoLineas: "" })}
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                          seccion === d.value
+                            ? "bg-[#3B82F6] text-white font-semibold"
+                            : "text-[#374151] hover:bg-[#F9FAFB]"
+                        }`}
+                      >
+                        <span>{d.label}</span>
+                        {count !== undefined && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            seccion === d.value ? "bg-white/20 text-white" : "bg-[#EFF6FF] text-[#3B82F6]"
+                          }`}>{count}</span>
+                        )}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -591,21 +755,63 @@ export default async function EquiposPage({
                   )}
                 </div>
                 <div className="space-y-1">
-                  {visibleTypes.map((t) => (
+                  {tipo && (
                     <Link
-                      key={t.value}
-                      href={buildUrl({ tipo: t.value, subtipo: "", incluyeBarra: "", incluyeMaleta: "", incluyeLeash: "", sinReparaciones: "", anio: "", tamanio: "", referencia: "", largoLineas: "" })}
-                      className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                        tipo === t.value
-                          ? "bg-[#3B82F6] text-white font-semibold"
-                          : "text-[#374151] hover:bg-[#F9FAFB]"
-                      }`}
+                      href={buildUrl({ tipo: "", subtipo: "", incluyeBarra: "", incluyeMaleta: "", incluyeLeash: "", sinReparaciones: "", anio: "", tamanio: "", referencia: "", largoLineas: "" })}
+                      className="block px-3 py-2 rounded-lg text-sm text-[#374151] hover:bg-[#F9FAFB] transition-colors"
                     >
-                      {getTypeLabel(t.value)}
+                      Todos
                     </Link>
-                  ))}
+                  )}
+                  {visibleTypes.filter(t => !tipo || t.value === tipo).map((t) => {
+                    const count = typeCountMap.get(t.value);
+                    return (
+                      <Link
+                        key={t.value}
+                        href={buildUrl({ tipo: t.value, subtipo: "", incluyeBarra: "", incluyeMaleta: "", incluyeLeash: "", sinReparaciones: "", anio: "", tamanio: "", referencia: "", largoLineas: "" })}
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                          tipo === t.value
+                            ? "bg-[#3B82F6] text-white font-semibold"
+                            : "text-[#374151] hover:bg-[#F9FAFB]"
+                        }`}
+                      >
+                        <span>{getTypeLabel(t.value)}</span>
+                        {count !== undefined && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            tipo === t.value ? "bg-white/20 text-white" : "bg-[#EFF6FF] text-[#3B82F6]"
+                          }`}>{count}</span>
+                        )}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* Subtipo (filtro inteligente) */}
+              {smartConfig && smartConfig.linkFilters.some(f => f.kind === "subtipo") && (() => {
+                const f = smartConfig.linkFilters.find(f => f.kind === "subtipo")!;
+                if (f.kind !== "subtipo") return null;
+                return (
+                  <div>
+                    <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">{f.label}</h3>
+                    <div className="space-y-1">
+                      {f.options.map(opt => (
+                        <Link
+                          key={opt.value}
+                          href={buildUrl({ subtipo: subtipo === opt.value ? "" : opt.value })}
+                          className={`block px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                            subtipo === opt.value
+                              ? "bg-[#3B82F6] text-white font-semibold"
+                              : "text-[#374151] hover:bg-[#F9FAFB]"
+                          }`}
+                        >
+                          {opt.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Marca */}
               <BrandFilterClient
@@ -615,23 +821,109 @@ export default async function EquiposPage({
                 clearMarcaHref={buildUrl({ marca: "" })}
               />
 
+              {/* Referencia */}
+              <ReferenciaFilterClient
+                top5={top5Referencias.map(r => ({ ...r, href: buildUrl({ referencia: r.name }) }))}
+                all={allReferenciasAlpha.map(r => ({ ...r, href: buildUrl({ referencia: r.name }) }))}
+                currentReferencia={referencia}
+                clearHref={buildUrl({ referencia: "" })}
+              />
+
+              {/* Tamaño */}
+              <SizeFilterClient
+                top10Sizes={top10Sizes.map(s => ({ ...s, href: buildUrl({ tamanio: s.name }) }))}
+                allSizes={allSizesList.map(s => ({ ...s, href: buildUrl({ tamanio: s.name }) }))}
+                currentTamanio={tamanio}
+                clearTamanioHref={buildUrl({ tamanio: "" })}
+              />
+
+              {/* Largo de líneas (SmartFormFilters — solo barra/líneas) */}
+              {smartConfig && smartConfig.textFilters.length > 0 && (
+                <SmartFormFilters
+                  key={`${seccion}-${tipo}`}
+                  activeFilters={smartConfig.textFilters}
+                  largoLineas={largoLineas}
+                  baseParams={textFilterBaseParams}
+                />
+              )}
+
+              {/* Año */}
+              <YearFilterClient
+                top10Years={top10Years.map(y => ({ ...y, href: buildUrl({ anio: y.name }) }))}
+                allYears={allYearsList.map(y => ({ ...y, href: buildUrl({ anio: y.name }) }))}
+                currentAnio={anio}
+                clearAnioHref={buildUrl({ anio: "" })}
+              />
+
+              {/* Toggles: barra, maleta, leash, reparaciones */}
+              {smartConfig && smartConfig.linkFilters.some(f => f.kind === "toggle") && (
+                <div className="space-y-4 pt-2 border-t border-[#F3F4F6]">
+                  {smartConfig.linkFilters.filter(f => f.kind === "toggle").map((f, i) => {
+                    if (f.kind !== "toggle") return null;
+                    const val = params[f.key] ?? "";
+                    const offLabel = f.key === "sinReparaciones"
+                      ? "Con reparaciones"
+                      : f.key === "incluyeBarra"  ? "Sin barra"
+                      : f.key === "incluyeMaleta" ? "Sin maleta"
+                      : f.key === "incluyeLeash"  ? "Sin leash"
+                      : `Sin ${f.label.toLowerCase()}`;
+                    const counts = toggleCounts[f.key];
+                    return (
+                      <div key={i}>
+                        <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">{f.label}</h3>
+                        <div className="space-y-1">
+                          {[
+                            { href: buildUrl({ [f.key]: "" }),    label: "Todas",    active: val === "",    count: undefined },
+                            { href: buildUrl({ [f.key]: "si" }),  label: f.onLabel,  active: val === "si",  count: counts?.si },
+                            { href: buildUrl({ [f.key]: "no" }),  label: offLabel,   active: val === "no",  count: counts?.no },
+                          ].map(opt => (
+                            <Link
+                              key={opt.label}
+                              href={opt.href}
+                              className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                                opt.active ? "bg-[#3B82F6] text-white font-semibold" : "text-[#374151] hover:bg-[#F9FAFB]"
+                              }`}
+                            >
+                              <span>{opt.label}</span>
+                              {opt.count !== undefined && opt.count > 0 && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                  opt.active ? "bg-white/20 text-white" : "bg-[#EFF6FF] text-[#3B82F6]"
+                                }`}>{opt.count}</span>
+                              )}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Estado */}
               <div>
                 <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">Estado</h3>
                 <div className="space-y-1">
-                  {CONDITIONS.map((c) => (
-                    <Link
-                      key={c.value}
-                      href={buildUrl({ condicion: c.value })}
-                      className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                        condicion === c.value
-                          ? "bg-[#3B82F6] text-white font-semibold"
-                          : "text-[#374151] hover:bg-[#F9FAFB]"
-                      }`}
-                    >
-                      {c.label}
-                    </Link>
-                  ))}
+                  {CONDITIONS.map((c) => {
+                    const count = c.value ? conditionCountMap.get(c.value) : undefined;
+                    return (
+                      <Link
+                        key={c.value}
+                        href={buildUrl({ condicion: c.value })}
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                          condicion === c.value
+                            ? "bg-[#3B82F6] text-white font-semibold"
+                            : "text-[#374151] hover:bg-[#F9FAFB]"
+                        }`}
+                      >
+                        <span>{c.label}</span>
+                        {count !== undefined && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            condicion === c.value ? "bg-white/20 text-white" : "bg-[#EFF6FF] text-[#3B82F6]"
+                          }`}>{count}</span>
+                        )}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -642,71 +934,6 @@ export default async function EquiposPage({
                 currentCiudad={ciudad}
                 clearCiudadHref={buildUrl({ ciudad: "" })}
               />
-
-              {/* Filtros de texto contextuales (nivel 2) */}
-              {smartConfig && smartConfig.textFilters.length > 0 && (
-                <SmartFormFilters
-                  key={`${seccion}-${tipo}`}
-                  activeFilters={smartConfig.textFilters}
-                  referencia={referencia}
-                  tamanio={tamanio}
-                  anio={anio}
-                  largoLineas={largoLineas}
-                  baseParams={textFilterBaseParams}
-                  tamanioLabel={smartConfig.tamanioLabel}
-                />
-              )}
-
-              {/* Filtros inteligentes de link (subtipo, toggles) */}
-              {smartConfig && smartConfig.linkFilters.length > 0 && (
-                <div className="space-y-4 pt-2 border-t border-[#F3F4F6]">
-                  {smartConfig.linkFilters.map((f, i) => {
-                    if (f.kind === "subtipo") {
-                      return (
-                        <div key={i}>
-                          <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">{f.label}</h3>
-                          <div className="space-y-1">
-                            {f.options.map(opt => (
-                              <Link
-                                key={opt.value}
-                                href={buildUrl({ subtipo: subtipo === opt.value ? "" : opt.value })}
-                                className={`block px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                                  subtipo === opt.value
-                                    ? "bg-[#3B82F6] text-white font-semibold"
-                                    : "text-[#374151] hover:bg-[#F9FAFB]"
-                                }`}
-                              >
-                                {opt.label}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    if (f.kind === "toggle") {
-                      const isActive = params[f.key] === "si";
-                      return (
-                        <div key={i}>
-                          <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2">{f.label}</h3>
-                          <Link
-                            href={buildUrl({ [f.key]: isActive ? "" : "si" })}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors border ${
-                              isActive
-                                ? "bg-emerald-50 border-emerald-200 text-emerald-700 font-semibold"
-                                : "border-[#E5E7EB] text-[#374151] hover:bg-[#F9FAFB]"
-                            }`}
-                          >
-                            {isActive ? `✓ ${f.onLabel}` : f.onLabel}
-                          </Link>
-                        </div>
-                      );
-                    }
-
-                    return null;
-                  })}
-                </div>
-              )}
 
               {/* Precio */}
               <div>

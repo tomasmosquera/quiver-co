@@ -62,13 +62,18 @@ export default function BrandFilterClient({
           <Link
             key={b.slug}
             href={b.href}
-            className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
+            className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
               currentMarca === b.slug
                 ? "bg-[#3B82F6] text-white font-semibold"
                 : "text-[#374151] hover:bg-[#F9FAFB]"
             }`}
           >
-            {b.name} ({b.count})
+            <span>{b.name}</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              currentMarca === b.slug
+                ? "bg-white/20 text-white"
+                : "bg-[#EFF6FF] text-[#3B82F6]"
+            }`}>{b.count}</span>
           </Link>
         ))}
 
