@@ -12,7 +12,7 @@ export default function OgImage() {
         style={{
           width: 1200,
           height: 630,
-          background: "#111827",
+          background: "#ffffff",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -21,18 +21,6 @@ export default function OgImage() {
           position: "relative",
         }}
       >
-        {/* Glow azul fondo */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            width: 600,
-            height: 400,
-            background: "radial-gradient(circle at 80% 20%, rgba(59,130,246,0.2) 0%, transparent 70%)",
-          }}
-        />
-
         {/* Logo container */}
         <div
           style={{
@@ -80,29 +68,6 @@ export default function OgImage() {
           Quiver Co.
         </div>
 
-        {/* Tagline */}
-        <div
-          style={{
-            fontSize: 28,
-            color: "#9CA3AF",
-            marginBottom: 28,
-            textAlign: "center",
-            padding: "0 80px",
-          }}
-        >
-          Marketplace de Kitesurf y Deportes de Viento · Colombia
-        </div>
-
-        {/* URL */}
-        <div
-          style={{
-            fontSize: 22,
-            fontWeight: 500,
-            color: "#3B82F6",
-          }}
-        >
-          quiverkite.com
-        </div>
       </div>
     ),
     { ...size }
