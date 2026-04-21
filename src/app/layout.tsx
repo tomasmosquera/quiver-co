@@ -18,6 +18,30 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
   },
+  openGraph: {
+    title: "Quiver Co. — Marketplace de Kitesurf y Deportes de Viento",
+    description:
+      "Compra y vende equipos de kitesurf, wingfoil, windsurf y más en Colombia.",
+    url: "https://www.quiverkite.com",
+    siteName: "Quiver Co.",
+    images: [
+      {
+        url: "https://www.quiverkite.com/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "Quiver Co. — Marketplace de Kitesurf en Colombia",
+      },
+    ],
+    locale: "es_CO",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Quiver Co. — Marketplace de Kitesurf en Colombia",
+    description:
+      "Compra y vende equipos de kitesurf, wingfoil, windsurf y más en Colombia.",
+    images: ["https://www.quiverkite.com/og-image.svg"],
+  },
 };
 
 export default function RootLayout({

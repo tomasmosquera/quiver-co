@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <!-- Fondo -->
+  <rect width="1200" height="630" fill="#111827"/>
+
+  <!-- Patrón de puntos sutil -->
+  <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+    <circle cx="2" cy="2" r="1.5" fill="#1F2937"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Degradado de acento azul en esquina superior derecha -->
+  <radialGradient id="glow" cx="80%" cy="20%" r="50%">
+    <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.15"/>
+    <stop offset="100%" stop-color="#111827" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Logo (fondo redondeado) — centrado horizontalmente, posicionado arriba del texto -->
+  <rect x="536" y="175" width="128" height="128" rx="32" fill="#1F2937"/>
+
+  <!-- Ícono de viento (wind) escalado a ~110px centrado en el rect de 128px -->
+  <g transform="translate(556, 195) scale(3.6)" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
+    <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
+    <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+  </g>
+
+  <!-- Punto azul de marca -->
+  <circle cx="654" cy="293" r="12" fill="#3B82F6"/>
+
+  <!-- Nombre Quiver Co. -->
+  <text
+    x="600"
+    y="380"
+    font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="72"
+    font-weight="700"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="-1"
+  >Quiver Co.</text>
+
+  <!-- Tagline -->
+  <text
+    x="600"
+    y="440"
+    font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="28"
+    font-weight="400"
+    fill="#9CA3AF"
+    text-anchor="middle"
+    letter-spacing="0.5"
+  >Marketplace de Kitesurf y Deportes de Viento · Colombia</text>
+
+  <!-- URL -->
+  <text
+    x="600"
+    y="510"
+    font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="22"
+    font-weight="500"
+    fill="#3B82F6"
+    text-anchor="middle"
+    letter-spacing="0.5"
+  >quiverkite.com</text>
+
+  <!-- Línea decorativa bajo la URL -->
+  <rect x="480" y="525" width="240" height="2" rx="1" fill="#3B82F6" opacity="0.4"/>
+</svg>
