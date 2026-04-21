@@ -82,8 +82,8 @@ export default async function HomePage() {
   const { getTRM, toCOP } = await import("@/lib/trm");
   const { rate: trm } = await getTRM();
 
-  const SALES_OFFSET  = 21;
-  const AMOUNT_OFFSET = 56_531_000;
+  const SALES_OFFSET  = 8;
+  const AMOUNT_OFFSET = 21_535_000;
 
   const [counts, recentListings, totalListings, salesStats] = await Promise.all([
     prisma.listing.groupBy({
