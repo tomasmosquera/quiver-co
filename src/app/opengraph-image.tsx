@@ -24,19 +24,17 @@ export default function OgImage() {
         {/* Logo container */}
         <div
           style={{
-            width: 120,
-            height: 120,
-            background: "#1F2937",
-            borderRadius: 30,
+            width: 500,
+            height: 500,
+            background: "#111827",
+            borderRadius: 120,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            marginBottom: 32,
             position: "relative",
           }}
         >
-          {/* Ícono wind SVG */}
-          <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="320" height="320" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
             <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
             <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
@@ -45,29 +43,15 @@ export default function OgImage() {
           <div
             style={{
               position: "absolute",
-              bottom: 10,
-              right: 10,
-              width: 18,
-              height: 18,
-              borderRadius: 9,
+              bottom: 44,
+              right: 44,
+              width: 64,
+              height: 64,
+              borderRadius: 32,
               background: "#3B82F6",
             }}
           />
         </div>
-
-        {/* Nombre */}
-        <div
-          style={{
-            fontSize: 72,
-            fontWeight: 700,
-            color: "white",
-            letterSpacing: "-1px",
-            marginBottom: 16,
-          }}
-        >
-          Quiver Co.
-        </div>
-
       </div>
     ),
     { ...size }
