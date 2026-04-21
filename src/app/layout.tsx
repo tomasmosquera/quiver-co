@@ -24,14 +24,6 @@ export const metadata: Metadata = {
       "Compra y vende equipos de kitesurf, wingfoil, windsurf y más en Colombia.",
     url: "https://www.quiverkite.com",
     siteName: "Quiver Co.",
-    images: [
-      {
-        url: "https://www.quiverkite.com/og-image.svg",
-        width: 1200,
-        height: 630,
-        alt: "Quiver Co. — Marketplace de Kitesurf en Colombia",
-      },
-    ],
     locale: "es_CO",
     type: "website",
   },
@@ -40,7 +32,6 @@ export const metadata: Metadata = {
     title: "Quiver Co. — Marketplace de Kitesurf en Colombia",
     description:
       "Compra y vende equipos de kitesurf, wingfoil, windsurf y más en Colombia.",
-    images: ["https://www.quiverkite.com/og-image.svg"],
   },
 };
 
