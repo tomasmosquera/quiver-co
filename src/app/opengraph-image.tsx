@@ -24,10 +24,10 @@ export default function OgImage() {
         {/* Logo container */}
         <div
           style={{
-            width: 500,
-            height: 500,
+            width: 400,
+            height: 400,
             background: "#111827",
-            borderRadius: 120,
+            borderRadius: 96,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
