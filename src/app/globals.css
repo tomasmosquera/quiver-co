@@ -46,6 +46,21 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #D1D5DB;
+  background: #FFFFFF;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 1px #3B82F6;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

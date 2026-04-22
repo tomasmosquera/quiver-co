@@ -5,7 +5,7 @@ import { type Metadata } from "next";
 import Link from "next/link";
 import {
   MapPin, Star, Shield, ChevronLeft,
-  Eye, Calendar,
+  Eye, Calendar, AlertTriangle, CheckCircle,
 } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
 import ExpandableImage from "@/components/ExpandableImage";
@@ -62,6 +62,67 @@ const ACCESORIO_TYPE_LABELS: Record<string, string> = {
   tecnologia:         "Tecnología",
   otros:              "Otros",
 };
+
+interface StandardInspectionMetadata {
+  version?: string;
+  completedAt?: string;
+  score?: number;
+  rawScore?: number;
+  label?: string;
+  alerts?: string[];
+  answers?: Record<string, string>;
+  photos?: Record<string, string[]>;
+  repairNotes?: string;
+}
+
+const INSPECTION_CHECK_LABELS: Record<string, string> = {
+  identity_match: "Identificacion",
+  inflates_shape: "Infla y toma forma",
+  holds_pressure: "Mantiene presion",
+  main_valve_ok: "Valvula principal",
+  one_pump_ok: "One pump",
+  leading_edge_ok: "Leading edge",
+  struts_ok: "Costillas",
+  canopy_no_tears: "Canopy sin rasgaduras",
+  canopy_no_severe_wear: "Tela sin desgaste severo",
+  trailing_edge_ok: "Trailing edge",
+  bridles_ok: "Bridas",
+  pigtails_ok: "Pigtails",
+  pulleys_ok: "Poleas",
+  repairs_declared: "Reparaciones declaradas",
+};
+
+const INSPECTION_PHOTO_LABELS: Record<string, string> = {
+  inflated_identity: "Cometa inflada completa",
+  pressure_final: "Foto final de presion",
+  main_valve: "Valvula principal",
+  one_pump: "One pump / mangueras",
+  leading_edge: "Leading edge",
+  trailing_edge: "Trailing edge",
+  bridles_left: "Bridas lado izquierdo",
+  bridles_right: "Bridas lado derecho",
+  repairs: "Reparaciones o danos",
+};
+
+function getInspection(metadata: unknown): StandardInspectionMetadata | null {
+  if (!metadata || typeof metadata !== "object") return null;
+  const value = (metadata as Record<string, unknown>).standardInspection;
+  if (!value || typeof value !== "object") return null;
+  return value as StandardInspectionMetadata;
+}
+
+function inspectionBadgeClass(answer?: string) {
+  if (answer === "pass" || answer === "na") return "bg-emerald-50 text-emerald-700";
+  if (answer === "fail") return "bg-red-50 text-red-700";
+  return "bg-[#F3F4F6] text-[#6B7280]";
+}
+
+function inspectionAnswerLabel(answer?: string) {
+  if (answer === "pass") return "Aprobado";
+  if (answer === "fail") return "No aprobado";
+  if (answer === "na") return "No aplica";
+  return "Pendiente";
+}
 
 function conditionColor(c: string) {
   if (c === "NUEVO")      return "bg-emerald-50 text-emerald-700";
@@ -140,6 +201,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
     : null;
 
   const isOwner = session?.user?.id === listing.sellerId;
+  const standardInspection = getInspection(listing.metadata);
 
   return (
     <div className="bg-[#FAFAF8] min-h-screen">
@@ -287,6 +349,87 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                   </div>
                 );
               })()}
+
+              {standardInspection && (
+                <div className="border-t border-[#F3F4F6] mt-5 pt-5 space-y-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-[#6B7280]">
+                        Peritaje del vendedor
+                      </p>
+                      <h3 className="mt-1 text-xl font-bold text-[#111827]">
+                        {standardInspection.score ?? 0}/100
+                        <span className="ml-2 text-sm font-semibold text-[#3B82F6]">
+                          {standardInspection.label ?? "Sin clasificar"}
+                        </span>
+                      </h3>
+                      {standardInspection.completedAt && (
+                        <p className="mt-1 text-xs text-[#6B7280]">
+                          Realizado el {new Date(standardInspection.completedAt).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })}
+                        </p>
+                      )}
+                    </div>
+                    <div className="rounded-xl bg-blue-50 px-4 py-3 text-xs leading-relaxed text-[#1D4ED8] sm:max-w-xs">
+                      Inspeccion guiada por el vendedor. No reemplaza una revision profesional.
+                    </div>
+                  </div>
+
+                  {standardInspection.alerts && standardInspection.alerts.length > 0 ? (
+                    <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                      <div className="flex items-center gap-2 text-sm font-bold text-amber-800">
+                        <AlertTriangle className="h-4 w-4" />
+                        Alertas
+                      </div>
+                      {standardInspection.alerts.map((alert) => (
+                        <p key={alert} className="text-sm text-amber-800">{alert}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">
+                      <CheckCircle className="h-4 w-4" />
+                      Sin alertas criticas declaradas en el peritaje.
+                    </div>
+                  )}
+
+                  {standardInspection.answers && (
+                    <div>
+                      <p className="mb-3 text-sm font-semibold text-[#111827]">Resultado por seccion</p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {Object.entries(INSPECTION_CHECK_LABELS).map(([checkId, label]) => (
+                          <div key={checkId} className="flex items-center justify-between gap-3 rounded-xl bg-[#F9FAFB] px-3 py-2 text-xs">
+                            <span className="text-[#374151]">{label}</span>
+                            <span className={`shrink-0 rounded-full px-2 py-1 font-bold ${inspectionBadgeClass(standardInspection.answers?.[checkId])}`}>
+                              {inspectionAnswerLabel(standardInspection.answers?.[checkId])}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {standardInspection.photos && (
+                    <div>
+                      <p className="mb-3 text-sm font-semibold text-[#111827]">Fotos del peritaje</p>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {Object.entries(standardInspection.photos).flatMap(([photoId, urls]) =>
+                          (urls ?? []).map((url, index) => (
+                            <div key={`${photoId}-${url}`} className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-2">
+                              <ExpandableImage
+                                src={url}
+                                alt={`${INSPECTION_PHOTO_LABELS[photoId] ?? "Foto de peritaje"} ${index + 1}`}
+                                className="aspect-square w-full rounded-lg object-cover hover:opacity-90 transition-opacity"
+                              />
+                              <p className="mt-2 text-xs font-semibold text-[#374151]">
+                                {INSPECTION_PHOTO_LABELS[photoId] ?? photoId}
+                              </p>
+                            </div>
+                          )),
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="border-t border-[#F3F4F6] mt-5 pt-5">
                 <h3 className="font-semibold text-[#111827] mb-2">Descripción</h3>

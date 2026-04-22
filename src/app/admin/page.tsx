@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ShoppingCart, Package, Users, TrendingUp, Clock, CheckCircle, Truck, AlertCircle } from "lucide-react";
+import { ShoppingCart, Package, Users, TrendingUp, Clock, CheckCircle, Truck, AlertCircle, PlusCircle } from "lucide-react";
 
 
 export default async function AdminPage() {
@@ -65,6 +65,22 @@ export default async function AdminPage() {
         <h1 className="text-2xl font-bold text-[#111827]">Dashboard</h1>
         <p className="text-sm text-[#6B7280] mt-1">Resumen general de Quiver Co.</p>
       </div>
+
+      <Link
+        href="/admin/crear-anuncio"
+        className="flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50 p-5 transition-colors hover:border-blue-200 hover:bg-blue-100 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#2563EB]">
+            <PlusCircle className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="font-bold text-[#111827]">Crear anuncio con peritaje estandar</p>
+            <p className="mt-1 text-sm text-[#6B7280]">URL oculta para probar el flujo de cometas desde admin.</p>
+          </div>
+        </div>
+        <span className="text-sm font-bold text-[#2563EB]">Abrir flujo</span>
+      </Link>
 
       {/* Main stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
