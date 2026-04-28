@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { ListingStatus } from "@prisma/client";
+import { sendListingStatusSeller } from "@/lib/email";
 
 export async function PATCH(
   req: NextRequest,
@@ -23,7 +24,10 @@ export async function PATCH(
   if (!allowed.includes(status))
     return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
 
-  const existing = await prisma.listing.findUnique({ where: { id } });
+  const existing = await prisma.listing.findUnique({
+    where: { id },
+    include: { seller: { select: { email: true, name: true } } },
+  });
   if (!existing) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
   if (!userIsAdmin && existing.sellerId !== session.user.id)
     return NextResponse.json({ error: "Sin permiso" }, { status: 403 });
@@ -32,6 +36,17 @@ export async function PATCH(
     where: { id },
     data: { status },
   });
+
+  // Notificar al vendedor solo cuando el admin cambia el estado (no cuando el mismo vendedor lo cambia)
+  if (userIsAdmin) {
+    sendListingStatusSeller(
+      existing.seller.email!,
+      existing.seller.name ?? "Vendedor",
+      existing.title,
+      id,
+      status,
+    ).catch(console.error);
+  }
 
   return NextResponse.json({ listing });
 }

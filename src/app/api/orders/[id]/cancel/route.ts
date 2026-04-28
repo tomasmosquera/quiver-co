@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
+import { sendOrderCancelledBuyer, sendOrderCancelledSeller } from "@/lib/email";
 
 
 export async function PATCH(
@@ -14,7 +15,14 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      buyer:   { select: { email: true, name: true } },
+      seller:  { select: { email: true, name: true } },
+      listing: { select: { title: true } },
+    },
+  });
   if (!order) return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
 
   const userIsAdmin = isAdmin(session.user.email);
@@ -51,6 +59,10 @@ export async function PATCH(
       data: { status: "ACTIVE" },
     }),
   ]);
+
+  const title = order.listing.title;
+  sendOrderCancelledBuyer(order.buyer.email!, order.buyer.name ?? "Comprador", title, id).catch(console.error);
+  sendOrderCancelledSeller(order.seller.email!, order.seller.name ?? "Vendedor", title, id).catch(console.error);
 
   return NextResponse.json({ success: true });
 }

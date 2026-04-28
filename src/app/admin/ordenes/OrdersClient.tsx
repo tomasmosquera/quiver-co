@@ -185,6 +185,12 @@ function OrderRow({ order }: { order: Order }) {
               {label}
             </button>
           ))}
+          <a
+            href={`/admin/ordenes/${order.id}`}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#374151] transition-colors"
+          >
+            Ver detalle
+          </a>
           <button
             onClick={() => setExpanded(!expanded)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border border-[#E5E7EB] hover:bg-[#F9FAFB] text-[#374151] transition-colors"

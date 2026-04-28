@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendOrderShippedBuyer } from "@/lib/email";
 
 export async function PATCH(
   req: NextRequest,
@@ -12,7 +13,13 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      buyer:   { select: { email: true, name: true } },
+      listing: { select: { title: true } },
+    },
+  });
   if (!order) return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
   if (order.sellerId !== session.user.id) {
     return NextResponse.json({ error: "Acceso denegado" }, { status: 403 });
@@ -35,6 +42,8 @@ export async function PATCH(
     where: { id },
     data: { status: "SHIPPED", shippedAt: now, deliveryDeadline: deadline, shippingProofUrl },
   });
+
+  sendOrderShippedBuyer(order.buyer.email!, order.buyer.name ?? "Comprador", order.listing.title, id).catch(console.error);
 
   return NextResponse.json(updated);
 }

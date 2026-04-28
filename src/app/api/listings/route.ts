@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Discipline, EquipmentType, Condition } from "@prisma/client";
+import { sendNewListingAdmin } from "@/lib/email";
+import { ADMIN_EMAILS } from "@/lib/admin";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -36,6 +38,8 @@ export async function POST(req: NextRequest) {
     },
     include: { images: true },
   });
+
+  sendNewListingAdmin(ADMIN_EMAILS, session.user.name ?? "Usuario", listing.title, listing.id).catch(console.error);
 
   return NextResponse.json({ listing }, { status: 201 });
 }
