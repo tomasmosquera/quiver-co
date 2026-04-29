@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Star, Shield } from "lucide-react";
+import { ClipboardCheck, MapPin, Shield, Star } from "lucide-react";
 import FavoriteButton from "./FavoriteButton";
 
 export interface Product {
@@ -14,7 +14,8 @@ export interface Product {
   location: string;
   discipline: string;
   image?: string;
-  seller: { name: string; rating: number; verified: boolean };
+  seller: { name: string; rating: number | null; reviewCount?: number; verified: boolean };
+  hasInspection?: boolean;
   featured?: boolean;
   isSaved?: boolean;
 }
@@ -36,6 +37,12 @@ function conditionColor(c: Product["condition"]) {
 
 export default function ProductCard({ product }: { product: Product }) {
   const discColor = DISCIPLINE_COLORS[product.discipline] ?? "bg-gray-50 text-gray-700";
+  const sellerRatingLabel = product.seller.rating !== null
+    ? product.seller.rating.toFixed(1)
+    : "Nuevo vendedor";
+  const sellerRatingTitle = product.seller.rating !== null
+    ? `${product.seller.rating.toFixed(1)} (${product.seller.reviewCount ?? 0} reseña${product.seller.reviewCount === 1 ? "" : "s"})`
+    : "Nuevo vendedor";
 
   return (
     <Link
@@ -110,8 +117,13 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.seller.verified && (
               <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />
             )}
+            {product.hasInspection && (
+              <span title="Cuenta con peritaje" aria-label="Cuenta con peritaje">
+                <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
+              </span>
+            )}
             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span className="text-xs text-[#6B7280]">{product.seller.rating}</span>
+            <span title={sellerRatingTitle} className="text-xs text-[#6B7280]">{sellerRatingLabel}</span>
           </div>
         </div>
       </div>

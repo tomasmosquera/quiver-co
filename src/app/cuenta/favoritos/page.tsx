@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { hasStandardInspection } from "@/lib/kiteInspection";
 import { prisma } from "@/lib/prisma";
+import { getSellerRatingStatsMap } from "@/lib/reviews";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { Heart } from "lucide-react";
@@ -23,6 +25,7 @@ export default async function FavoritosPage() {
   });
 
   const savedListings = favorites.map(f => f.listing);
+  const sellerRatings = await getSellerRatingStatsMap(savedListings.map((listing) => listing.sellerId));
 
   return (
     <div className="space-y-6">
@@ -35,7 +38,9 @@ export default async function FavoritosPage() {
 
       {savedListings.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-          {savedListings.map(l => (
+          {savedListings.map(l => {
+            const sellerRating = sellerRatings.get(l.sellerId);
+            return (
             <ProductCard
               key={l.id}
               product={{
@@ -48,11 +53,18 @@ export default async function FavoritosPage() {
                 location: l.city,
                 discipline: l.discipline.charAt(0) + l.discipline.slice(1).toLowerCase(),
                 image: l.images[0]?.url || "",
-                seller: { name: l.seller.name || "Usuario", rating: 5, verified: l.seller.verified },
+                seller: {
+                  name: l.seller.name || "Usuario",
+                  rating: sellerRating?.avgRating ?? null,
+                  reviewCount: sellerRating?.reviewCount ?? 0,
+                  verified: l.seller.verified,
+                },
+                hasInspection: hasStandardInspection(l.metadata),
                 isSaved: true,
               }}
             />
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-[#E5E7EB] p-12 text-center flex flex-col items-center">

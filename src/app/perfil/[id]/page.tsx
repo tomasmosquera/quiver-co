@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { hasStandardInspection } from "@/lib/kiteInspection";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
@@ -132,7 +133,13 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
                     location: l.city,
                     discipline: l.discipline.charAt(0) + l.discipline.slice(1).toLowerCase(),
                     image: l.images[0]?.url || undefined,
-                    seller: { name: l.seller.name || "Usuario", rating: 5, verified: l.seller.verified },
+                    seller: {
+                      name: l.seller.name || "Usuario",
+                      rating: avgRating,
+                      reviewCount: reviews.length,
+                      verified: l.seller.verified,
+                    },
+                    hasInspection: hasStandardInspection(l.metadata),
                   }}
                 />
               ))}
@@ -213,7 +220,13 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
                     location: l.city,
                     discipline: l.discipline.charAt(0) + l.discipline.slice(1).toLowerCase(),
                     image: l.images[0]?.url || undefined,
-                    seller: { name: l.seller.name || "Usuario", rating: 5, verified: l.seller.verified },
+                    seller: {
+                      name: l.seller.name || "Usuario",
+                      rating: avgRating,
+                      reviewCount: reviews.length,
+                      verified: l.seller.verified,
+                    },
+                    hasInspection: hasStandardInspection(l.metadata),
                   }}
                 />
               ))}

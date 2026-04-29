@@ -1,11 +1,14 @@
 import Link from "next/link";
 import {
   Search, ArrowRight, Wind, Shield, CreditCard,
+  ClipboardCheck,
   Star, MapPin, ChevronRight, TrendingUp,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import FavoriteButton from "@/components/FavoriteButton";
 import { auth } from "@/lib/auth";
+import { hasStandardInspection } from "@/lib/kiteInspection";
+import { formatSellerRatingLabel, formatSellerRatingTitle, getSellerRatingStatsMap } from "@/lib/reviews";
 
 /* ─── Data ─── */
 
@@ -111,6 +114,7 @@ export default async function HomePage() {
 
   const totalSales  = (salesStats._count._all  ?? 0) + SALES_OFFSET;
   const totalAmount = (salesStats._sum.amount   ?? 0) + AMOUNT_OFFSET;
+  const sellerRatings = await getSellerRatingStatsMap(recentListings.map((listing) => listing.sellerId));
 
   function formatAmount(n: number): string {
     if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
@@ -315,6 +319,8 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {recentListings.map((listing) => {
               const img = listing.images[0]?.url;
+              const hasInspection = hasStandardInspection(listing.metadata);
+              const sellerRating = sellerRatings.get(listing.sellerId);
               return (
                 <Link
                   key={listing.id}
@@ -373,8 +379,15 @@ export default async function HomePage() {
                       </div>
                       <div className="flex items-center gap-1">
                         {listing.seller.verified && <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />}
+                        {hasInspection && (
+                          <span title="Cuenta con peritaje" aria-label="Cuenta con peritaje">
+                            <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          </span>
+                        )}
                         <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                        <span className="text-xs text-[#6B7280]">{listing.seller.name}</span>
+                        <span title={formatSellerRatingTitle(sellerRating)} className="text-xs text-[#6B7280]">
+                          {formatSellerRatingLabel(sellerRating)}
+                        </span>
                       </div>
                     </div>
                   </div>

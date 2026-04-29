@@ -117,6 +117,12 @@ export const KITE_INSPECTION_REQUIRED_PHOTOS = [
   "bridles_right",
 ] as const;
 
+export function hasStandardInspection(metadata: unknown): boolean {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return false;
+  const inspection = (metadata as Record<string, unknown>).standardInspection;
+  return Boolean(inspection && typeof inspection === "object" && !Array.isArray(inspection));
+}
+
 export function calculateKiteInspection(
   answers: Record<string, InspectionAnswer | undefined>,
   photos: Record<string, string[] | undefined>,

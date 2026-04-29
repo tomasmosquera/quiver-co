@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Search, SlidersHorizontal, MapPin, Star, Shield, Wind } from "lucide-react";
+import { ClipboardCheck, MapPin, Search, Shield, SlidersHorizontal, Star, Wind } from "lucide-react";
 import BrandFilterClient from "@/components/BrandFilterClient";
 import SortSelect from "@/components/SortSelect";
 import MobileFilters from "@/components/MobileFilters";
@@ -10,6 +10,8 @@ import SizeFilterClient from "@/components/SizeFilterClient";
 import YearFilterClient from "@/components/YearFilterClient";
 import ReferenciaFilterClient from "@/components/ReferenciaFilterClient";
 import { auth } from "@/lib/auth";
+import { hasStandardInspection } from "@/lib/kiteInspection";
+import { formatSellerRatingLabel, formatSellerRatingTitle, getSellerRatingStatsMap } from "@/lib/reviews";
 
 /* ─── Datos estáticos ─── */
 
@@ -386,6 +388,7 @@ export default async function EquiposPage({
     const key = Object.entries(SECCION_TO_DB).find(([, v]) => v === g.discipline)?.[0] ?? g.discipline;
     return [key, g._count.discipline];
   }));
+  const sellerRatings = await getSellerRatingStatsMap(listings.map((listing) => listing.sellerId));
   const typeCountMap = new Map(typeGroups.map(g => [g.equipmentType as string, g._count.equipmentType]));
   const conditionCountMap = new Map(conditionGroups.map(g => [g.condition as string, g._count.condition]));
 
@@ -1024,6 +1027,8 @@ export default async function EquiposPage({
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {listings.map((listing) => {
                   const img = listing.images[0]?.url;
+                  const hasInspection = hasStandardInspection(listing.metadata);
+                  const sellerRating = sellerRatings.get(listing.sellerId);
                   return (
                     <Link
                       key={listing.id}
@@ -1087,8 +1092,15 @@ export default async function EquiposPage({
                           </div>
                           <div className="flex items-center gap-1">
                             {listing.seller.verified && <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />}
+                            {hasInspection && (
+                              <span title="Cuenta con peritaje" aria-label="Cuenta con peritaje">
+                                <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
+                              </span>
+                            )}
                             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                            <span className="text-xs text-[#6B7280]">Nuevo</span>
+                            <span title={formatSellerRatingTitle(sellerRating)} className="text-xs text-[#6B7280]">
+                              {formatSellerRatingLabel(sellerRating)}
+                            </span>
                           </div>
                         </div>
                       </div>

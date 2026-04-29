@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { type Metadata } from "next";
 import Link from "next/link";
 import {
-  MapPin, Star, Shield, ChevronLeft,
+  ClipboardCheck, MapPin, Star, Shield, ChevronLeft,
   Eye, Calendar, AlertTriangle, CheckCircle,
 } from "lucide-react";
 import ImageGallery from "@/components/ImageGallery";
@@ -561,6 +561,11 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                       <span className="text-xs text-[#6B7280]">Nuevo vendedor</span>
                     )}
                     {listing.seller.verified && <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />}
+                    {standardInspection && (
+                      <span title="Cuenta con peritaje" aria-label="Cuenta con peritaje">
+                        <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
