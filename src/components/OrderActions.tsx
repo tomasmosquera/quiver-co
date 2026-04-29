@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Loader2, X, Truck, Upload, ImageIcon, XCircle } from "lucide-react";
+import { Loader2, X, Truck, Upload, XCircle } from "lucide-react";
+import { uploadAsset } from "@/lib/clientUpload";
 
 interface Props {
   orderId: string;
@@ -39,14 +40,15 @@ function ShipModal({
   async function handleFile(file: File) {
     setUploadError("");
     setUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    setUploading(false);
-    if (!res.ok) { setUploadError("Error subiendo la imagen, intenta de nuevo."); return; }
-    const { url } = await res.json();
-    setProofUrl(url);
-    setPreview(URL.createObjectURL(file));
+    try {
+      const url = await uploadAsset(file);
+      setProofUrl(url);
+      setPreview(URL.createObjectURL(file));
+    } catch {
+      setUploadError("Error subiendo la imagen, intenta de nuevo.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleConfirm() {

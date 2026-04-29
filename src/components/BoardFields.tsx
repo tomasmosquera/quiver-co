@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Plus, X, Loader2, ImagePlus } from "lucide-react";
+import { uploadAsset } from "@/lib/clientUpload";
 
 /* ─── Tipos ─── */
 
@@ -201,12 +202,14 @@ export default function BoardFields({
 
   async function uploadRepairImage(i: number, file: File) {
     setUploadingRepairImg(i);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (data.url) updateRepair(i, { imageUrl: data.url });
-    setUploadingRepairImg(null);
+    try {
+      const url = await uploadAsset(file);
+      updateRepair(i, { imageUrl: url });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUploadingRepairImg(null);
+    }
   }
 
   return (
@@ -333,7 +336,7 @@ export default function BoardFields({
             placeholder="Ej: 5'0'', 5'4'', 6'0''..."
             className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] bg-white"
           />
-          <p className="text-xs text-[#9CA3AF] mt-1">En pies y pulgadas, ej: 5'0''</p>
+          <p className="text-xs text-[#9CA3AF] mt-1">En pies y pulgadas, ej: 5&apos;0&apos;&apos;</p>
         </div>
       )}
 

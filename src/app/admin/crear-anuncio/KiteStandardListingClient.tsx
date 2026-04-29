@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import CityPicker from "@/components/CityPicker";
 import PhotoUploader from "@/components/PhotoUploader";
+import { uploadAsset } from "@/lib/clientUpload";
 import {
   calculateKiteInspection,
   KITE_INSPECTION_CHECKS,
@@ -309,6 +310,9 @@ function UploadBox({ photoId, photos, uploading, onUpload, onRemove }: {
             </button>
           )}
         </div>
+        <p className="mt-3 text-xs text-[#9CA3AF]">
+          Las fotos grandes se optimizan autom&aacute;ticamente antes de subirlas.
+        </p>
       </div>
 
       <input ref={ref} type="file" accept="image/*" multiple className="hidden"
@@ -364,11 +368,7 @@ export default function KiteStandardListingClient() {
   function updateAnswer(id: string, value: InspectionAnswer) { setAnswers(c => ({ ...c, [id]: value })); setError(""); }
 
   async function uploadFile(file: File) {
-    const fd = new FormData(); fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "No se pudo subir la foto");
-    return data.url as string | undefined;
+    return uploadAsset(file);
   }
 
   async function uploadCommercialImages(files: FileList) {

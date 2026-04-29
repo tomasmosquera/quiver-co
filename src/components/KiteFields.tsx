@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Plus, X, Loader2, ImagePlus } from "lucide-react";
+import { uploadAsset } from "@/lib/clientUpload";
 
 /* ─── Tipos ─── */
 
@@ -222,12 +223,14 @@ export default function KiteFields({
 
   async function uploadRepairImage(i: number, file: File) {
     setUploadingRepairImg(i);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const data = await res.json();
-    if (data.url) updateRepair(i, { imageUrl: data.url });
-    setUploadingRepairImg(null);
+    try {
+      const url = await uploadAsset(file);
+      updateRepair(i, { imageUrl: url });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUploadingRepairImg(null);
+    }
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Shield, ShieldCheck, ShieldX, ShieldAlert, Loader2, Upload } from "lucide-react";
+import { uploadAsset } from "@/lib/clientUpload";
 
 interface Props {
   status: string; // NONE | PENDING | APPROVED | REJECTED
@@ -24,15 +25,14 @@ export default function VerificationRequest({ status, idUrl }: Props) {
     setError(null);
     setUploading(true);
     setPreview(URL.createObjectURL(file));
-
-    const form = new FormData();
-    form.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: form });
-    const data = await res.json();
-    setUploading(false);
-
-    if (!res.ok) { setError("Error al subir la imagen"); return; }
-    setUploadedUrl(data.url);
+    try {
+      const url = await uploadAsset(file);
+      setUploadedUrl(url);
+    } catch {
+      setError("Error al subir la imagen");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleSubmit() {

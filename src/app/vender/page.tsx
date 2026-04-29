@@ -14,6 +14,7 @@ import BoardFields, { BoardMetadata, BOARD_TYPES } from "@/components/BoardField
 import BarraFields, { BarraMetadata } from "@/components/BarraFields";
 import ArnesFields, { ArnesMetadata, ARNES_TYPES } from "@/components/ArnesFields";
 import CityPicker from "@/components/CityPicker";
+import { uploadAsset } from "@/lib/clientUpload";
 
 /* ─── Constantes ─── */
 
@@ -252,18 +253,14 @@ export default function VenderPage() {
 
   async function uploadImages(files: FileList) {
     setUploading(true);
-    const uploads = await Promise.all(
-      Array.from(files).map(async file => {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        return data.url as string | undefined;
-      })
-    );
-    const urls = uploads.filter(Boolean) as string[];
-    set("images", [...form.images, ...urls]);
-    setUploading(false);
+    try {
+      const urls = await Promise.all(Array.from(files).map(uploadAsset));
+      set("images", [...form.images, ...urls]);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "No se pudieron subir las fotos");
+    } finally {
+      setUploading(false);
+    }
   }
 
   function validateStep() {

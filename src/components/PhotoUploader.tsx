@@ -109,6 +109,9 @@ export default function PhotoUploader({ images, onChange, uploading, onUpload }:
       <p className="text-xs text-[#9CA3AF] text-center mt-2">
         JPG, PNG o WEBP · Máx. 8 fotos · {images.length}/8 · Arrastra para reordenar
       </p>
+      <p className="text-xs text-[#9CA3AF] text-center mt-1">
+        Las fotos grandes se optimizan automáticamente antes de subirlas
+      </p>
 
       <input
         ref={fileRef}
