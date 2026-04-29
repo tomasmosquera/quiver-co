@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, CheckCircle, Loader2, Trash2 } from "lucide-react";
@@ -8,7 +8,7 @@ import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
 import BarraFields, { BarraMetadata } from "@/components/BarraFields";
 import CityPicker from "@/components/CityPicker";
-import { uploadAsset } from "@/lib/clientUpload";
+import { uploadFiles } from "@/lib/clientUpload";
 
 const DISCIPLINES = [
   { value: "KITESURF",  label: "Kitesurf",  emoji: "🪁" },
@@ -96,6 +96,9 @@ export default function EditForm({ listingId, initial }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const uploadControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => uploadControllerRef.current?.abort(), []);
 
   const KITE_DISCIPLINES = ["KITESURF", "KITEFOIL", "WINDSURF"];
   const isKiteCometa = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "COMETA";
@@ -111,15 +114,27 @@ export default function EditForm({ listingId, initial }: Props) {
   }
 
   async function uploadImages(files: FileList) {
+    const controller = new AbortController();
+    uploadControllerRef.current = controller;
     setUploading(true);
+    setError("");
     try {
-      const urls = await Promise.all(Array.from(files).map(uploadAsset));
-      set("images", [...form.images, ...urls]);
+      const { urls } = await uploadFiles(Array.from(files), { signal: controller.signal });
+      if (urls.length > 0) {
+        set("images", [...form.images, ...urls]);
+      }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "No se pudieron subir las fotos");
     } finally {
+      if (uploadControllerRef.current === controller) {
+        uploadControllerRef.current = null;
+      }
       setUploading(false);
     }
+  }
+
+  function cancelImageUpload() {
+    uploadControllerRef.current?.abort();
   }
 
   function validate() {
@@ -471,6 +486,7 @@ export default function EditForm({ listingId, initial }: Props) {
               onChange={urls => set("images", urls)}
               uploading={uploading}
               onUpload={uploadImages}
+              onCancelUpload={cancelImageUpload}
             />
           </div>
 

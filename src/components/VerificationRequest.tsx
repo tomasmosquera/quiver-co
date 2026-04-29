@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, ShieldCheck, ShieldX, ShieldAlert, Loader2, Upload } from "lucide-react";
-import { uploadAsset } from "@/lib/clientUpload";
+import { Shield, ShieldCheck, ShieldX, ShieldAlert, Loader2, Upload, X } from "lucide-react";
+import { isUploadCancelledError, uploadAsset } from "@/lib/clientUpload";
 
 interface Props {
   status: string; // NONE | PENDING | APPROVED | REJECTED
@@ -18,21 +18,41 @@ export default function VerificationRequest({ status, idUrl }: Props) {
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const uploadControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => uploadControllerRef.current?.abort(), []);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const controller = new AbortController();
+    uploadControllerRef.current = controller;
     setError(null);
     setUploading(true);
+    setUploadedUrl(null);
     setPreview(URL.createObjectURL(file));
     try {
-      const url = await uploadAsset(file);
+      const url = await uploadAsset(file, { signal: controller.signal });
       setUploadedUrl(url);
-    } catch {
-      setError("Error al subir la imagen");
+    } catch (uploadError) {
+      if (!isUploadCancelledError(uploadError)) {
+        setError("Error al subir la imagen");
+      }
     } finally {
+      if (uploadControllerRef.current === controller) {
+        uploadControllerRef.current = null;
+      }
       setUploading(false);
     }
+  }
+
+  function cancelUpload() {
+    uploadControllerRef.current?.abort();
+    uploadControllerRef.current = null;
+    setPreview(null);
+    setUploadedUrl(null);
+    setError(null);
+    setUploading(false);
   }
 
   async function handleSubmit() {
@@ -87,7 +107,7 @@ export default function VerificationRequest({ status, idUrl }: Props) {
             <p className="text-xs text-red-600 mt-0.5">La imagen no fue válida. Sube una foto clara de tu cédula e inténtalo de nuevo.</p>
           </div>
         </div>
-        <UploadArea inputRef={inputRef} preview={preview} uploading={uploading} uploadedUrl={uploadedUrl} error={error} onFile={handleFile} onSubmit={handleSubmit} submitting={submitting} />
+        <UploadArea inputRef={inputRef} preview={preview} uploading={uploading} uploadedUrl={uploadedUrl} error={error} onFile={handleFile} onCancelUpload={cancelUpload} onSubmit={handleSubmit} submitting={submitting} />
       </div>
     );
   }
@@ -104,28 +124,39 @@ export default function VerificationRequest({ status, idUrl }: Props) {
           </p>
         </div>
       </div>
-      <UploadArea inputRef={inputRef} preview={preview} uploading={uploading} uploadedUrl={uploadedUrl} error={error} onFile={handleFile} onSubmit={handleSubmit} submitting={submitting} />
+      <UploadArea inputRef={inputRef} preview={preview} uploading={uploading} uploadedUrl={uploadedUrl} error={error} onFile={handleFile} onCancelUpload={cancelUpload} onSubmit={handleSubmit} submitting={submitting} />
     </div>
   );
 }
 
-function UploadArea({ inputRef, preview, uploading, uploadedUrl, error, onFile, onSubmit, submitting }: {
+function UploadArea({ inputRef, preview, uploading, uploadedUrl, error, onFile, onCancelUpload, onSubmit, submitting }: {
   inputRef: React.RefObject<HTMLInputElement | null>;
   preview: string | null;
   uploading: boolean;
   uploadedUrl: string | null;
   error: string | null;
   onFile: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCancelUpload: () => void;
   onSubmit: () => void;
   submitting: boolean;
 }) {
   return (
     <div className="space-y-3">
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          onFile(e);
+          e.currentTarget.value = "";
+        }}
+      />
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#E5E7EB] hover:border-[#3B82F6] rounded-xl py-6 transition-colors"
+        disabled={uploading}
+        className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#E5E7EB] hover:border-[#3B82F6] rounded-xl py-6 transition-colors disabled:opacity-60"
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -138,6 +169,16 @@ function UploadArea({ inputRef, preview, uploading, uploadedUrl, error, onFile, 
         )}
         {uploading && <Loader2 className="w-4 h-4 animate-spin text-[#3B82F6]" />}
       </button>
+      {uploading && (
+        <button
+          type="button"
+          onClick={onCancelUpload}
+          className="w-full flex items-center justify-center gap-2 py-2.5 border border-red-200 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <X className="w-4 h-4" />
+          Cancelar subida
+        </button>
+      )}
 
       {error && <p className="text-xs text-red-600">{error}</p>}
 

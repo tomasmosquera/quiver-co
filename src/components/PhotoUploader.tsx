@@ -8,9 +8,10 @@ interface Props {
   onChange: (images: string[]) => void;
   uploading: boolean;
   onUpload: (files: FileList) => void;
+  onCancelUpload?: () => void;
 }
 
-export default function PhotoUploader({ images, onChange, uploading, onUpload }: Props) {
+export default function PhotoUploader({ images, onChange, uploading, onUpload, onCancelUpload }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
   const dragItem = useRef<number | null>(null);
@@ -85,9 +86,10 @@ export default function PhotoUploader({ images, onChange, uploading, onUpload }:
 
         {images.length < 8 && (
           <button
+            type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="aspect-square rounded-xl border-2 border-dashed border-[#D1D5DB] hover:border-[#3B82F6] flex flex-col items-center justify-center gap-1.5 text-[#9CA3AF] hover:text-[#3B82F6] transition-all"
+            className="aspect-square rounded-xl border-2 border-dashed border-[#D1D5DB] hover:border-[#3B82F6] flex flex-col items-center justify-center gap-1.5 text-[#9CA3AF] hover:text-[#3B82F6] transition-all disabled:opacity-50"
           >
             {uploading
               ? <Loader2 className="w-5 h-5 animate-spin" />
@@ -105,6 +107,16 @@ export default function PhotoUploader({ images, onChange, uploading, onUpload }:
         <Upload className="w-4 h-4" />
         {uploading ? "Subiendo..." : "Seleccionar fotos"}
       </button>
+      {uploading && onCancelUpload && (
+        <button
+          type="button"
+          onClick={onCancelUpload}
+          className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 border border-red-200 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-colors"
+        >
+          <X className="w-4 h-4" />
+          Cancelar subida
+        </button>
+      )}
 
       <p className="text-xs text-[#9CA3AF] text-center mt-2">
         JPG, PNG o WEBP · Máx. 8 fotos · {images.length}/8 · Arrastra para reordenar
@@ -119,7 +131,10 @@ export default function PhotoUploader({ images, onChange, uploading, onUpload }:
         accept="image/*"
         multiple
         className="hidden"
-        onChange={e => e.target.files && onUpload(e.target.files)}
+        onChange={(e) => {
+          if (e.target.files) onUpload(e.target.files);
+          e.currentTarget.value = "";
+        }}
       />
     </div>
   );

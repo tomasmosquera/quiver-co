@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Plus, X, Loader2, ImagePlus } from "lucide-react";
-import { uploadAsset } from "@/lib/clientUpload";
+import { isUploadCancelledError, uploadAsset } from "@/lib/clientUpload";
 
 /* ─── Tipos ─── */
 
@@ -171,6 +171,7 @@ export default function KiteFields({
   const [uploadingRepairImg, setUploadingRepairImg] = useState<number | null>(null);
   const [colorOpen, setColorOpen] = useState(false);
   const colorRef = useRef<HTMLDivElement>(null);
+  const repairUploadControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -179,6 +180,8 @@ export default function KiteFields({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => () => repairUploadControllerRef.current?.abort(), []);
 
   function setMeta(patch: Partial<KiteMetadata>) {
     onMetaChange({ ...meta, ...patch });
@@ -222,15 +225,26 @@ export default function KiteFields({
   }
 
   async function uploadRepairImage(i: number, file: File) {
+    const controller = new AbortController();
+    repairUploadControllerRef.current = controller;
     setUploadingRepairImg(i);
     try {
-      const url = await uploadAsset(file);
+      const url = await uploadAsset(file, { signal: controller.signal });
       updateRepair(i, { imageUrl: url });
     } catch (error) {
-      console.error(error);
+      if (!isUploadCancelledError(error)) {
+        console.error(error);
+      }
     } finally {
+      if (repairUploadControllerRef.current === controller) {
+        repairUploadControllerRef.current = null;
+      }
       setUploadingRepairImg(null);
     }
+  }
+
+  function cancelRepairUpload() {
+    repairUploadControllerRef.current?.abort();
   }
 
   return (
@@ -530,18 +544,28 @@ export default function KiteFields({
                       <X className="w-3 h-3" />
                     </button>
                   </div>
+                ) : uploadingRepairImg === i ? (
+                  <button
+                    type="button"
+                    onClick={cancelRepairUpload}
+                    className="flex items-center gap-2 text-xs text-red-600 hover:text-red-700"
+                  >
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Cancelar subida
+                  </button>
                 ) : (
-                  <label className="flex items-center gap-2 text-xs text-amber-600 cursor-pointer hover:text-amber-800 w-fit">
-                    {uploadingRepairImg === i
-                      ? <Loader2 className="w-4 h-4 animate-spin" />
-                      : <ImagePlus className="w-4 h-4" />
-                    }
-                    {uploadingRepairImg === i ? "Subiendo..." : "Agregar foto (opcional)"}
+                  <label className={`flex items-center gap-2 text-xs w-fit ${uploadingRepairImg !== null ? "cursor-not-allowed text-amber-400" : "cursor-pointer text-amber-600 hover:text-amber-800"}`}>
+                    <ImagePlus className="w-4 h-4" />
+                    Agregar foto (opcional)
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={e => e.target.files?.[0] && uploadRepairImage(i, e.target.files[0])}
+                      disabled={uploadingRepairImg !== null}
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) uploadRepairImage(i, e.target.files[0]);
+                        e.currentTarget.value = "";
+                      }}
                     />
                   </label>
                 )}

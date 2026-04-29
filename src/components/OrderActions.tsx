@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Loader2, X, Truck, Upload, XCircle } from "lucide-react";
-import { uploadAsset } from "@/lib/clientUpload";
+import { isUploadCancelledError, uploadAsset } from "@/lib/clientUpload";
 
 interface Props {
   orderId: string;
@@ -28,27 +28,56 @@ function ShipModal({
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const uploadControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     function handler(e: KeyboardEvent) {
-      if (e.key === "Escape") onCancel();
+      if (e.key === "Escape") {
+        uploadControllerRef.current?.abort();
+        onCancel();
+      }
     }
     document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    return () => {
+      document.removeEventListener("keydown", handler);
+      uploadControllerRef.current?.abort();
+    };
   }, [onCancel]);
 
   async function handleFile(file: File) {
+    const controller = new AbortController();
+    uploadControllerRef.current = controller;
     setUploadError("");
     setUploading(true);
+    setProofUrl(null);
     try {
-      const url = await uploadAsset(file);
+      const url = await uploadAsset(file, { signal: controller.signal });
       setProofUrl(url);
       setPreview(URL.createObjectURL(file));
-    } catch {
-      setUploadError("Error subiendo la imagen, intenta de nuevo.");
+    } catch (uploadErr) {
+      if (!isUploadCancelledError(uploadErr)) {
+        setUploadError("Error subiendo la imagen, intenta de nuevo.");
+      }
     } finally {
+      if (uploadControllerRef.current === controller) {
+        uploadControllerRef.current = null;
+      }
       setUploading(false);
     }
+  }
+
+  function cancelUpload() {
+    uploadControllerRef.current?.abort();
+    uploadControllerRef.current = null;
+    setUploading(false);
+    setProofUrl(null);
+    setPreview(null);
+    setUploadError("");
+  }
+
+  function handleModalCancel() {
+    uploadControllerRef.current?.abort();
+    onCancel();
   }
 
   async function handleConfirm() {
@@ -60,9 +89,9 @@ function ShipModal({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="absolute inset-0 bg-black/40" onClick={handleModalCancel} />
       <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm space-y-4">
-        <button onClick={onCancel} className="absolute top-4 right-4 text-[#9CA3AF] hover:text-[#374151]">
+        <button onClick={handleModalCancel} className="absolute top-4 right-4 text-[#9CA3AF] hover:text-[#374151]">
           <X className="w-4 h-4" />
         </button>
 
@@ -112,14 +141,28 @@ function ShipModal({
             type="file"
             accept="image/*,.pdf"
             className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+              e.currentTarget.value = "";
+            }}
           />
+          {uploading && (
+            <button
+              type="button"
+              onClick={cancelUpload}
+              className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 border border-red-200 rounded-xl text-sm text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Cancelar subida
+            </button>
+          )}
           {uploadError && <p className="text-xs text-red-600 mt-1">{uploadError}</p>}
         </div>
 
         <div className="flex gap-3 pt-1">
           <button
-            onClick={onCancel}
+            onClick={handleModalCancel}
             className="flex-1 py-2.5 text-sm border border-[#E5E7EB] rounded-xl text-[#374151] hover:bg-[#F9FAFB] font-medium transition-colors"
           >
             Cancelar

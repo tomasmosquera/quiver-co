@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -14,7 +14,7 @@ import BoardFields, { BoardMetadata, BOARD_TYPES } from "@/components/BoardField
 import BarraFields, { BarraMetadata } from "@/components/BarraFields";
 import ArnesFields, { ArnesMetadata, ARNES_TYPES } from "@/components/ArnesFields";
 import CityPicker from "@/components/CityPicker";
-import { uploadAsset } from "@/lib/clientUpload";
+import { uploadFiles } from "@/lib/clientUpload";
 
 /* ─── Constantes ─── */
 
@@ -124,6 +124,9 @@ export default function VenderPage() {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const uploadControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => uploadControllerRef.current?.abort(), []);
 
   if (status === "loading") return null;
 
@@ -252,15 +255,27 @@ export default function VenderPage() {
   }
 
   async function uploadImages(files: FileList) {
+    const controller = new AbortController();
+    uploadControllerRef.current = controller;
     setUploading(true);
+    setError("");
     try {
-      const urls = await Promise.all(Array.from(files).map(uploadAsset));
-      set("images", [...form.images, ...urls]);
+      const { urls } = await uploadFiles(Array.from(files), { signal: controller.signal });
+      if (urls.length > 0) {
+        set("images", [...form.images, ...urls]);
+      }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "No se pudieron subir las fotos");
     } finally {
+      if (uploadControllerRef.current === controller) {
+        uploadControllerRef.current = null;
+      }
       setUploading(false);
     }
+  }
+
+  function cancelImageUpload() {
+    uploadControllerRef.current?.abort();
   }
 
   function validateStep() {
@@ -765,6 +780,7 @@ export default function VenderPage() {
                 onChange={urls => set("images", urls)}
                 uploading={uploading}
                 onUpload={uploadImages}
+                onCancelUpload={cancelImageUpload}
               />
             </div>
           )}

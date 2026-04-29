@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import CityPicker from "@/components/CityPicker";
 import PhotoUploader from "@/components/PhotoUploader";
-import { uploadAsset } from "@/lib/clientUpload";
+import { uploadFiles } from "@/lib/clientUpload";
 import {
   calculateKiteInspection,
   KITE_INSPECTION_CHECKS,
@@ -243,10 +243,11 @@ function AnswerButtons({ checkId, value, onChange }: {
 }
 
 /* ─── UploadBox ─── */
-function UploadBox({ photoId, photos, uploading, onUpload, onRemove }: {
+function UploadBox({ photoId, photos, uploading, onUpload, onRemove, onCancelUpload }: {
   photoId: string; photos: string[]; uploading: boolean;
   onUpload: (id: string, files: FileList) => void;
   onRemove: (id: string, url: string) => void;
+  onCancelUpload: (id: string) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
 
@@ -258,16 +259,26 @@ function UploadBox({ photoId, photos, uploading, onUpload, onRemove }: {
           <p className="text-sm font-bold text-[#111827]">{PHOTO_LABELS[photoId]}</p>
           <p className="mt-0.5 text-xs text-[#6B7280] leading-relaxed">{PHOTO_HELP[photoId]}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => ref.current?.click()}
-          disabled={uploading}
-          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#111827] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#374151] disabled:opacity-60"
-        >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
-          <span className="hidden sm:inline">Subir foto</span>
-          <span className="sm:hidden">Subir</span>
-        </button>
+        {uploading ? (
+          <button
+            type="button"
+            onClick={() => onCancelUpload(photoId)}
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50"
+          >
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Cancelar</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => ref.current?.click()}
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#111827] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#374151]"
+          >
+            <ImagePlus className="h-4 w-4" />
+            <span className="hidden sm:inline">Subir foto</span>
+            <span className="sm:hidden">Subir</span>
+          </button>
+        )}
       </div>
 
       {/* Body */}
@@ -294,6 +305,7 @@ function UploadBox({ photoId, photos, uploading, onUpload, onRemove }: {
               <button
                 type="button"
                 onClick={() => ref.current?.click()}
+                disabled={uploading}
                 className="aspect-square flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#D1D5DB] text-[#9CA3AF] hover:border-[#3B82F6] hover:text-[#3B82F6] transition-colors"
               >
                 <ImagePlus className="h-5 w-5" />
@@ -303,7 +315,8 @@ function UploadBox({ photoId, photos, uploading, onUpload, onRemove }: {
             <button
               type="button"
               onClick={() => ref.current?.click()}
-              className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#D1D5DB] text-[#9CA3AF] hover:border-[#3B82F6] hover:text-[#3B82F6] transition-colors"
+              disabled={uploading}
+              className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#D1D5DB] text-[#9CA3AF] hover:border-[#3B82F6] hover:text-[#3B82F6] transition-colors disabled:opacity-50"
             >
               <Camera className="h-6 w-6" />
               <span className="text-sm font-semibold">Toca para agregar foto</span>
@@ -353,6 +366,8 @@ export default function KiteStandardListingClient() {
   const [error, setError] = useState("");
   const [timerStartedAt, setTimerStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
+  const commercialUploadControllerRef = useRef<AbortController | null>(null);
+  const inspectionUploadControllerRef = useRef<AbortController | null>(null);
 
   const result = useMemo(() => calculateKiteInspection(answers, inspectionPhotos), [answers, inspectionPhotos]);
   const title = buildTitle(form);
@@ -364,31 +379,66 @@ export default function KiteStandardListingClient() {
     return () => window.clearInterval(id);
   }, [timerStartedAt, timerSeconds]);
 
+  useEffect(() => {
+    return () => {
+      commercialUploadControllerRef.current?.abort();
+      inspectionUploadControllerRef.current?.abort();
+    };
+  }, []);
+
   function updateForm(patch: Partial<ListingForm>) { setForm(c => ({ ...c, ...patch })); setError(""); }
   function updateAnswer(id: string, value: InspectionAnswer) { setAnswers(c => ({ ...c, [id]: value })); setError(""); }
 
-  async function uploadFile(file: File) {
-    return uploadAsset(file);
-  }
-
   async function uploadCommercialImages(files: FileList) {
+    const controller = new AbortController();
+    commercialUploadControllerRef.current = controller;
     setUploadingCommercial(true);
+    setError("");
     try {
-      const urls = (await Promise.all(Array.from(files).map(uploadFile))).filter(Boolean) as string[];
-      setCommercialPhotos(c => [...c, ...urls].slice(0, 8));
-    } finally { setUploadingCommercial(false); }
+      const { urls } = await uploadFiles(Array.from(files), { signal: controller.signal });
+      if (urls.length > 0) {
+        setCommercialPhotos(c => [...c, ...urls].slice(0, 8));
+      }
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "No se pudieron subir las fotos comerciales.");
+    } finally {
+      if (commercialUploadControllerRef.current === controller) {
+        commercialUploadControllerRef.current = null;
+      }
+      setUploadingCommercial(false);
+    }
   }
 
   async function uploadInspectionImages(photoId: string, files: FileList) {
+    const controller = new AbortController();
+    inspectionUploadControllerRef.current = controller;
     setUploadingPhotoId(photoId);
+    setError("");
     try {
-      const urls = (await Promise.all(Array.from(files).map(uploadFile))).filter(Boolean) as string[];
-      setInspectionPhotos(c => ({ ...c, [photoId]: [...(c[photoId] ?? []), ...urls] }));
-    } finally { setUploadingPhotoId(null); }
+      const { urls } = await uploadFiles(Array.from(files), { signal: controller.signal });
+      if (urls.length > 0) {
+        setInspectionPhotos(c => ({ ...c, [photoId]: [...(c[photoId] ?? []), ...urls] }));
+      }
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "No se pudieron subir las fotos del peritaje.");
+    } finally {
+      if (inspectionUploadControllerRef.current === controller) {
+        inspectionUploadControllerRef.current = null;
+      }
+      setUploadingPhotoId(null);
+    }
   }
 
   function removeInspectionPhoto(photoId: string, url: string) {
     setInspectionPhotos(c => ({ ...c, [photoId]: (c[photoId] ?? []).filter(u => u !== url) }));
+  }
+
+  function cancelCommercialUpload() {
+    commercialUploadControllerRef.current?.abort();
+  }
+
+  function cancelInspectionUpload() {
+    inspectionUploadControllerRef.current?.abort();
   }
 
   function formatTimer(s: number) {
@@ -627,7 +677,13 @@ export default function KiteStandardListingClient() {
           {step === 1 && (
             <div>
               <StepHeader title="Fotos comerciales" description="Estas son las fotos del anuncio. El peritaje tendrá sus propias fotos técnicas separadas." />
-              <PhotoUploader images={commercialPhotos} onChange={setCommercialPhotos} uploading={uploadingCommercial} onUpload={uploadCommercialImages} />
+              <PhotoUploader
+                images={commercialPhotos}
+                onChange={setCommercialPhotos}
+                uploading={uploadingCommercial}
+                onUpload={uploadCommercialImages}
+                onCancelUpload={cancelCommercialUpload}
+              />
             </div>
           )}
 
@@ -656,7 +712,14 @@ export default function KiteStandardListingClient() {
                   </div>
                 </div>
               </div>
-              <UploadBox photoId="inflated_identity" photos={inspectionPhotos.inflated_identity ?? []} uploading={uploadingPhotoId === "inflated_identity"} onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} />
+              <UploadBox
+                photoId="inflated_identity"
+                photos={inspectionPhotos.inflated_identity ?? []}
+                uploading={uploadingPhotoId === "inflated_identity"}
+                onUpload={uploadInspectionImages}
+                onRemove={removeInspectionPhoto}
+                onCancelUpload={cancelInspectionUpload}
+              />
               <AnswerButtons checkId="identity_match" value={answers.identity_match} onChange={v => updateAnswer("identity_match", v)} />
               <AnswerButtons checkId="inflates_shape" value={answers.inflates_shape} onChange={v => updateAnswer("inflates_shape", v)} />
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -670,25 +733,25 @@ export default function KiteStandardListingClient() {
             <InspectionSection title="Válvulas y one pump" description="Revisa cierre, fugas visibles, conectores y mangueras."
               photoIds={["main_valve","one_pump"]} checkIds={["main_valve_ok","one_pump_ok"]}
               photos={inspectionPhotos} answers={answers} uploadingPhotoId={uploadingPhotoId}
-              onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} onAnswer={updateAnswer} />
+              onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} onCancelUpload={cancelInspectionUpload} onAnswer={updateAnswer} />
           )}
           {step === 4 && (
             <InspectionSection title="Estructura inflable" description="Revisa leading edge y costillas. Busca cortes, deformaciones y costuras abiertas."
               photoIds={["leading_edge"]} checkIds={["leading_edge_ok","struts_ok"]}
               photos={inspectionPhotos} answers={answers} uploadingPhotoId={uploadingPhotoId}
-              onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} onAnswer={updateAnswer} />
+              onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} onCancelUpload={cancelInspectionUpload} onAnswer={updateAnswer} />
           )}
           {step === 5 && (
             <InspectionSection title="Tela y borde de fuga" description="Revisa canopy, desgaste fuerte, moho, zonas quebradizas y trailing edge."
               photoIds={["trailing_edge"]} checkIds={["canopy_no_tears","canopy_no_severe_wear","trailing_edge_ok"]}
               photos={inspectionPhotos} answers={answers} uploadingPhotoId={uploadingPhotoId}
-              onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} onAnswer={updateAnswer} />
+              onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} onCancelUpload={cancelInspectionUpload} onAnswer={updateAnswer} />
           )}
           {step === 6 && (
             <InspectionSection title="Bridas, pigtails y poleas" description="Revisa simetría, cortes, desgaste, puntos de conexión y movimiento de poleas."
               photoIds={["bridles_left","bridles_right"]} checkIds={["bridles_ok","pigtails_ok","pulleys_ok"]}
               photos={inspectionPhotos} answers={answers} uploadingPhotoId={uploadingPhotoId}
-              onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} onAnswer={updateAnswer} />
+              onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} onCancelUpload={cancelInspectionUpload} onAnswer={updateAnswer} />
           )}
 
           {/* STEP 7: Reparaciones */}
@@ -703,7 +766,14 @@ export default function KiteStandardListingClient() {
                     <textarea value={repairNotes} onChange={e => setRepairNotes(e.target.value)} rows={4} className="input resize-none"
                       placeholder="Zona, tipo de daño, cómo fue reparado y cualquier detalle relevante." />
                   </Field>
-                  <UploadBox photoId="repairs" photos={inspectionPhotos.repairs ?? []} uploading={uploadingPhotoId === "repairs"} onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} />
+                  <UploadBox
+                    photoId="repairs"
+                    photos={inspectionPhotos.repairs ?? []}
+                    uploading={uploadingPhotoId === "repairs"}
+                    onUpload={uploadInspectionImages}
+                    onRemove={removeInspectionPhoto}
+                    onCancelUpload={cancelInspectionUpload}
+                  />
                 </>
               )}
               <AnswerButtons checkId="repairs_declared" value={answers.repairs_declared} onChange={v => updateAnswer("repairs_declared", v)} />
@@ -729,7 +799,14 @@ export default function KiteStandardListingClient() {
                   <span className="text-2xl font-bold tabular-nums text-[#111827] shrink-0">{formatTimer(timerSeconds)}</span>
                 </div>
               </div>
-              <UploadBox photoId="pressure_final" photos={inspectionPhotos.pressure_final ?? []} uploading={uploadingPhotoId === "pressure_final"} onUpload={uploadInspectionImages} onRemove={removeInspectionPhoto} />
+              <UploadBox
+                photoId="pressure_final"
+                photos={inspectionPhotos.pressure_final ?? []}
+                uploading={uploadingPhotoId === "pressure_final"}
+                onUpload={uploadInspectionImages}
+                onRemove={removeInspectionPhoto}
+                onCancelUpload={cancelInspectionUpload}
+              />
               <AnswerButtons checkId="holds_pressure" value={answers.holds_pressure} onChange={v => updateAnswer("holds_pressure", v)} />
 
               {/* Score cards */}
@@ -900,18 +977,27 @@ function ToggleField({ label, value, onChange }: { label: string; value?: boolea
   );
 }
 
-function InspectionSection({ title, description, photoIds, checkIds, photos, answers, uploadingPhotoId, onUpload, onRemove, onAnswer }: {
+function InspectionSection({ title, description, photoIds, checkIds, photos, answers, uploadingPhotoId, onUpload, onRemove, onCancelUpload, onAnswer }: {
   title: string; description: string; photoIds: string[]; checkIds: string[];
   photos: InspectionPhotos; answers: Answers; uploadingPhotoId: string | null;
   onUpload: (id: string, files: FileList) => void;
   onRemove: (id: string, url: string) => void;
+  onCancelUpload: (id: string) => void;
   onAnswer: (id: string, v: InspectionAnswer) => void;
 }) {
   return (
     <div className="space-y-5">
       <StepHeader title={title} description={description} />
       {photoIds.map(id => (
-        <UploadBox key={id} photoId={id} photos={photos[id] ?? []} uploading={uploadingPhotoId === id} onUpload={onUpload} onRemove={onRemove} />
+        <UploadBox
+          key={id}
+          photoId={id}
+          photos={photos[id] ?? []}
+          uploading={uploadingPhotoId === id}
+          onUpload={onUpload}
+          onRemove={onRemove}
+          onCancelUpload={onCancelUpload}
+        />
       ))}
       {checkIds.map(id => (
         <AnswerButtons key={id} checkId={id} value={answers[id]} onChange={v => onAnswer(id, v)} />
