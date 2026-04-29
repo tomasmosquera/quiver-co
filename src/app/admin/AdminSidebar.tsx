@@ -16,6 +16,8 @@ const NAV = [
 export default function AdminSidebar() {
   const pathname = usePathname();
 
+  if (pathname === "/admin/crear-anuncio") return null;
+
   return (
     <aside className="w-56 bg-[#111827] text-white flex flex-col shrink-0">
       <div className="px-6 py-5 border-b border-white/10">
