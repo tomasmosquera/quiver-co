@@ -395,7 +395,10 @@ export default function KiteStandardListingClient() {
     setUploadingCommercial(true);
     setError("");
     try {
-      const { urls } = await uploadFiles(Array.from(files), { signal: controller.signal });
+      const { urls } = await uploadFiles(Array.from(files), {
+        profile: "listing",
+        signal: controller.signal,
+      });
       if (urls.length > 0) {
         setCommercialPhotos(c => [...c, ...urls].slice(0, 8));
       }
@@ -415,7 +418,10 @@ export default function KiteStandardListingClient() {
     setUploadingPhotoId(photoId);
     setError("");
     try {
-      const { urls } = await uploadFiles(Array.from(files), { signal: controller.signal });
+      const { urls } = await uploadFiles(Array.from(files), {
+        profile: "inspection",
+        signal: controller.signal,
+      });
       if (urls.length > 0) {
         setInspectionPhotos(c => ({ ...c, [photoId]: [...(c[photoId] ?? []), ...urls] }));
       }

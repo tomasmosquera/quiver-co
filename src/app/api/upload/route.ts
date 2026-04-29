@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
   const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
     cloudinary.uploader.upload_stream(
-      { folder: "quiver-co", resource_type: "image" },
+      { folder: "quiver-co", resource_type: "auto" },
       (error, result) => {
         if (error || !result) reject(error);
         else resolve(result as { secure_url: string });

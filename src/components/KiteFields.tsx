@@ -229,7 +229,10 @@ export default function KiteFields({
     repairUploadControllerRef.current = controller;
     setUploadingRepairImg(i);
     try {
-      const url = await uploadAsset(file, { signal: controller.signal });
+      const url = await uploadAsset(file, {
+        profile: "repair",
+        signal: controller.signal,
+      });
       updateRepair(i, { imageUrl: url });
     } catch (error) {
       if (!isUploadCancelledError(error)) {

@@ -32,7 +32,10 @@ export default function VerificationRequest({ status, idUrl }: Props) {
     setUploadedUrl(null);
     setPreview(URL.createObjectURL(file));
     try {
-      const url = await uploadAsset(file, { signal: controller.signal });
+      const url = await uploadAsset(file, {
+        profile: "document",
+        signal: controller.signal,
+      });
       setUploadedUrl(url);
     } catch (uploadError) {
       if (!isUploadCancelledError(uploadError)) {

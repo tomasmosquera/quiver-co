@@ -1,16 +1,70 @@
 "use client";
 
-const MAX_UPLOAD_DIMENSION = 1800;
-const MIN_SIZE_TO_OPTIMIZE_BYTES = 900 * 1024;
-const OUTPUT_IMAGE_TYPE = "image/webp";
-const NON_OPTIMIZABLE_IMAGE_TYPES = new Set(["image/gif", "image/svg+xml"]);
+type UploadProfile = "listing" | "inspection" | "repair" | "document";
 
 interface UploadOptions {
+  profile?: UploadProfile;
   signal?: AbortSignal;
+  signature?: CloudinaryUploadSignature;
 }
+
+interface UploadProfileSettings {
+  maxDimension: number;
+  minOptimizeBytes: number;
+  quality: number;
+}
+
+interface CloudinaryUploadSignature {
+  apiKey: string;
+  cloudName: string;
+  folder: string;
+  resourceType: "auto";
+  signature: string;
+  timestamp: number;
+}
+
+const OUTPUT_IMAGE_TYPE = "image/webp";
+const NON_OPTIMIZABLE_IMAGE_TYPES = new Set(["image/gif", "image/svg+xml"]);
+const SIGNATURE_CACHE_TTL_MS = 30_000;
+
+const UPLOAD_PROFILES: Record<UploadProfile, UploadProfileSettings> = {
+  listing: {
+    maxDimension: 1600,
+    minOptimizeBytes: 700 * 1024,
+    quality: 0.68,
+  },
+  inspection: {
+    maxDimension: 1400,
+    minOptimizeBytes: 450 * 1024,
+    quality: 0.6,
+  },
+  repair: {
+    maxDimension: 1200,
+    minOptimizeBytes: 350 * 1024,
+    quality: 0.56,
+  },
+  document: {
+    maxDimension: 1600,
+    minOptimizeBytes: 500 * 1024,
+    quality: 0.7,
+  },
+};
+
+let cachedSignature:
+  | {
+      expiresAt: number;
+      value: CloudinaryUploadSignature;
+    }
+  | null = null;
+
+let signatureRequest: Promise<CloudinaryUploadSignature> | null = null;
 
 function isOptimizableImage(file: File) {
   return file.type.startsWith("image/") && !NON_OPTIMIZABLE_IMAGE_TYPES.has(file.type);
+}
+
+function getProfileSettings(profile: UploadProfile) {
+  return UPLOAD_PROFILES[profile];
 }
 
 function createAbortError() {
@@ -21,17 +75,16 @@ function throwIfAborted(signal?: AbortSignal) {
   if (signal?.aborted) throw createAbortError();
 }
 
-function getOutputFileName(name: string, mimeType: string) {
+function getOutputFileName(name: string) {
   const baseName = name.replace(/\.[^.]+$/, "") || "upload";
-  const extension = mimeType === "image/webp" ? "webp" : "jpg";
-  return `${baseName}.${extension}`;
+  return `${baseName}.webp`;
 }
 
-function getTargetDimensions(width: number, height: number) {
+function getTargetDimensions(width: number, height: number, maxDimension: number) {
   const longestSide = Math.max(width, height);
-  if (longestSide <= MAX_UPLOAD_DIMENSION) return { width, height };
+  if (longestSide <= maxDimension) return { width, height };
 
-  const scale = MAX_UPLOAD_DIMENSION / longestSide;
+  const scale = maxDimension / longestSide;
   return {
     width: Math.max(1, Math.round(width * scale)),
     height: Math.max(1, Math.round(height * scale)),
@@ -43,6 +96,7 @@ function loadImage(file: File, signal?: AbortSignal) {
 
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
+
     const cleanup = () => {
       URL.revokeObjectURL(objectUrl);
       image.onload = null;
@@ -81,6 +135,7 @@ function canvasToBlob(
 
   return new Promise<Blob>((resolve, reject) => {
     let settled = false;
+
     const finish = (callback: () => void) => {
       if (settled) return;
       settled = true;
@@ -107,26 +162,108 @@ function canvasToBlob(
   });
 }
 
+async function fetchUploadSignature(signal?: AbortSignal) {
+  if (cachedSignature && cachedSignature.expiresAt > Date.now()) {
+    return cachedSignature.value;
+  }
+
+  if (!signatureRequest) {
+    signatureRequest = (async () => {
+      const response = await fetch("/api/upload/signature", {
+        method: "POST",
+        signal,
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (
+        !response.ok ||
+        typeof data.apiKey !== "string" ||
+        typeof data.cloudName !== "string" ||
+        typeof data.folder !== "string" ||
+        typeof data.resourceType !== "string" ||
+        typeof data.signature !== "string" ||
+        typeof data.timestamp !== "number"
+      ) {
+        throw new Error(
+          typeof data.error === "string" ? data.error : "No se pudo preparar la subida."
+        );
+      }
+
+      const value = data as CloudinaryUploadSignature;
+      cachedSignature = {
+        value,
+        expiresAt: Date.now() + SIGNATURE_CACHE_TTL_MS,
+      };
+      return value;
+    })().finally(() => {
+      signatureRequest = null;
+    });
+  }
+
+  return signatureRequest;
+}
+
+async function uploadToCloudinary(
+  file: File,
+  signature: CloudinaryUploadSignature,
+  signal?: AbortSignal
+) {
+  throwIfAborted(signal);
+
+  const formData = new FormData();
+  formData.append("file", file, file.name);
+  formData.append("api_key", signature.apiKey);
+  formData.append("folder", signature.folder);
+  formData.append("signature", signature.signature);
+  formData.append("timestamp", String(signature.timestamp));
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`,
+    {
+      method: "POST",
+      body: formData,
+      signal,
+    }
+  );
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || typeof data.secure_url !== "string") {
+    const cloudinaryError =
+      typeof data?.error?.message === "string" ? data.error.message : null;
+    throw new Error(cloudinaryError ?? "No se pudo subir el archivo.");
+  }
+
+  return data.secure_url as string;
+}
+
 export function isUploadCancelledError(error: unknown) {
   return error instanceof Error && error.name === "AbortError";
 }
 
-export async function optimizeImageForUpload(file: File, { signal }: UploadOptions = {}) {
+export async function optimizeImageForUpload(
+  file: File,
+  { profile = "listing", signal }: UploadOptions = {}
+) {
   if (!isOptimizableImage(file)) return file;
 
+  const settings = getProfileSettings(profile);
   const shouldSkipEarly =
-    file.size <= MIN_SIZE_TO_OPTIMIZE_BYTES &&
+    file.size <= settings.minOptimizeBytes &&
     (file.type === "image/jpeg" || file.type === "image/webp" || file.type === "image/avif");
 
   if (shouldSkipEarly) return file;
 
   try {
     const image = await loadImage(file, signal);
-    const { width, height } = getTargetDimensions(image.naturalWidth, image.naturalHeight);
+    const { width, height } = getTargetDimensions(
+      image.naturalWidth,
+      image.naturalHeight,
+      settings.maxDimension
+    );
     const shouldResize = width !== image.naturalWidth || height !== image.naturalHeight;
     const shouldReencode =
       shouldResize ||
-      file.size > MIN_SIZE_TO_OPTIMIZE_BYTES ||
+      file.size > settings.minOptimizeBytes ||
       file.type !== OUTPUT_IMAGE_TYPE;
 
     if (!shouldReencode) return file;
@@ -140,12 +277,12 @@ export async function optimizeImageForUpload(file: File, { signal }: UploadOptio
 
     context.drawImage(image, 0, 0, width, height);
 
-    const quality = file.size > 4 * 1024 * 1024 ? 0.68 : 0.74;
+    const quality = file.size > 4 * 1024 * 1024 ? Math.max(0.5, settings.quality - 0.06) : settings.quality;
     const blob = await canvasToBlob(canvas, OUTPUT_IMAGE_TYPE, quality, signal);
 
     if (blob.size >= file.size) return file;
 
-    return new File([blob], getOutputFileName(file.name, OUTPUT_IMAGE_TYPE), {
+    return new File([blob], getOutputFileName(file.name), {
       type: OUTPUT_IMAGE_TYPE,
       lastModified: file.lastModified,
     });
@@ -155,26 +292,20 @@ export async function optimizeImageForUpload(file: File, { signal }: UploadOptio
   }
 }
 
-export async function uploadAsset(file: File, { signal }: UploadOptions = {}) {
-  const preparedFile = await optimizeImageForUpload(file, { signal });
-  const formData = new FormData();
-
-  formData.append("file", preparedFile, preparedFile.name);
-
-  throwIfAborted(signal);
-
-  const response = await fetch("/api/upload", { method: "POST", body: formData, signal });
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok || typeof data.url !== "string") {
-    throw new Error(typeof data.error === "string" ? data.error : "No se pudo subir el archivo.");
-  }
-
-  return data.url as string;
+export async function uploadAsset(file: File, options: UploadOptions = {}) {
+  const preparedFile = await optimizeImageForUpload(file, options);
+  const signature = options.signature ?? (await fetchUploadSignature(options.signal));
+  return uploadToCloudinary(preparedFile, signature, options.signal);
 }
 
 export async function uploadFiles(files: Iterable<File>, options: UploadOptions = {}) {
-  const uploads = await Promise.allSettled(Array.from(files, (file) => uploadAsset(file, options)));
+  const fileList = Array.from(files);
+  if (fileList.length === 0) return { urls: [], cancelled: false };
+
+  const signature = await fetchUploadSignature(options.signal);
+  const uploads = await Promise.allSettled(
+    fileList.map((file) => uploadAsset(file, { ...options, signature }))
+  );
   const urls: string[] = [];
   let cancelled = false;
   let firstError: unknown = null;

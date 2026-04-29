@@ -51,7 +51,10 @@ function ShipModal({
     setUploading(true);
     setProofUrl(null);
     try {
-      const url = await uploadAsset(file, { signal: controller.signal });
+      const url = await uploadAsset(file, {
+        profile: "document",
+        signal: controller.signal,
+      });
       setProofUrl(url);
       setPreview(URL.createObjectURL(file));
     } catch (uploadErr) {

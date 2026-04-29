@@ -260,7 +260,10 @@ export default function VenderPage() {
     setUploading(true);
     setError("");
     try {
-      const { urls } = await uploadFiles(Array.from(files), { signal: controller.signal });
+      const { urls } = await uploadFiles(Array.from(files), {
+        profile: "listing",
+        signal: controller.signal,
+      });
       if (urls.length > 0) {
         set("images", [...form.images, ...urls]);
       }
