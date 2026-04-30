@@ -349,10 +349,40 @@ function ScoreBadge({ score, label, compact = false }: { score: number; label: s
   );
 }
 
+export interface PeritajePrefill {
+  title: string;
+  discipline: string;
+  equipmentType: string;
+  brand: string;
+  size: string;
+  condition: string;
+  price: string;
+  currency: "COP" | "USD";
+  description: string;
+  city: string;
+  images: string[];
+  metadata: Record<string, unknown>;
+}
+
 /* ─── Main component ─── */
-export default function KiteStandardListingClient() {
+export default function KiteStandardListingClient({
+  backHref = "/admin",
+  backLabel = "Volver al admin",
+  initialStep = 0,
+  prefillData,
+  existingListingId,
+}: {
+  backHref?: string;
+  backLabel?: string;
+  /** Start the flow at this step index (0 = Anuncio, 2 = Aire) */
+  initialStep?: number;
+  /** If provided, use this data for the listing (from /vender flow) */
+  prefillData?: PeritajePrefill;
+  /** If provided, PATCH this listing's inspection instead of creating a new one */
+  existingListingId?: string;
+} = {}) {
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(initialStep);
   const [form, setForm] = useState<ListingForm>(INITIAL_FORM);
   const [department, setDepartment] = useState("");
   const [commercialPhotos, setCommercialPhotos] = useState<string[]>([]);
@@ -452,7 +482,10 @@ export default function KiteStandardListingClient() {
   }
 
   function validateStep(s = step) {
+    // Steps before initialStep are provided via prefillData — skip validation
+    if (s < initialStep) return "";
     if (s === 0) {
+      if (prefillData) return ""; // supplied externally
       if (!selectedBrand(form)) return "Selecciona o escribe la marca.";
       if (!form.size)           return "Selecciona el tamaño.";
       if (!form.year)           return "Selecciona el año.";
@@ -463,7 +496,10 @@ export default function KiteStandardListingClient() {
       if (form.includesBag === undefined) return "Indica si incluye maleta.";
       if (!form.description.trim()) return "Escribe una descripción.";
     }
-    if (s === 1 && commercialPhotos.length === 0) return "Agrega al menos una foto comercial.";
+    if (s === 1) {
+      if (prefillData) return ""; // photos come from vender form
+      if (commercialPhotos.length === 0) return "Agrega al menos una foto comercial.";
+    }
     if (s === 2) {
       if (!inspectionPhotos.inflated_identity?.length) return "Sube la foto de la cometa inflada.";
       if (!answers.identity_match || !answers.inflates_shape) return "Responde los checks de identificación y aire.";
@@ -501,38 +537,89 @@ export default function KiteStandardListingClient() {
     const err = validateStep(); if (err) { setError(err); return; }
     setStep(c => Math.min(c + 1, STEPS.length - 1)); setError("");
   }
-  function back() { setStep(c => Math.max(c - 1, 0)); setError(""); }
+  function back() {
+    if (step <= initialStep) { router.back(); return; }
+    setStep(c => Math.max(c - 1, initialStep)); setError("");
+  }
 
   async function submit() {
     const errs = STEPS.map((_, i) => validateStep(i)).filter(Boolean);
     if (errs.length) { setError(errs[0]); return; }
     setSubmitting(true); setError("");
     try {
-      const metadata = {
+      const standardInspection = {
+        version: KITE_INSPECTION_VERSION,
+        source: existingListingId ? "seller-self-reported"
+               : prefillData     ? "seller-vender-flow"
+               : backHref === "/admin" ? "seller-admin-prototype"
+               : "seller-self-reported",
+        completedAt: new Date().toISOString(),
+        score: result.score, rawScore: result.rawScore, label: result.label,
+        alerts: result.alerts, answers, photos: inspectionPhotos,
+        repairNotes: repairNotes.trim() || undefined,
+      };
+
+      if (existingListingId) {
+        // Mode: add inspection to an existing listing
+        const res = await fetch(`/api/listings/${existingListingId}/inspect`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            hasRepairs: hasInspectionRepairs ?? false,
+            repairs: hasInspectionRepairs
+              ? [{ description: repairNotes.trim(), imageUrl: inspectionPhotos.repairs?.[0] }] : [],
+            standardInspection,
+          }),
+        });
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Error al guardar peritaje"); }
+        router.push(`/equipo/${existingListingId}`);
+        router.refresh();
+        return;
+      }
+
+      // Mode: create new listing (standalone or linked from /vender)
+      const listingBase = prefillData ? {
+        title:         prefillData.title,
+        description:   prefillData.description,
+        price:         prefillData.price,
+        currency:      prefillData.currency,
+        discipline:    prefillData.discipline,
+        equipmentType: prefillData.equipmentType,
+        condition:     prefillData.condition,
+        brand:         prefillData.brand,
+        size:          prefillData.size,
+        city:          prefillData.city,
+        images:        prefillData.images,
+      } : {
+        title, description: form.description.trim(), price: form.price,
+        currency: form.currency, discipline: "KITESURF", equipmentType: "COMETA",
+        condition: form.condition, brand: selectedBrand(form),
+        size: form.size, city: form.city, images: commercialPhotos,
+      };
+
+      const metadata = prefillData ? {
+        ...prefillData.metadata,
+        hasRepairs: hasInspectionRepairs ?? false,
+        repairs: hasInspectionRepairs
+          ? [{ description: repairNotes.trim(), imageUrl: inspectionPhotos.repairs?.[0] }] : [],
+        standardInspection,
+      } : {
         reference: form.reference.trim() || undefined,
         year: form.year, includesBar: form.includesBar, includesBag: form.includesBag,
         hasRepairs: hasInspectionRepairs ?? false,
         repairs: hasInspectionRepairs
           ? [{ description: repairNotes.trim(), imageUrl: inspectionPhotos.repairs?.[0] }] : [],
-        standardInspection: {
-          version: KITE_INSPECTION_VERSION, source: "seller-admin-prototype",
-          completedAt: new Date().toISOString(),
-          score: result.score, rawScore: result.rawScore, label: result.label,
-          alerts: result.alerts, answers, photos: inspectionPhotos,
-          repairNotes: repairNotes.trim() || undefined,
-        },
+        standardInspection,
       };
+
       const res = await fetch("/api/listings", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title, description: form.description.trim(), price: form.price,
-          currency: form.currency, discipline: "KITESURF", equipmentType: "COMETA",
-          condition: form.condition, brand: selectedBrand(form),
-          size: form.size, city: form.city, images: commercialPhotos, metadata,
-        }),
+        body: JSON.stringify({ ...listingBase, metadata }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al publicar");
+      // Clear vender draft if applicable
+      if (typeof window !== "undefined") sessionStorage.removeItem("quiver-vender-draft");
       router.push(`/equipo/${data.listing.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al publicar");
@@ -540,7 +627,8 @@ export default function KiteStandardListingClient() {
     }
   }
 
-  const progressPct = ((step + 1) / STEPS.length) * 100;
+  const visibleSteps = STEPS.slice(initialStep);
+  const progressPct = ((step - initialStep + 1) / visibleSteps.length) * 100;
 
   return (
     <div className="space-y-5">
@@ -548,8 +636,8 @@ export default function KiteStandardListingClient() {
       {/* ── Header ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Link href="/admin" className="mb-2 inline-flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#111827]">
-            <ChevronLeft className="h-4 w-4" /> Volver al admin
+          <Link href={backHref} className="mb-2 inline-flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#111827]">
+            <ChevronLeft className="h-4 w-4" /> {backLabel}
           </Link>
           <h1 className="text-xl font-bold text-[#111827] sm:text-2xl">Peritaje Estándar — Cometa</h1>
           <p className="mt-0.5 text-sm text-[#6B7280]">14 checks · 8 fotos base · puntaje automático</p>
@@ -582,7 +670,7 @@ export default function KiteStandardListingClient() {
       <div className="rounded-2xl border border-[#E5E7EB] bg-white px-4 pb-4 pt-3">
         {/* Progress bar + label */}
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-xs text-[#9CA3AF]">Paso {step + 1} de {STEPS.length}</span>
+          <span className="text-xs text-[#9CA3AF]">Paso {step - initialStep + 1} de {visibleSteps.length}</span>
           <span className="text-xs font-bold text-[#111827]">{STEPS[step]}</span>
         </div>
         <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-[#F3F4F6]">
@@ -593,7 +681,9 @@ export default function KiteStandardListingClient() {
         </div>
         {/* Scrollable pills */}
         <div className="flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {STEPS.map((label, i) => (
+          {visibleSteps.map((label, vi) => {
+            const i = vi + initialStep;
+            return (
             <button
               key={label}
               type="button"
@@ -604,9 +694,10 @@ export default function KiteStandardListingClient() {
                                "bg-[#F3F4F6] text-[#9CA3AF]"
               }`}
             >
-              {i + 1}. {label}
+              {vi + 1}. {label}
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 

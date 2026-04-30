@@ -6,57 +6,66 @@ import Link from "next/link";
 import { ChevronLeft, CheckCircle, Loader2, Trash2 } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
+import BoardFields, { BoardMetadata, BOARD_TYPES } from "@/components/BoardFields";
 import BarraFields, { BarraMetadata } from "@/components/BarraFields";
+import ArnesFields, { ArnesMetadata, ARNES_TYPES } from "@/components/ArnesFields";
 import CityPicker from "@/components/CityPicker";
 import { uploadFiles } from "@/lib/clientUpload";
 
+const COMING_SOON = ["WINDSURF", "WAKEBOARD", "PADDLE"];
+
 const DISCIPLINES = [
-  { value: "KITESURF",  label: "Kitesurf",  emoji: "🪁" },
-  { value: "KITEFOIL",  label: "Kitefoil",  emoji: "🚀" },
-  { value: "WINGFOIL",  label: "Wingfoil",  emoji: "🪽" },
-  { value: "WINDSURF",  label: "Windsurf",  emoji: "⛵" },
-  { value: "WAKEBOARD", label: "Wakeboard", emoji: "🚤" },
-  { value: "PADDLE",    label: "Paddle",    emoji: "🧘" },
+  { value: "KITESURF",  label: "Kitesurf",   emoji: "🪁" },
+  { value: "KITEFOIL",  label: "Kitefoil",   emoji: "🚀" },
+  { value: "WINGFOIL",  label: "Wingfoil",   emoji: "🪽" },
+  { value: "WATERWEAR", label: "Accesorios", emoji: "🎒" },
+  { value: "WINDSURF",  label: "Windsurf",   emoji: "⛵" },
+  { value: "WAKEBOARD", label: "Wakeboard",  emoji: "🚤" },
+  { value: "PADDLE",    label: "Paddle",     emoji: "🧘" },
 ];
 
 const EQUIPMENT_TYPES_BY_DISCIPLINE: Record<string, { value: string; label: string }[]> = {
   KITESURF: [
-    { value: "COMETA",      label: "Cometa" },
-    { value: "TABLA",       label: "Tabla" },
-    { value: "BARRA_LINEAS",label: "Barra & Líneas" },
-    { value: "ARNES",       label: "Arnés" },
+    { value: "COMETA",       label: "Cometa" },
+    { value: "TABLA",        label: "Tabla" },
+    { value: "BARRA_LINEAS", label: "Barra & Líneas" },
+    { value: "ARNES",        label: "Arnés" },
   ],
   KITEFOIL: [
-    { value: "COMETA",      label: "Cometa" },
-    { value: "TABLA",       label: "Tabla" },
-    { value: "BARRA_LINEAS",label: "Barra & Líneas" },
-    { value: "ARNES",       label: "Arnés" },
+    { value: "COMETA",       label: "Cometa" },
+    { value: "TABLA",        label: "Tabla" },
+    { value: "BARRA_LINEAS", label: "Barra & Líneas" },
+    { value: "ARNES",        label: "Arnés" },
   ],
   WINGFOIL: [
-    { value: "WING",        label: "Wing" },
-    { value: "TABLA",       label: "Tabla" },
-    { value: "LEASH",       label: "Leash" },
-    { value: "ARNES",       label: "Arnés" },
+    { value: "WING",  label: "Wing" },
+    { value: "TABLA", label: "Tabla" },
+    { value: "LEASH", label: "Leash" },
+    { value: "ARNES", label: "Arnés" },
   ],
   WATERWEAR: [
-    { value: "ACC_COMETA",  label: "Accesorios de cometa" },
-    { value: "ACC_WING",    label: "Accesorios de wing" },
-    { value: "ACC_BARRA",   label: "Accesorios de barra" },
-    { value: "ACC_TABLA",   label: "Accesorios de tabla" },
-    { value: "ACC_ARNES",   label: "Accesorios de arnés" },
-    { value: "BOMBAS",      label: "Bombas" },
-    { value: "MALETAS",     label: "Maletas y bolsas" },
-    { value: "WETSUIT",     label: "Wetsuits" },
-    { value: "PONCHO",      label: "Ponchos y Toallas" },
-    { value: "PROTECCION",  label: "Protección" },
-    { value: "TECNOLOGIA",  label: "Tecnología" },
-    { value: "OTROS",       label: "Otros" },
+    { value: "ACC_COMETA", label: "Accesorios de cometa" },
+    { value: "ACC_WING",   label: "Accesorios de wing" },
+    { value: "ACC_BARRA",  label: "Accesorios de barra" },
+    { value: "ACC_TABLA",  label: "Accesorios de tabla" },
+    { value: "ACC_ARNES",  label: "Accesorios de arnés" },
+    { value: "BOMBAS",     label: "Bombas" },
+    { value: "MALETAS",    label: "Maletas y bolsas" },
+    { value: "WETSUIT",    label: "Wetsuits" },
+    { value: "PONCHO",     label: "Ponchos y Toallas" },
+    { value: "PROTECCION", label: "Protección" },
+    { value: "TECNOLOGIA", label: "Tecnología" },
+    { value: "OTROS",      label: "Otros" },
   ],
   _DEFAULT: [
-    { value: "COMETA",      label: "Cometa" },
-    { value: "TABLA",       label: "Tabla" },
-    { value: "BARRA_LINEAS",label: "Barra & Líneas" },
-    { value: "ARNES",       label: "Arnés" },
+    { value: "COMETA",       label: "Cometa" },
+    { value: "TABLA",        label: "Tabla" },
+    { value: "BARRA_LINEAS", label: "Barra & Líneas" },
+    { value: "FOIL",         label: "Foil" },
+    { value: "ARNES",        label: "Arnés" },
+    { value: "TRAJE",        label: "Traje" },
+    { value: "ACCESORIO",    label: "Accesorio" },
+    { value: "COMBO",        label: "Combo completo" },
   ],
 };
 
@@ -66,6 +75,20 @@ const CONDITIONS = [
   { value: "USADO",     label: "Usado",      desc: "Uso normal, puede tener marcas de uso" },
 ];
 
+const WATERWEAR_BRAND_PLACEHOLDERS: Record<string, string> = {
+  ACC_COMETA: "Ej: Cabrinha, Ozone, Duotone...",
+  ACC_WING:   "Ej: Duotone, ION, F-One...",
+  ACC_BARRA:  "Ej: Duotone, North, Cabrinha...",
+  ACC_TABLA:  "Ej: Cabrinha, Slingshot, Hulu...",
+  ACC_ARNES:  "Ej: Ride Engine, Mystic, Dakine...",
+  BOMBAS:     "Ej: Cabrinha, Duotone, Ozone...",
+  MALETAS:    "Ej: Cogua, Duotone, Cabrinha...",
+  WETSUIT:    "Ej: ION, Manera, Prolimit, Mystic...",
+  PONCHO:     "Ej: Prolimit, Mystic, ION...",
+  PROTECCION: "Ej: Mystic, ION, Prolimit...",
+  TECNOLOGIA: "Ej: Woo, Weatherflow, GoPro...",
+  OTROS:      "Ej: Cabrinha, Airush, Duotone...",
+};
 
 interface InitialData {
   discipline: string;
@@ -79,7 +102,7 @@ interface InitialData {
   description: string;
   city: string;
   images: string[];
-  metadata: KiteMetadata & BarraMetadata;
+  metadata: KiteMetadata & BoardMetadata & BarraMetadata & ArnesMetadata & { accesorioType?: string };
 }
 
 interface Props {
@@ -101,12 +124,69 @@ export default function EditForm({ listingId, initial }: Props) {
   useEffect(() => () => uploadControllerRef.current?.abort(), []);
 
   const KITE_DISCIPLINES = ["KITESURF", "KITEFOIL", "WINDSURF"];
-  const isKiteCometa = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "COMETA";
-  const isWing       = form.discipline === "WINGFOIL" && form.equipmentType === "WING";
-  const isLeash      = form.discipline === "WINGFOIL" && form.equipmentType === "LEASH";
-  const isKiteBarra  = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "BARRA_LINEAS";
-  const hasSpecialFields = isKiteCometa || isWing || isLeash || isKiteBarra;
+  const isWing        = form.discipline === "WINGFOIL" && form.equipmentType === "WING";
+  const isLeash       = form.discipline === "WINGFOIL" && form.equipmentType === "LEASH";
+  const isKiteCometa  = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "COMETA";
+  const isKiteTabla   = (KITE_DISCIPLINES.includes(form.discipline) || form.discipline === "WINGFOIL") && form.equipmentType === "TABLA";
+  const isKiteBarra   = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "BARRA_LINEAS";
+  const isKiteArnes   = (KITE_DISCIPLINES.includes(form.discipline) || form.discipline === "WINGFOIL") && form.equipmentType === "ARNES";
+  const hasSpecialFields = isKiteCometa || isWing || isLeash || isKiteTabla || isKiteBarra || isKiteArnes;
+
   const equipmentTypes = EQUIPMENT_TYPES_BY_DISCIPLINE[form.discipline] ?? EQUIPMENT_TYPES_BY_DISCIPLINE._DEFAULT;
+
+  const autoTitle = isWing
+    ? [
+        form.brand,
+        form.metadata.reference,
+        form.metadata.complement,
+        form.metadata.year,
+        form.size,
+        form.metadata.includesBag ? "Con maleta" : "",
+        form.metadata.hasRepairs !== undefined
+          ? (form.metadata.hasRepairs ? "Con reparaciones" : "Sin reparaciones")
+          : "",
+      ].filter(Boolean).join(" ")
+    : isKiteCometa
+    ? [
+        form.brand,
+        form.metadata.reference,
+        form.metadata.complement,
+        form.metadata.year,
+        form.size,
+        form.metadata.includesBar ? "Con barra" : "",
+        form.metadata.hasRepairs !== undefined
+          ? (form.metadata.hasRepairs ? "Con reparaciones" : "Sin reparaciones")
+          : "",
+      ].filter(Boolean).join(" ")
+    : isKiteTabla
+    ? [
+        BOARD_TYPES.find(t => t.value === form.metadata.boardType)?.label,
+        form.brand,
+        form.metadata.reference,
+        form.metadata.complement,
+        form.metadata.year,
+        form.size,
+      ].filter(Boolean).join(" ")
+    : isKiteBarra
+    ? [
+        "Barra",
+        form.brand,
+        form.metadata.reference,
+        form.metadata.complement,
+        form.size,
+        form.metadata.lineLength,
+        form.metadata.year,
+      ].filter(Boolean).join(" ")
+    : isKiteArnes
+    ? [
+        ARNES_TYPES.find(t => t.value === form.metadata.arnesType)?.label,
+        "Arnés",
+        form.brand,
+        form.metadata.reference,
+        form.size,
+        form.metadata.year,
+      ].filter(Boolean).join(" ")
+    : null;
 
   function set(key: keyof InitialData, value: string | string[]) {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -141,9 +221,51 @@ export default function EditForm({ listingId, initial }: Props) {
   }
 
   function validate() {
-    if (!form.discipline)   return "Selecciona una disciplina";
+    if (!form.discipline)    return "Selecciona una disciplina";
     if (!form.equipmentType) return "Selecciona el tipo de equipo";
-    if (!form.title.trim()) return "Escribe un título";
+    if (isKiteCometa) {
+      if (!form.brand.trim())                       return "Escribe la marca de la cometa";
+      if (!form.size)                               return "Selecciona el tamaño";
+      if (!form.metadata.year)                      return "Selecciona el año";
+      if (form.metadata.includesBar === undefined)   return "Indica si incluye barra y líneas";
+      if (form.metadata.includesBag === undefined)   return "Indica si incluye maleta";
+      if (form.metadata.hasRepairs === undefined)    return "Indica si tiene reparaciones";
+    }
+    if (isWing) {
+      if (!form.brand.trim())                       return "Escribe la marca del wing";
+      if (!form.size)                               return "Selecciona el tamaño";
+      if (!form.metadata.year)                      return "Selecciona el año";
+      if (form.metadata.includesBag === undefined)   return "Indica si incluye maleta";
+      if (form.metadata.hasRepairs === undefined)    return "Indica si tiene reparaciones";
+    }
+    if (isKiteTabla) {
+      if (!form.metadata.boardType)                 return "Selecciona el tipo de tabla";
+      if (!form.brand.trim())                       return "Escribe la marca de la tabla";
+      if (!form.size)                               return "Selecciona el tamaño";
+      if (!form.metadata.year)                      return "Selecciona el año";
+      if (form.metadata.hasRepairs === undefined)    return "Indica si tiene reparaciones";
+    }
+    if (isLeash) {
+      if (!form.brand.trim())                      return "Selecciona la marca del leash";
+      if (!form.metadata.lineLength)               return "Selecciona el tipo de leash";
+      if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
+    }
+    if (isKiteBarra) {
+      if (!form.brand.trim())                      return "Selecciona la marca de la barra";
+      if (!form.size)                              return "Selecciona el tamaño de la barra";
+      if (!form.metadata.year)                     return "Selecciona el año";
+      if (!form.metadata.lineLength)               return "Selecciona el largo de las líneas";
+      if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
+    }
+    if (isKiteArnes) {
+      if (!form.metadata.arnesType)                return "Selecciona el tipo de arnés";
+      if (!form.brand.trim())                      return "Selecciona la marca del arnés";
+      if (!form.metadata.reference?.trim())         return "Escribe la referencia / modelo";
+      if (!form.size)                              return "Selecciona la talla";
+      if (!form.metadata.year)                     return "Selecciona el año";
+      if (form.metadata.hasRepairs === undefined)   return "Indica si tiene reparaciones";
+    }
+    if (!hasSpecialFields && !form.title.trim()) return "Escribe un título";
     if (!form.condition)    return "Selecciona el estado";
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) return "Escribe un precio válido";
     if (!form.description.trim()) return "Escribe una descripción";
@@ -163,6 +285,7 @@ export default function EditForm({ listingId, initial }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          title: hasSpecialFields ? autoTitle : form.title,
           metadata: hasSpecialFields ? form.metadata : undefined,
         }),
       });
@@ -249,22 +372,31 @@ export default function EditForm({ listingId, initial }: Props) {
           {/* Disciplina */}
           <div>
             <label className="block text-sm font-semibold text-[#374151] mb-3">Disciplina *</label>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-              {DISCIPLINES.map((d) => (
-                <button
-                  key={d.value}
-                  onClick={() => setForm(prev => ({ ...prev, discipline: d.value, equipmentType: "", metadata: {} }))}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
-                    form.discipline === d.value
-                      ? "border-[#3B82F6] bg-blue-50"
-                      : "border-[#E5E7EB] hover:border-[#D1D5DB]"
-                  }`}
-                >
-                  <span className={`text-xs font-semibold ${form.discipline === d.value ? "text-[#3B82F6]" : "text-[#374151]"}`}>
-                    {d.label}
-                  </span>
-                </button>
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {DISCIPLINES.map((d) => {
+                const soon = COMING_SOON.includes(d.value);
+                return (
+                  <button
+                    key={d.value}
+                    onClick={() => {
+                      if (soon) return;
+                      setForm(prev => ({ ...prev, discipline: d.value, equipmentType: "", metadata: {} }));
+                    }}
+                    disabled={soon}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                      soon
+                        ? "border-[#E5E7EB] bg-[#F9FAFB] cursor-not-allowed opacity-60"
+                        : form.discipline === d.value
+                        ? "border-[#3B82F6] bg-blue-50"
+                        : "border-[#E5E7EB] hover:border-[#D1D5DB]"
+                    }`}
+                  >
+                    <span className={`text-xs font-semibold ${form.discipline === d.value && !soon ? "text-[#3B82F6]" : "text-[#374151]"}`}>
+                      {d.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -291,7 +423,7 @@ export default function EditForm({ listingId, initial }: Props) {
           {/* Resto de campos — solo si ya eligió tipo de equipo */}
           {form.equipmentType && <>
 
-          {/* Cometa (KITESURF / KITEFOIL / WINDSURF) */}
+          {/* Cometa */}
           {isKiteCometa && (
             <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
               <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la cometa</p>
@@ -307,7 +439,7 @@ export default function EditForm({ listingId, initial }: Props) {
             </div>
           )}
 
-          {/* Wing (WINGFOIL) */}
+          {/* Wing */}
           {isWing && (
             <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
               <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos del wing</p>
@@ -323,23 +455,24 @@ export default function EditForm({ listingId, initial }: Props) {
             </div>
           )}
 
-          {/* Leash (WINGFOIL) */}
-          {isLeash && (
+          {/* Tabla */}
+          {isKiteTabla && (
             <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
-              <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos del leash</p>
-              <BarraFields
+              <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la tabla</p>
+              <BoardFields
                 brand={form.brand}
                 size={form.size}
                 meta={form.metadata}
                 onBrandChange={v => set("brand", v)}
                 onSizeChange={v => set("size", v)}
                 onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
-                discipline="WINGFOIL"
+                allowedTypes={form.discipline === "KITEFOIL" || form.discipline === "WINGFOIL" ? ["foilboard"] : undefined}
+                discipline={form.discipline}
               />
             </div>
           )}
 
-          {/* Barra & Líneas (KITESURF / KITEFOIL) */}
+          {/* Barra & Líneas */}
           {isKiteBarra && (
             <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
               <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos de la barra</p>
@@ -355,43 +488,96 @@ export default function EditForm({ listingId, initial }: Props) {
             </div>
           )}
 
+          {/* Leash */}
+          {isLeash && (
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos del leash</p>
+              <BarraFields
+                brand={form.brand}
+                size={form.size}
+                meta={form.metadata}
+                onBrandChange={v => set("brand", v)}
+                onSizeChange={v => set("size", v)}
+                onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                discipline="WINGFOIL"
+              />
+            </div>
+          )}
+
+          {/* Arnés */}
+          {isKiteArnes && (
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <p className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mb-4">Datos del arnés</p>
+              <ArnesFields
+                brand={form.brand}
+                size={form.size}
+                meta={form.metadata}
+                onBrandChange={v => set("brand", v)}
+                onSizeChange={v => set("size", v)}
+                onMetaChange={m => setForm(prev => ({ ...prev, metadata: m }))}
+                discipline={form.discipline}
+              />
+            </div>
+          )}
+
           {/* Título */}
           <div>
             <label className="block text-sm font-semibold text-[#374151] mb-1">Título *</label>
-            <input
-              type="text"
-              value={form.title}
-              onChange={e => set("title", e.target.value)}
-              maxLength={100}
-              className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
-            />
-            <p className="text-xs text-[#9CA3AF] mt-1">{form.title.length}/100</p>
+            {hasSpecialFields ? (
+              <div className="w-full px-4 py-2.5 border border-[#E5E7EB] rounded-xl text-sm bg-[#F9FAFB] text-[#374151] min-h-[42px]">
+                {autoTitle || <span className="text-[#9CA3AF]">Se genera automáticamente con los datos del equipo</span>}
+              </div>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={e => set("title", e.target.value)}
+                  maxLength={100}
+                  className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+                />
+                <p className="text-xs text-[#9CA3AF] mt-1">{form.title.length}/100</p>
+              </>
+            )}
           </div>
 
           {/* Marca y talla (solo si NO tiene campos especiales) */}
           {!hasSpecialFields && (
-            <div className="grid grid-cols-2 gap-4">
+            form.discipline === "WATERWEAR" ? (
               <div>
-                <label className="block text-sm font-semibold text-[#374151] mb-1">Marca</label>
+                <label className="block text-sm font-semibold text-[#374151] mb-1">Marca <span className="font-normal text-[#9CA3AF]">(opcional)</span></label>
                 <input
                   type="text"
                   value={form.brand}
                   onChange={e => set("brand", e.target.value)}
-                  placeholder="Ej: Cabrinha..."
+                  placeholder={form.equipmentType ? WATERWEAR_BRAND_PLACEHOLDERS[form.equipmentType] ?? "Ej: Cabrinha, ION, Dakine..." : "Ej: Cabrinha, ION, Dakine..."}
                   className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#374151] mb-1">Talla / Tamaño</label>
-                <input
-                  type="text"
-                  value={form.size}
-                  onChange={e => set("size", e.target.value)}
-                  placeholder="Ej: 12m, 142cm..."
-                  className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
-                />
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-[#374151] mb-1">Marca</label>
+                  <input
+                    type="text"
+                    value={form.brand}
+                    onChange={e => set("brand", e.target.value)}
+                    placeholder="Ej: Cabrinha, Duotone..."
+                    className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-[#374151] mb-1">Talla / Tamaño</label>
+                  <input
+                    type="text"
+                    value={form.size}
+                    onChange={e => set("size", e.target.value)}
+                    placeholder="Ej: 12m, 142cm, M..."
+                    className="w-full px-4 py-2.5 border border-[#D1D5DB] rounded-xl text-sm focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
+                  />
+                </div>
               </div>
-            </div>
+            )
           )}
 
           {/* Estado */}

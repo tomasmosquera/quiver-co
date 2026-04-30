@@ -230,6 +230,7 @@ interface SearchParams {
   incluyeMaleta?: string;
   incluyeLeash?: string;
   sinReparaciones?: string;
+  conPeritaje?: string;
 }
 
 export default async function EquiposPage({
@@ -250,6 +251,7 @@ export default async function EquiposPage({
     ciudad = "", subtipo = "", anio = "", tamanio = "",
     referencia = "", largoLineas = "",
     incluyeBarra = "", incluyeMaleta = "", incluyeLeash = "", sinReparaciones = "",
+    conPeritaje = "",
   } = params;
 
   /* ─── Construir filtros de Prisma ─── */
@@ -308,6 +310,9 @@ export default async function EquiposPage({
   if (incluyeLeash === "no")    conditions.push({ metadata: { path: ["includesLeash"], equals: false } });
   if (sinReparaciones === "si") conditions.push({ metadata: { path: ["hasRepairs"],   equals: false } });
   if (sinReparaciones === "no") conditions.push({ metadata: { path: ["hasRepairs"],   equals: true } });
+  // Peritaje: filtra por presencia del campo standardInspection.version
+  if (conPeritaje === "si") conditions.push({ metadata: { path: ["standardInspection", "version"], string_contains: "kite-standard" } } as never);
+  if (conPeritaje === "no") conditions.push({ NOT: { metadata: { path: ["standardInspection", "version"], string_contains: "kite-standard" } } } as never);
 
   const where = { AND: conditions };
 
@@ -449,6 +454,24 @@ export default async function EquiposPage({
       ])
     : [[], [], [], []];
 
+  // Conteos de peritaje — solo cuando tipo === COMETA en sección kite
+  const isKiteCometa = tipo === "COMETA" && ["KITESURF", "KITEFOIL"].includes(seccion);
+  const peritajeRows = isKiteCometa
+    ? await prisma.$queryRawUnsafe<{ has_peritaje: boolean; cnt: bigint }[]>(`
+        SELECT
+          (metadata->'standardInspection' IS NOT NULL AND metadata->>'standardInspection' != 'null') AS has_peritaje,
+          COUNT(*) AS cnt
+        FROM listings
+        WHERE ${baseToggleWhere}
+        GROUP BY has_peritaje
+      `)
+    : [];
+
+  const peritajeCounts = {
+    si: Number(peritajeRows.find(r => r.has_peritaje)?.cnt ?? 0),
+    no: Number(peritajeRows.find(r => !r.has_peritaje)?.cnt ?? 0),
+  };
+
   // Mapas: true/false string → count
   const toToggleMap = (rows: ToggleCount[]) =>
     new Map(rows.map(r => [r.val, Number(r.cnt)]));
@@ -481,7 +504,7 @@ export default async function EquiposPage({
   const PREDEFINED_LOWER = PREDEFINED_BRANDS.map(b => b.toLowerCase());
   const hasActiveFilters = !!(seccion || tipo || marca || condicion || ciudad || subtipo ||
     anio || tamanio || referencia || largoLineas || incluyeBarra || incluyeMaleta ||
-    incluyeLeash || sinReparaciones || precioMin || precioMax);
+    incluyeLeash || sinReparaciones || conPeritaje || precioMin || precioMax);
 
   // Con filtros activos: solo marcas con anuncios. Sin filtros: incluir predefinidas aunque tengan 0.
   const allBrandSlugs = hasActiveFilters
@@ -577,6 +600,7 @@ export default async function EquiposPage({
       ...(incluyeMaleta  && { incluyeMaleta }),
       ...(incluyeLeash   && { incluyeLeash }),
       ...(sinReparaciones && { sinReparaciones }),
+      ...(conPeritaje    && { conPeritaje }),
       ...overrides,
     };
     const p = new URLSearchParams();
@@ -646,6 +670,8 @@ export default async function EquiposPage({
     incluyeMaleta  === "si" && { label: "Con maleta",         clearUrl: buildUrl({ incluyeMaleta: "" }) },
     incluyeLeash   === "si" && { label: "Con leash",          clearUrl: buildUrl({ incluyeLeash: "" }) },
     sinReparaciones === "si" && { label: "Sin reparaciones",  clearUrl: buildUrl({ sinReparaciones: "" }) },
+    conPeritaje === "si" && { label: "Con peritaje",         clearUrl: buildUrl({ conPeritaje: "" }) },
+    conPeritaje === "no" && { label: "Sin peritaje",         clearUrl: buildUrl({ conPeritaje: "" }) },
     (precioMin || precioMax) && { label: `${precioMin ? `$${parseInt(precioMin).toLocaleString("es-CO")}` : ""}${precioMin && precioMax ? " – " : ""}${precioMax ? `$${parseInt(precioMax).toLocaleString("es-CO")}` : ""}`, clearUrl: buildUrl({ precioMin: "", precioMax: "" }) },
   ].filter(Boolean) as ActiveChip[];
 
@@ -906,6 +932,37 @@ export default async function EquiposPage({
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* Peritaje — solo para COMETA kitesurf/kitefoil */}
+              {isKiteCometa && (
+                <div>
+                  <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5 text-[#3B82F6]" /> Peritaje
+                  </h3>
+                  <div className="space-y-1">
+                    {[
+                      { href: buildUrl({ conPeritaje: "" }),    label: "Todas",        active: conPeritaje === "",    count: undefined },
+                      { href: buildUrl({ conPeritaje: "si" }),  label: "Con peritaje", active: conPeritaje === "si",  count: peritajeCounts.si },
+                      { href: buildUrl({ conPeritaje: "no" }),  label: "Sin peritaje", active: conPeritaje === "no",  count: peritajeCounts.no },
+                    ].map(opt => (
+                      <Link
+                        key={opt.label}
+                        href={opt.href}
+                        className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                          opt.active ? "bg-[#3B82F6] text-white font-semibold" : "text-[#374151] hover:bg-[#F9FAFB]"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {opt.count !== undefined && opt.count > 0 && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            opt.active ? "bg-white/20 text-white" : "bg-[#EFF6FF] text-[#3B82F6]"
+                          }`}>{opt.count}</span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
 

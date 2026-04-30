@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Wind, ChevronRight, ChevronLeft,
-  CheckCircle, Loader2,
+  CheckCircle, Loader2, Shield,
 } from "lucide-react";
 import PhotoUploader from "@/components/PhotoUploader";
 import KiteFields, { KiteMetadata } from "@/components/KiteFields";
@@ -129,6 +129,7 @@ export default function VenderPage() {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showPeritajePrompt, setShowPeritajePrompt] = useState(false);
   const uploadControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => () => uploadControllerRef.current?.abort(), []);
@@ -152,6 +153,7 @@ export default function VenderPage() {
   const isWing          = form.discipline === "WINGFOIL" && form.equipmentType === "WING";
   const isLeash         = form.discipline === "WINGFOIL" && form.equipmentType === "LEASH";
   const isKiteCometa    = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "COMETA";
+  const canPeritaje     = ["KITESURF","KITEFOIL"].includes(form.discipline) && form.equipmentType === "COMETA";
   const isKiteTabla     = (KITE_DISCIPLINES.includes(form.discipline) || form.discipline === "WINGFOIL") && form.equipmentType === "TABLA";
   const isKiteBarra     = KITE_DISCIPLINES.includes(form.discipline) && form.equipmentType === "BARRA_LINEAS";
   const isKiteArnes     = (KITE_DISCIPLINES.includes(form.discipline) || form.discipline === "WINGFOIL") && form.equipmentType === "ARNES";
@@ -343,10 +345,34 @@ export default function VenderPage() {
     return "";
   }
 
+  function goToPeritaje() {
+    const draft = {
+      title: autoTitle || form.title,
+      discipline: form.discipline,
+      equipmentType: form.equipmentType,
+      brand: form.brand,
+      size: form.size,
+      condition: form.condition,
+      price: form.price,
+      currency: form.currency as "COP" | "USD",
+      description: form.description,
+      city: form.city,
+      images: form.images,
+      metadata: form.metadata,
+    };
+    sessionStorage.setItem("quiver-vender-draft", JSON.stringify(draft));
+    router.push("/vender/peritaje");
+  }
+
   function next() {
     const err = validateStep();
     if (err) { setError(err); return; }
+    if (step === 2 && canPeritaje && !showPeritajePrompt) {
+      setShowPeritajePrompt(true);
+      return;
+    }
     setStep(s => s + 1);
+    setShowPeritajePrompt(false);
     setError("");
   }
 
@@ -791,7 +817,7 @@ export default function VenderPage() {
           )}
 
           {/* ── Paso 2: Fotos ── */}
-          {step === 2 && (
+          {step === 2 && !showPeritajePrompt && (
             <div>
               <h2 className="text-lg font-bold text-[#111827] mb-1">Fotos del equipo</h2>
               <p className="text-sm text-[#6B7280] mb-6">
@@ -804,6 +830,47 @@ export default function VenderPage() {
                 onUpload={uploadImages}
                 onCancelUpload={cancelImageUpload}
               />
+            </div>
+          )}
+
+          {/* ── Peritaje prompt (after photos, only for kite cometas) ── */}
+          {step === 2 && showPeritajePrompt && (
+            <div>
+              <h2 className="text-lg font-bold text-[#111827] mb-1">¿Agregar Peritaje Quiver Co.?</h2>
+              <p className="text-sm text-[#6B7280] mb-6">
+                El Peritaje Estándar incluye 14 checks técnicos, 8 fotos de inspección y un puntaje visible en tu anuncio. Los compradores confían más en cometas peritadas.
+              </p>
+              <div className="grid gap-4">
+                <button
+                  onClick={goToPeritaje}
+                  className="flex items-start gap-4 p-5 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-left hover:bg-emerald-100 transition-colors"
+                >
+                  <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
+                    <Shield className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-emerald-900">Con Peritaje Quiver Co.</p>
+                    <p className="text-sm text-emerald-700 mt-0.5 leading-relaxed">
+                      14 checks técnicos + 8 fotos + puntaje visible. Tu anuncio destaca con el sello de confianza.
+                    </p>
+                    <p className="text-xs font-semibold text-emerald-600 mt-2">Recomendado →</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => { setShowPeritajePrompt(false); setStep(3); setError(""); }}
+                  className="flex items-start gap-4 p-5 rounded-2xl border-2 border-[#E5E7EB] bg-white text-left hover:border-[#D1D5DB] hover:bg-[#F9FAFB] transition-colors"
+                >
+                  <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3F4F6]">
+                    <ChevronRight className="h-5 w-5 text-[#9CA3AF]" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#374151]">Sin peritaje, publicar directamente</p>
+                    <p className="text-sm text-[#6B7280] mt-0.5 leading-relaxed">
+                      Tu anuncio se publicará normalmente sin sello de verificación.
+                    </p>
+                  </div>
+                </button>
+              </div>
             </div>
           )}
 
@@ -856,7 +923,7 @@ export default function VenderPage() {
 
           {/* Navegación */}
           <div className="flex gap-3 mt-8">
-            {step > 0 && (
+            {step > 0 && !showPeritajePrompt && (
               <button
                 onClick={() => setStep(s => s - 1)}
                 className="flex items-center gap-2 px-5 py-2.5 border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors"
@@ -864,19 +931,29 @@ export default function VenderPage() {
                 <ChevronLeft className="w-4 h-4" /> Atrás
               </button>
             )}
-            <button
-              onClick={step < 3 ? next : submit}
-              disabled={submitting}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#111827] hover:bg-[#374151] text-white font-semibold rounded-xl transition-colors disabled:opacity-60 text-sm"
-            >
-              {submitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Publicando...</>
-              ) : step < 3 ? (
-                <>Continuar <ChevronRight className="w-4 h-4" /></>
-              ) : (
-                <>Publicar anuncio <CheckCircle className="w-4 h-4" /></>
-              )}
-            </button>
+            {showPeritajePrompt && (
+              <button
+                onClick={() => setShowPeritajePrompt(false)}
+                className="flex items-center gap-2 px-5 py-2.5 border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#374151] hover:bg-[#F9FAFB] transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" /> Volver a fotos
+              </button>
+            )}
+            {!showPeritajePrompt && (
+              <button
+                onClick={step < 3 ? next : submit}
+                disabled={submitting}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#111827] hover:bg-[#374151] text-white font-semibold rounded-xl transition-colors disabled:opacity-60 text-sm"
+              >
+                {submitting ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Publicando...</>
+                ) : step < 3 ? (
+                  <>Continuar <ChevronRight className="w-4 h-4" /></>
+                ) : (
+                  <>Publicar anuncio <CheckCircle className="w-4 h-4" /></>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

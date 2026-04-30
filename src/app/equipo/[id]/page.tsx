@@ -203,6 +203,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
   const isOwner = session?.user?.id === listing.sellerId;
   const standardInspection = getInspection(listing.metadata);
+  const canAddPeritaje = ["KITESURF","KITEFOIL"].includes(listing.discipline) && listing.equipmentType === "COMETA";
 
   return (
     <div className="bg-[#FAFAF8] min-h-screen">
@@ -482,6 +483,15 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                   >
                     Editar anuncio
                   </Link>
+                  {canAddPeritaje && (
+                    <Link
+                      href={`/equipo/${listing.id}/peritaje`}
+                      className="flex items-center justify-center gap-2 w-full py-3 border-2 border-emerald-600 text-emerald-700 font-semibold rounded-xl hover:bg-emerald-600 hover:text-white transition-all text-sm"
+                    >
+                      <ClipboardCheck className="w-4 h-4" />
+                      {standardInspection ? "Actualizar peritaje" : "Agregar peritaje"}
+                    </Link>
+                  )}
                 </div>
               ) : listing.status === "SOLD" ? (
                 <div className="mt-4 space-y-3">
@@ -568,7 +578,11 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                     ) : (
                       <span className="text-xs text-[#6B7280]">Nuevo vendedor</span>
                     )}
-                    {listing.seller.verified && <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />}
+                    {listing.seller.verified && (
+                      <span title="Vendedor verificado" aria-label="Vendedor verificado">
+                        <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />
+                      </span>
+                    )}
                     {standardInspection && (
                       <span title="Cuenta con peritaje" aria-label="Cuenta con peritaje">
                         <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />

@@ -115,7 +115,9 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
           <div className="flex items-center gap-1">
             {product.seller.verified && (
-              <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />
+              <span title="Vendedor verificado" aria-label="Vendedor verificado">
+                <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />
+              </span>
             )}
             {product.hasInspection && (
               <span title="Cuenta con peritaje" aria-label="Cuenta con peritaje">

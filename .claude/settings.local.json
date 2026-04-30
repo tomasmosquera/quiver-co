@@ -37,7 +37,8 @@
       "Bash(grep -v \"^$\")",
       "Bash(curl -s \"http://localhost:3000/equipo/cmo0vo0c000096841le6ynqwg\")",
       "Bash(curl -s \"http://localhost:3000/api/auth/providers\")",
-      "Bash(npx vercel *)"
+      "Bash(npx vercel *)",
+      "Bash(node prisma/seed-peritaje.js)"
     ]
   }
 }
