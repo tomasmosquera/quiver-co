@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="profileBg" x1="126" y1="88" x2="886" y2="932" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+
+    <radialGradient id="profileGlowTop" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(770 230) rotate(139) scale(360 360)">
+      <stop offset="0" stop-color="#3B82F6" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="profileGlowBottom" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(286 774) rotate(23) scale(340 300)">
+      <stop offset="0" stop-color="#1D4ED8" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#1D4ED8" stop-opacity="0"/>
+    </radialGradient>
+
+    <pattern id="profileDots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#1F2937"/>
+    </pattern>
+
+    <filter id="cardShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="28" stdDeviation="40" flood-color="#020617" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" rx="240" fill="url(#profileBg)"/>
+  <rect width="1024" height="1024" rx="240" fill="url(#profileDots)"/>
+  <rect width="1024" height="1024" rx="240" fill="url(#profileGlowTop)"/>
+  <rect width="1024" height="1024" rx="240" fill="url(#profileGlowBottom)"/>
+
+  <g opacity="0.12" stroke="#60A5FA" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M148 362H458c46 0 84-38 84-84s-38-84-84-84c-36 0-66 23-77 57"/>
+    <path d="M148 456H584c38 0 68-30 68-68s-30-68-68-68"/>
+    <path d="M148 576H418c46 0 84 38 84 84s-38 84-84 84c-36 0-66-23-77-57"/>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="208" y="208" width="608" height="608" rx="170" fill="#1F2937" stroke="#374151" stroke-width="4"/>
+    <g transform="translate(290 306) scale(18.5)" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
+      <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
+      <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+    </g>
+    <circle cx="726" cy="726" r="52" fill="#3B82F6"/>
+  </g>
+</svg>
