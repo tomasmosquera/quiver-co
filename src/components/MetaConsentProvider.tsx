@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Suspense,
   createContext,
   useContext,
   useState,
@@ -91,7 +92,9 @@ export default function MetaConsentProvider({
       {children}
       {marketingEnabled ? (
         <>
-          <MetaPixel pixelId={pixelId} consent={consent} />
+          <Suspense fallback={null}>
+            <MetaPixel pixelId={pixelId} consent={consent} />
+          </Suspense>
           <CookieConsentBanner
             open={bannerOpen}
             consent={consent}

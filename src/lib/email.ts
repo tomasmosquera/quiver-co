@@ -1,10 +1,23 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 const FROM = "Quiver Co. <noreply@quiverkite.com>";
 
 const BASE_URL = "https://www.quiverkite.com";
+
+async function sendEmail(
+  payload: Parameters<NonNullable<typeof resend>["emails"]["send"]>[0],
+) {
+  if (!resend) {
+    console.warn("[email] RESEND_API_KEY is missing. Skipping email send.");
+    return;
+  }
+
+  await resend.emails.send(payload);
+}
 
 function layout(content: string) {
   return `
@@ -26,7 +39,7 @@ function btn(href: string, label: string) {
 /* ─── Contraseña ─── */
 
 export async function sendPasswordResetEmail(to: string, name: string, resetUrl: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: "Recupera tu contraseña — Quiver Co.",
@@ -47,7 +60,7 @@ export async function sendPasswordResetEmail(to: string, name: string, resetUrl:
 /* ─── Órdenes — Comprador ─── */
 
 export async function sendOrderPaidBuyer(to: string, buyerName: string, listingTitle: string, orderId: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `Compra confirmada: ${listingTitle}`,
@@ -63,7 +76,7 @@ export async function sendOrderPaidBuyer(to: string, buyerName: string, listingT
 }
 
 export async function sendOrderShippedBuyer(to: string, buyerName: string, listingTitle: string, orderId: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `Tu equipo está en camino: ${listingTitle}`,
@@ -79,7 +92,7 @@ export async function sendOrderShippedBuyer(to: string, buyerName: string, listi
 }
 
 export async function sendOrderCancelledBuyer(to: string, buyerName: string, listingTitle: string, orderId: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `Orden cancelada: ${listingTitle}`,
@@ -97,7 +110,7 @@ export async function sendOrderCancelledBuyer(to: string, buyerName: string, lis
 /* ─── Órdenes — Vendedor ─── */
 
 export async function sendOrderPaidSeller(to: string, sellerName: string, listingTitle: string, orderId: string, buyerName: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `¡Vendiste un equipo! ${listingTitle}`,
@@ -113,7 +126,7 @@ export async function sendOrderPaidSeller(to: string, sellerName: string, listin
 }
 
 export async function sendOrderDeliveredSeller(to: string, sellerName: string, listingTitle: string, orderId: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `Entrega confirmada: ${listingTitle}`,
@@ -129,7 +142,7 @@ export async function sendOrderDeliveredSeller(to: string, sellerName: string, l
 }
 
 export async function sendOrderCancelledSeller(to: string, sellerName: string, listingTitle: string, orderId: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `Orden cancelada: ${listingTitle}`,
@@ -155,7 +168,7 @@ const LISTING_STATUS_LABELS: Record<string, string> = {
 
 export async function sendListingStatusSeller(to: string, sellerName: string, listingTitle: string, listingId: string, newStatus: string) {
   const statusLabel = LISTING_STATUS_LABELS[newStatus] ?? newStatus.toLowerCase();
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to,
     subject: `Tu anuncio fue ${statusLabel}: ${listingTitle}`,
@@ -173,7 +186,7 @@ export async function sendListingStatusSeller(to: string, sellerName: string, li
 /* ─── Anuncios — Admin ─── */
 
 export async function sendNewListingAdmin(adminEmails: string[], sellerName: string, listingTitle: string, listingId: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to: adminEmails,
     subject: `Nuevo anuncio publicado: ${listingTitle}`,
@@ -190,7 +203,7 @@ export async function sendNewListingAdmin(adminEmails: string[], sellerName: str
 }
 
 export async function sendOrderUpdateAdmin(adminEmails: string[], event: string, listingTitle: string, orderId: string, buyerName: string, sellerName: string) {
-  await resend.emails.send({
+  await sendEmail({
     from: FROM,
     to: adminEmails,
     subject: `Orden ${event}: ${listingTitle}`,
