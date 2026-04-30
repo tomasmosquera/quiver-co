@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { Wind, Share2, MessageCircle, Check } from "lucide-react";
 import { useState } from "react";
+import { useMetaConsent } from "@/components/MetaConsentProvider";
 
 export default function Footer() {
   const [copied, setCopied] = useState(false);
+  const { marketingEnabled, openPreferences } = useMetaConsent();
 
   function copyUrl() {
     navigator.clipboard.writeText("https://quiverkite.com");
@@ -112,6 +114,17 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              {marketingEnabled ? (
+                <li>
+                  <button
+                    type="button"
+                    onClick={openPreferences}
+                    className="text-sm text-[#9CA3AF] hover:text-white transition-colors"
+                  >
+                    Preferencias de cookies
+                  </button>
+                </li>
+              ) : null}
             </ul>
           </div>
         </div>

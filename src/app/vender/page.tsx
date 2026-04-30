@@ -15,6 +15,11 @@ import BarraFields, { BarraMetadata } from "@/components/BarraFields";
 import ArnesFields, { ArnesMetadata, ARNES_TYPES } from "@/components/ArnesFields";
 import CityPicker from "@/components/CityPicker";
 import { uploadFiles } from "@/lib/clientUpload";
+import {
+  generateMetaEventId,
+  getCurrentMetaSourceUrl,
+  trackMetaEvent,
+} from "@/lib/meta/browser";
 
 /* ─── Constantes ─── */
 
@@ -348,6 +353,7 @@ export default function VenderPage() {
   async function submit() {
     setSubmitting(true);
     setError("");
+    const metaEventId = generateMetaEventId("seller-lead");
     try {
       const res = await fetch("/api/listings", {
         method: "POST",
@@ -356,10 +362,23 @@ export default function VenderPage() {
           ...form,
           title: hasSpecialFields ? autoTitle : form.title,
           metadata: hasSpecialFields ? form.metadata : undefined,
+          metaEventId,
+          metaSourceUrl: getCurrentMetaSourceUrl(),
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al publicar");
+      trackMetaEvent(
+        "Lead",
+        {
+          content_name: data.listing.title,
+          content_category: data.listing.discipline,
+          content_type: data.listing.equipmentType,
+          currency: data.listing.currency,
+          value: data.listing.price,
+        },
+        { eventId: metaEventId },
+      );
       router.push(`/equipo/${data.listing.id}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Error al publicar");

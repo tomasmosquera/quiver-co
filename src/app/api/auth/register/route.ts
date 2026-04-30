@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { sendMetaServerEvent, splitFullName } from "@/lib/meta/server";
 
 export async function POST(req: Request) {
-  const { name, email, password } = await req.json();
+  const { name, email, password, metaEventId, metaSourceUrl } = await req.json();
 
   if (!name?.trim() || !email?.trim() || !password) {
     return NextResponse.json({ error: "Todos los campos son obligatorios." }, { status: 400 });
@@ -20,11 +21,26 @@ export async function POST(req: Request) {
 
   const hashed = await bcrypt.hash(password, 12);
 
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password: hashed,
+    },
+  });
+
+  const { firstName, lastName } = splitFullName(user.name);
+
+  await sendMetaServerEvent({
+    eventName: "CompleteRegistration",
+    eventId: metaEventId,
+    eventSourceUrl: metaSourceUrl,
+    request: req,
+    userData: {
+      email: user.email,
+      firstName,
+      lastName,
+      externalId: user.id,
     },
   });
 

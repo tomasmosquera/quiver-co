@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendMetaServerEvent, splitFullName } from "@/lib/meta/server";
 
 // POST — crear o recuperar conversación al hacer clic en "Contactar vendedor"
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
-  const { listingId } = await req.json();
+  const { listingId, metaEventId, metaSourceUrl } = await req.json();
   if (!listingId) return NextResponse.json({ error: "Falta listingId" }, { status: 400 });
 
   const listing = await prisma.listing.findUnique({ where: { id: listingId } });
@@ -20,6 +21,26 @@ export async function POST(req: NextRequest) {
     where: { listingId_buyerId: { listingId, buyerId: session.user.id } },
     update: {},
     create: { listingId, buyerId: session.user.id, sellerId: listing.sellerId },
+  });
+
+  const { firstName, lastName } = splitFullName(session.user.name);
+
+  await sendMetaServerEvent({
+    eventName: "Contact",
+    eventId: metaEventId,
+    eventSourceUrl: metaSourceUrl,
+    request: req,
+    userData: {
+      email: session.user.email,
+      firstName,
+      lastName,
+      externalId: session.user.id,
+    },
+    customData: {
+      content_ids: [listingId],
+      content_name: listing.title,
+      content_type: "product",
+    },
   });
 
   return NextResponse.json({ conversationId: conversation.id });

@@ -9,6 +9,7 @@ import CityFilterClient from "@/components/CityFilterClient";
 import SizeFilterClient from "@/components/SizeFilterClient";
 import YearFilterClient from "@/components/YearFilterClient";
 import ReferenciaFilterClient from "@/components/ReferenciaFilterClient";
+import CatalogMetaTracker from "@/components/CatalogMetaTracker";
 import { auth } from "@/lib/auth";
 import { hasStandardInspection } from "@/lib/kiteInspection";
 import { formatSellerRatingLabel, formatSellerRatingTitle, getSellerRatingStatsMap } from "@/lib/reviews";
@@ -653,6 +654,12 @@ export default async function EquiposPage({
   return (
     <div className="bg-[#FAFAF8] min-h-screen overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <CatalogMetaTracker
+          searchString={q}
+          results={total}
+          section={seccion}
+          equipmentType={tipo}
+        />
 
         {/* Header */}
         <div className="mb-6">
@@ -1073,7 +1080,7 @@ export default async function EquiposPage({
                           {listing.title}
                         </h3>
 
-                        {(listing as any).currency === "USD" ? (
+                        {listing.currency === "USD" ? (
                           <div className="mt-auto">
                             <p className="text-[#111827] font-bold text-xl">USD ${listing.price.toLocaleString("en-US")}</p>
                             <p className="text-xs text-[#6B7280]">≈ ${toCOP(listing.price, "USD", trm).toLocaleString("es-CO")} COP</p>

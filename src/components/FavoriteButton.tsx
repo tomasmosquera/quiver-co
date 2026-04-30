@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { Heart } from "lucide-react";
+import {
+  generateMetaEventId,
+  getCurrentMetaSourceUrl,
+  trackMetaEvent,
+} from "@/lib/meta/browser";
 
 export default function FavoriteButton({ 
   listingId, 
@@ -22,16 +27,32 @@ export default function FavoriteButton({
 
     setLoading(true);
     const previous = isSaved;
+    const action = previous ? "REMOVE" : "ADD";
+    const metaEventId = action === "ADD" ? generateMetaEventId("add-to-wishlist") : undefined;
     setIsSaved(!isSaved);
 
     try {
       const res = await fetch("/api/favorites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listingId, action: previous ? "REMOVE" : "ADD" }),
+        body: JSON.stringify({
+          listingId,
+          action,
+          metaEventId,
+          metaSourceUrl: getCurrentMetaSourceUrl(),
+        }),
       });
       if (!res.ok) {
         setIsSaved(previous);
+      } else if (action === "ADD" && metaEventId) {
+        trackMetaEvent(
+          "AddToWishlist",
+          {
+            content_ids: [listingId],
+            content_type: "product",
+          },
+          { eventId: metaEventId },
+        );
       }
     } catch {
       setIsSaved(previous);

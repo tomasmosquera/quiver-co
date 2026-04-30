@@ -4,6 +4,11 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import {
+  generateMetaEventId,
+  getCurrentMetaSourceUrl,
+  trackMetaEvent,
+} from "@/lib/meta/browser";
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -73,10 +78,17 @@ export default function AuthForms() {
       return;
     }
     setLoading(true);
+    const metaEventId = generateMetaEventId("complete-registration");
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: regName, email: regEmail, password: regPassword }),
+      body: JSON.stringify({
+        name: regName,
+        email: regEmail,
+        password: regPassword,
+        metaEventId,
+        metaSourceUrl: getCurrentMetaSourceUrl(),
+      }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -84,6 +96,7 @@ export default function AuthForms() {
       setLoading(false);
       return;
     }
+    trackMetaEvent("CompleteRegistration", {}, { eventId: metaEventId });
     // Auto-login after register
     const login = await signIn("credentials", {
       email: regEmail,

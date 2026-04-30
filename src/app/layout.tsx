@@ -5,11 +5,15 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SessionProvider from "@/components/SessionProvider";
+import MetaConsentProvider from "@/components/MetaConsentProvider";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 });
+
+const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "";
+const metaMarketingEnabled = Boolean(metaPixelId || process.env.META_PIXEL_ID);
 
 export const metadata: Metadata = {
   title: "Quiver Co. — Marketplace de Deportes de Viento y Agua en Colombia",
@@ -43,9 +47,14 @@ export default function RootLayout({
     <html lang="es" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased bg-[#FAFAF8] text-[#111827] max-w-[100vw] overflow-x-hidden">
         <SessionProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <MetaConsentProvider
+            marketingEnabled={metaMarketingEnabled}
+            pixelId={metaPixelId}
+          >
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </MetaConsentProvider>
         </SessionProvider>
         <Analytics />
       </body>

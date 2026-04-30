@@ -312,6 +312,12 @@ model Order {
   paymentMethod           String  @default("manual") // "manual" | "wompi"
   wompiReference          String? @unique
   wompiTransactionId      String?
+  metaConsentGranted      Boolean @default(false)
+  metaEventSourceUrl      String?
+  metaFbp                 String?
+  metaFbc                 String?
+  metaClientUserAgent     String?
+  metaClientIpAddress     String?
 
   @@map("orders")
 }

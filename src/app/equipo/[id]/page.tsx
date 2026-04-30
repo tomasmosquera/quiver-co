@@ -12,6 +12,7 @@ import ExpandableImage from "@/components/ExpandableImage";
 import FavoriteButton from "@/components/FavoriteButton";
 import ContactButton from "@/components/ContactButton";
 import ShareButton from "@/components/ShareButton";
+import ListingMetaTracker from "@/components/ListingMetaTracker";
 
 const DISCIPLINE_LABELS: Record<string, string> = {
   KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
@@ -174,7 +175,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const session = await auth();
 
-  const { getTRM, toCOP, formatPrice } = await import("@/lib/trm");
+  const { getTRM, toCOP } = await import("@/lib/trm");
   const { rate: trm } = await getTRM();
 
   const listing = await prisma.listing.findUnique({
@@ -206,6 +207,13 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
   return (
     <div className="bg-[#FAFAF8] min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ListingMetaTracker
+          listingId={listing.id}
+          title={listing.title}
+          discipline={listing.discipline}
+          price={listing.price}
+          currency={listing.currency}
+        />
 
         {/* Breadcrumb */}
         <Link href="/equipos" className="inline-flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#111827] mb-6">
@@ -443,7 +451,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
 
             {/* Precio */}
             <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 sticky top-24">
-              {(listing as any).currency === "USD" ? (
+              {listing.currency === "USD" ? (
                 <div>
                   <p className="text-3xl font-bold text-[#111827]">
                     USD ${listing.price.toLocaleString("en-US")}

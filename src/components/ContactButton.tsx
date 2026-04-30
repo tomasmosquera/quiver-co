@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MessageCircle, Loader2 } from "lucide-react";
+import {
+  generateMetaEventId,
+  getCurrentMetaSourceUrl,
+  trackMetaEvent,
+} from "@/lib/meta/browser";
 
 export default function ContactButton({ listingId, isLoggedIn }: { listingId: string; isLoggedIn: boolean }) {
   const [loading, setLoading] = useState(false);
@@ -11,14 +16,28 @@ export default function ContactButton({ listingId, isLoggedIn }: { listingId: st
   async function handleContact() {
     if (!isLoggedIn) { router.push("/login"); return; }
     setLoading(true);
+    const metaEventId = generateMetaEventId("contact");
     const res = await fetch("/api/conversations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listingId }),
+      body: JSON.stringify({
+        listingId,
+        metaEventId,
+        metaSourceUrl: getCurrentMetaSourceUrl(),
+      }),
     });
     const data = await res.json();
-    if (res.ok) router.push(`/mensajes/${data.conversationId}`);
-    else setLoading(false);
+    if (res.ok) {
+      trackMetaEvent(
+        "Contact",
+        {
+          content_ids: [listingId],
+          content_type: "product",
+        },
+        { eventId: metaEventId },
+      );
+      router.push(`/mensajes/${data.conversationId}`);
+    } else setLoading(false);
   }
 
   return (
