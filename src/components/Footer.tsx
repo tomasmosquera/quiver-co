@@ -3,11 +3,15 @@
 import Link from "next/link";
 import { Wind, Share2, MessageCircle, Check } from "lucide-react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useMetaConsent } from "@/components/MetaConsentProvider";
 
 export default function Footer() {
   const [copied, setCopied] = useState(false);
+  const pathname = usePathname();
   const { marketingEnabled, openPreferences } = useMetaConsent();
+  const flushFooterRoutes = new Set(["/", "/guias", "/spots"]);
+  const footerSpacing = flushFooterRoutes.has(pathname) ? "" : " mt-20";
 
   function copyUrl() {
     navigator.clipboard.writeText("https://quiverkite.com");
@@ -16,7 +20,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-[#111827] text-[#D1D5DB] mt-20">
+    <footer className={`bg-[#111827] text-[#D1D5DB]${footerSpacing}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}

@@ -447,10 +447,10 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* ── Columna derecha: precio + vendedor ── */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
 
             {/* Precio */}
-            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 sticky top-24">
+            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
               {listing.currency === "USD" ? (
                 <div>
                   <p className="text-3xl font-bold text-[#111827]">
