@@ -164,6 +164,22 @@ export default async function HomePage() {
               </button>
             </form>
 
+            {/* Mobile sell CTA */}
+            <div className="mt-6 flex flex-wrap items-center gap-3 sm:hidden">
+              <Link
+                href="/equipos"
+                className="flex-1 flex items-center justify-center px-5 py-3 bg-[#3B82F6] hover:bg-blue-500 text-white font-bold rounded-xl transition-colors text-sm"
+              >
+                Ver equipos
+              </Link>
+              <Link
+                href="/vender"
+                className="flex-1 flex items-center justify-center px-5 py-3 bg-white/10 border border-white/20 hover:bg-white/15 text-white font-semibold rounded-xl transition-colors text-sm"
+              >
+                Publicar gratis
+              </Link>
+            </div>
+
             {/* Quick discipline pills */}
             <div className="mt-5 flex flex-wrap gap-2">
               <span className="text-xs text-[#6B7280] my-auto mr-1">Ir directo a:</span>

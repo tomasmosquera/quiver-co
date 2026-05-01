@@ -1089,11 +1089,11 @@ export default async function EquiposPage({
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {listings.map((listing) => {
+                {listings.flatMap((listing, index) => {
                   const img = listing.images[0]?.url;
                   const hasInspection = hasStandardInspection(listing.metadata);
                   const sellerRating = sellerRatings.get(listing.sellerId);
-                  return (
+                  const card = (
                     <Link
                       key={listing.id}
                       href={`/equipo/${listing.id}`}
@@ -1170,12 +1170,43 @@ export default async function EquiposPage({
                       </div>
                     </Link>
                   );
+                  if (index === 3 && listings.length > 4) {
+                    return [
+                      <Link
+                        key="sell-cta"
+                        href="/vender"
+                        className="col-span-full rounded-2xl border-2 border-dashed border-[#3B82F6] bg-blue-50 hover:bg-blue-100 p-5 flex items-center gap-4 transition-colors"
+                      >
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#3B82F6] text-white text-2xl font-bold leading-none">
+                          +
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-[#111827] text-sm">¿Tienes equipo para vender?</p>
+                          <p className="text-xs text-[#6B7280] mt-0.5">Publicar es gratis. Llega a toda la comunidad de deportes acuáticos.</p>
+                        </div>
+                        <span className="shrink-0 px-4 py-2.5 bg-[#3B82F6] text-white font-bold rounded-xl text-sm whitespace-nowrap">
+                          Publicar →
+                        </span>
+                      </Link>,
+                      card,
+                    ];
+                  }
+                  return [card];
                 })}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* FAB mobile — Publicar equipo */}
+      <Link
+        href="/vender"
+        className="sm:hidden fixed bottom-6 right-4 z-40 flex items-center gap-2 px-5 py-3.5 bg-[#3B82F6] hover:bg-blue-500 text-white font-bold rounded-2xl shadow-xl shadow-blue-500/30 transition-colors text-sm"
+      >
+        <span className="text-lg font-bold leading-none">+</span>
+        Publicar
+      </Link>
     </div>
   );
 }
