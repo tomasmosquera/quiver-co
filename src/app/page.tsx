@@ -174,7 +174,7 @@ export default async function HomePage() {
               </Link>
               <Link
                 href="/vender"
-                className="flex-1 flex items-center justify-center px-5 py-3 bg-white/10 border border-white/20 hover:bg-white/15 text-white font-semibold rounded-xl transition-colors text-sm"
+                className="flex-1 flex items-center justify-center px-5 py-3 bg-[#3B82F6] hover:bg-blue-500 text-white font-bold rounded-xl transition-colors text-sm"
               >
                 Publicar gratis
               </Link>
