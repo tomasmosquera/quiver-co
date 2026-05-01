@@ -51,7 +51,8 @@ export default async function AdminAnunciosPage() {
       </div>
 
       <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[640px]">
           <thead>
             <tr className="border-b border-[#F3F4F6] bg-[#F9FAFB]">
               <th className="px-5 py-3 text-left text-xs font-semibold text-[#6B7280]">Anuncio</th>
@@ -113,6 +114,7 @@ export default async function AdminAnunciosPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
