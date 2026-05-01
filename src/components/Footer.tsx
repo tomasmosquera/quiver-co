@@ -11,7 +11,7 @@ export default function Footer() {
   const pathname = usePathname();
   const { marketingEnabled, openPreferences } = useMetaConsent();
   const flushFooterRoutes = new Set(["/", "/guias", "/spots"]);
-  const footerSpacing = flushFooterRoutes.has(pathname) ? "" : " mt-20";
+  const footerSpacing = flushFooterRoutes.has(pathname) || pathname.startsWith("/admin") ? "" : " mt-20";
 
   function copyUrl() {
     navigator.clipboard.writeText("https://quiverkite.com");

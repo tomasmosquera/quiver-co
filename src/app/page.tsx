@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   Search, ArrowRight, Wind, Shield, CreditCard,
   ClipboardCheck,
-  Star, MapPin, ChevronRight, TrendingUp,
+  Star, MapPin, ChevronRight,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -299,12 +299,7 @@ export default async function HomePage() {
       {/* ── FEATURED LISTINGS ── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="flex items-center justify-between mb-7">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-[#111827]">Equipos destacados</h2>
-            <span className="flex items-center gap-1 text-xs bg-amber-50 text-amber-700 font-medium px-2.5 py-1 rounded-full">
-              <TrendingUp className="w-3 h-3" /> Popular
-            </span>
-          </div>
+          <h2 className="text-2xl font-bold text-[#111827]">Equipos destacados</h2>
           <Link href="/equipos" className="text-sm text-[#3B82F6] hover:underline flex items-center gap-1">
             Ver todos <ChevronRight className="w-4 h-4" />
           </Link>
