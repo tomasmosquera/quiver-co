@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { PlusCircle } from "lucide-react";
 import ListingStatusToggle from "./ListingStatusToggle";
 import DeleteListingButton from "./DeleteListingButton";
 
@@ -43,11 +44,17 @@ export default async function AdminAnunciosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#111827]">Anuncios</h1>
           <p className="text-sm text-[#6B7280] mt-1">{listings.length} anuncios en total</p>
         </div>
+        <Link
+          href="/admin/anuncios/crear"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#111827] hover:bg-[#374151] text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
+        >
+          <PlusCircle className="w-4 h-4" /> Crear anuncio
+        </Link>
       </div>
 
       <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
