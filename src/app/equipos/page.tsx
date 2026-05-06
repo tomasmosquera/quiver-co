@@ -1113,6 +1113,11 @@ export default async function EquiposPage({
                             <Wind className="w-12 h-12" />
                           </div>
                         )}
+                        {listing.featured && (
+                          <span className="absolute top-3 left-3 bg-amber-400 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                            Destacado
+                          </span>
+                        )}
                         <span className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full ${CONDITION_COLORS[listing.condition] ?? ""}`}>
                           {CONDITION_LABELS[listing.condition] ?? listing.condition}
                         </span>
