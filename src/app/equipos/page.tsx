@@ -324,10 +324,11 @@ export default async function EquiposPage({
 
   /* ─── Ordenamiento ─── */
 
+  const isPriceSort = orden === "precio_asc" || orden === "precio_desc";
+
   const secondaryOrder =
-    orden === "precio_asc"  ? { price: "asc"  as const } :
-    orden === "precio_desc" ? { price: "desc" as const } :
-    orden === "vistas"      ? { views: "desc" as const } :
+    orden === "vistas" ? { views: "desc" as const } :
+    isPriceSort        ? { createdAt: "desc" as const } : // placeholder, overridden below
     { createdAt: "desc" as const };
 
   const orderBy = [{ featured: "desc" as const }, secondaryOrder];
@@ -341,18 +342,18 @@ export default async function EquiposPage({
   // Para el agrupado de tamaños, excluir el filtro de tamaño
   const conditionsForSizes = conditions.filter(c => !("size" in c));
 
-  const [listings, total, brandGroups, cityGroups, sizeGroups, disciplineGroups, typeGroups, conditionGroups] = await Promise.all([
-    prisma.listing.findMany({
-      where,
-      orderBy,
-      include: {
-        images:      { orderBy: { order: "asc" }, take: 1 },
-        seller:      { select: { name: true, image: true, verified: true } },
-        favoritedBy: userId ? { where: { userId } } : false,
-      },
-      take: 24,
-    }),
+  const listingInclude = {
+    images:      { orderBy: { order: "asc" as const }, take: 1 },
+    seller:      { select: { name: true, image: true, verified: true } },
+    favoritedBy: userId ? { where: { userId } } : false as false,
+  };
+
+  const [listingsRaw, total, brandGroups, cityGroups, sizeGroups, disciplineGroups, typeGroups, conditionGroups] = await Promise.all([
+    isPriceSort
+      ? prisma.listing.findMany({ where, orderBy: [{ featured: "desc" as const }], include: listingInclude })
+      : prisma.listing.findMany({ where, orderBy, include: listingInclude, take: 24 }),
     prisma.listing.count({ where }),
+
     prisma.listing.groupBy({
       by: ["brand"],
       where: whereForBrands,
@@ -388,6 +389,17 @@ export default async function EquiposPage({
       _count: { condition: true },
     }),
   ]);
+
+  /* ─── Ordenamiento por precio con conversión COP ─── */
+
+  const listings = isPriceSort
+    ? [...listingsRaw].sort((a, b) => {
+        if (a.featured !== b.featured) return a.featured ? -1 : 1;
+        const aCOP = a.currency === "USD" ? Math.round(a.price * trm) : a.price;
+        const bCOP = b.currency === "USD" ? Math.round(b.price * trm) : b.price;
+        return orden === "precio_asc" ? aCOP - bCOP : bCOP - aCOP;
+      }).slice(0, 24)
+    : listingsRaw;
 
   /* ─── Mapas de conteo para sección / equipo / estado ─── */
 
