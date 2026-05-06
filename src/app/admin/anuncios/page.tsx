@@ -6,6 +6,8 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import ListingStatusToggle from "./ListingStatusToggle";
 import DeleteListingButton from "./DeleteListingButton";
+import FeaturedToggle from "./FeaturedToggle";
+import EditCreatedAtButton from "./EditCreatedAtButton";
 
 
 const STATUS_COLOR: Record<string, string> = {
@@ -59,19 +61,24 @@ export default async function AdminAnunciosPage() {
 
       <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
-        <table className="w-full text-sm min-w-[640px]">
+        <table className="w-full text-sm min-w-[820px]">
           <thead>
             <tr className="border-b border-[#F3F4F6] bg-[#F9FAFB]">
+              <th className="px-3 py-3 text-center text-xs font-semibold text-[#6B7280]" title="Destacado">★</th>
               <th className="px-5 py-3 text-left text-xs font-semibold text-[#6B7280]">Anuncio</th>
               <th className="px-5 py-3 text-left text-xs font-semibold text-[#6B7280]">Vendedor</th>
               <th className="px-5 py-3 text-left text-xs font-semibold text-[#6B7280]">Precio</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-[#6B7280]">Publicado</th>
               <th className="px-5 py-3 text-left text-xs font-semibold text-[#6B7280]">Estado</th>
               <th className="px-5 py-3 text-left text-xs font-semibold text-[#6B7280]">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F3F4F6]">
             {listings.map((listing) => (
-              <tr key={listing.id} className="hover:bg-[#F9FAFB] transition-colors">
+              <tr key={listing.id} className={`hover:bg-[#F9FAFB] transition-colors ${listing.featured ? "bg-amber-50/30" : ""}`}>
+                <td className="px-3 py-4 text-center">
+                  <FeaturedToggle listingId={listing.id} featured={listing.featured} />
+                </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-[#F3F4F6] rounded-lg overflow-hidden shrink-0">
@@ -92,6 +99,9 @@ export default async function AdminAnunciosPage() {
                 </td>
                 <td className="px-5 py-4 font-semibold text-[#111827]">
                   ${listing.price.toLocaleString("es-CO")}
+                </td>
+                <td className="px-5 py-4">
+                  <EditCreatedAtButton listingId={listing.id} createdAt={listing.createdAt} />
                 </td>
                 <td className="px-5 py-4">
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLOR[listing.status]}`}>

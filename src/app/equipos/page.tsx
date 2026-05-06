@@ -324,11 +324,13 @@ export default async function EquiposPage({
 
   /* ─── Ordenamiento ─── */
 
-  const orderBy =
+  const secondaryOrder =
     orden === "precio_asc"  ? { price: "asc"  as const } :
     orden === "precio_desc" ? { price: "desc" as const } :
     orden === "vistas"      ? { views: "desc" as const } :
     { createdAt: "desc" as const };
+
+  const orderBy = [{ featured: "desc" as const }, secondaryOrder];
 
   /* ─── Queries ─── */
 
@@ -1110,11 +1112,6 @@ export default async function EquiposPage({
                           <div className="w-full h-full flex items-center justify-center text-[#D1D5DB]">
                             <Wind className="w-12 h-12" />
                           </div>
-                        )}
-                        {listing.featured && (
-                          <span className="absolute top-3 left-3 bg-[#3B82F6] text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                            Destacado
-                          </span>
                         )}
                         <span className={`absolute top-3 right-3 text-xs font-medium px-2.5 py-1 rounded-full ${CONDITION_COLORS[listing.condition] ?? ""}`}>
                           {CONDITION_LABELS[listing.condition] ?? listing.condition}

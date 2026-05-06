@@ -4,6 +4,33 @@ import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { v2 as cloudinary } from "cloudinary";
 
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!isAdmin(session?.user?.email))
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+
+  const { id } = await params;
+  const body = await req.json();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: Record<string, any> = {};
+
+  if (typeof body.featured === "boolean") data.featured = body.featured;
+  if (body.createdAt) {
+    const d = new Date(body.createdAt);
+    if (!isNaN(d.getTime())) data.createdAt = d;
+  }
+
+  if (Object.keys(data).length === 0)
+    return NextResponse.json({ error: "Nada que actualizar" }, { status: 400 });
+
+  const listing = await prisma.listing.update({ where: { id }, data });
+  return NextResponse.json({ listing });
+}
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
