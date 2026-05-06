@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ShieldCheck, ShieldAlert, Shield } from "lucide-react";
+import { ShieldCheck, ShieldAlert, Shield, UserPlus } from "lucide-react";
 import VerificationActions from "./VerificationActions";
 
 
@@ -34,9 +34,17 @@ export default async function AdminUsuariosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-[#111827]">Usuarios</h1>
-        <p className="text-sm text-[#6B7280] mt-1">{users.length} usuarios registrados · {pending.length} verificación pendiente</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[#111827]">Usuarios</h1>
+          <p className="text-sm text-[#6B7280] mt-1">{users.length} usuarios registrados · {pending.length} verificación pendiente</p>
+        </div>
+        <Link
+          href="/admin/usuarios/crear"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#111827] hover:bg-[#374151] text-white text-sm font-semibold rounded-xl transition-colors whitespace-nowrap"
+        >
+          <UserPlus className="w-4 h-4" /> Nuevo usuario
+        </Link>
       </div>
 
       {/* Alert de pendientes */}
