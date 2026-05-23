@@ -29,11 +29,13 @@ export default async function AdminConversationPage({ params }: Props) {
 
   if (!conversation || !conversation.buyer.email?.startsWith("ghost+")) notFound();
 
-  const messages = await prisma.message.findMany({
+  const rawMessages = await prisma.message.findMany({
     where: { conversationId: id },
     orderBy: { createdAt: "asc" },
     include: { sender: { select: { id: true, name: true, image: true } } },
   });
+
+  const messages = rawMessages.map((m) => ({ ...m, createdAt: m.createdAt.toISOString() }));
 
   const thumb = conversation.listing.images[0]?.url;
 
