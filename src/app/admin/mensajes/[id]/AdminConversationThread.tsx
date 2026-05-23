@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, AlertCircle } from "lucide-react";
+import { Send, AlertCircle, Trash2 } from "lucide-react";
 
 interface Message {
   id: string;
@@ -17,12 +17,33 @@ interface Props {
   initialMessages: Message[];
 }
 
+const STORAGE_KEY = "adminHiddenMessages";
+
+function getHidden(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveHidden(hidden: Set<string>) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...hidden]));
+}
+
 export default function AdminConversationThread({ conversationId, ghostUserId, initialMessages }: Props) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Cargar IDs ocultos desde localStorage (solo en cliente)
+  useEffect(() => {
+    setHidden(getHidden());
+  }, []);
 
   // Polling cada 5 segundos para ver respuestas del vendedor
   useEffect(() => {
@@ -39,6 +60,15 @@ export default function AdminConversationThread({ conversationId, ghostUserId, i
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  function hideMessage(id: string) {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      saveHidden(next);
+      return next;
+    });
+  }
 
   async function send() {
     if (!input.trim() || sending) return;
@@ -70,8 +100,10 @@ export default function AdminConversationThread({ conversationId, ghostUserId, i
     return new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "long" });
   }
 
+  const visible = messages.filter((m) => !hidden.has(m.id));
+
   const grouped: { date: string; messages: Message[] }[] = [];
-  for (const msg of messages) {
+  for (const msg of visible) {
     const date = formatDate(msg.createdAt);
     const last = grouped[grouped.length - 1];
     if (last?.date === date) last.messages.push(msg);
@@ -82,8 +114,8 @@ export default function AdminConversationThread({ conversationId, ghostUserId, i
     <div className="flex flex-col flex-1 min-h-0">
       {/* Mensajes */}
       <div className="flex-1 overflow-y-auto py-6 space-y-1 px-4">
-        {messages.length === 0 && (
-          <p className="text-center text-sm text-[#9CA3AF] mt-10">Sin mensajes aún.</p>
+        {visible.length === 0 && (
+          <p className="text-center text-sm text-[#9CA3AF] mt-10">Sin mensajes visibles.</p>
         )}
 
         {grouped.map(({ date, messages: dayMsgs }) => (
@@ -97,7 +129,7 @@ export default function AdminConversationThread({ conversationId, ghostUserId, i
             {dayMsgs.map((msg) => {
               const isGhost = msg.senderId === ghostUserId;
               return (
-                <div key={msg.id} className={`flex gap-2 mb-3 ${isGhost ? "flex-row-reverse" : "flex-row"}`}>
+                <div key={msg.id} className={`group flex gap-2 mb-3 ${isGhost ? "flex-row-reverse" : "flex-row"}`}>
                   {!isGhost && (
                     msg.sender.image
                       ? <img src={msg.sender.image} alt="" className="w-7 h-7 rounded-full object-cover shrink-0 mt-1" />
@@ -111,12 +143,23 @@ export default function AdminConversationThread({ conversationId, ghostUserId, i
                         {msg.sender.name} (vendedor)
                       </span>
                     )}
-                    <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                      isGhost
-                        ? "bg-[#8B5CF6] text-white rounded-tr-sm"
-                        : "bg-white border border-[#E5E7EB] text-[#111827] rounded-tl-sm"
-                    }`}>
-                      {msg.content}
+                    <div className="flex items-end gap-1.5">
+                      {/* Botón eliminar — visible al hacer hover */}
+                      <button
+                        onClick={() => hideMessage(msg.id)}
+                        title="Eliminar de esta vista"
+                        className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg text-[#9CA3AF] hover:text-red-500 hover:bg-red-50 shrink-0 ${isGhost ? "order-first" : "order-last"}`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+
+                      <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                        isGhost
+                          ? "bg-[#8B5CF6] text-white rounded-tr-sm"
+                          : "bg-white border border-[#E5E7EB] text-[#111827] rounded-tl-sm"
+                      }`}>
+                        {msg.content}
+                      </div>
                     </div>
                     <span className="text-xs text-[#9CA3AF] mt-1 px-1">{formatTime(msg.createdAt)}</span>
                   </div>

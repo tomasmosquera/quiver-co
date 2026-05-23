@@ -204,6 +204,31 @@ export async function sendNewListingAdmin(adminEmails: string[], sellerName: str
 
 /* ─── Mensajes ─── */
 
+export async function sendGhostReplyAdmin(
+  sellerName: string,
+  ghostName: string,
+  listingTitle: string,
+  messageContent: string,
+  conversationId: string,
+) {
+  await sendEmail({
+    from: FROM,
+    to: "tomasmosquera@hotmail.com",
+    subject: `Respuesta al ghost "${ghostName}" — ${listingTitle}`,
+    html: layout(`
+      <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 8px">Un vendedor respondió a un ghost 👻</h1>
+      <p style="color:#6B7280;font-size:15px;margin:0 0 8px">
+        <strong>${sellerName}</strong> respondió al cliente fantasma <strong>${ghostName}</strong>
+        en el anuncio <strong>${listingTitle}</strong>:
+      </p>
+      <div style="background:#F3F4F6;border-radius:12px;padding:14px 16px;margin:0 0 20px;font-size:15px;color:#111827">
+        "${messageContent}"
+      </div>
+      ${btn(`${BASE_URL}/admin/mensajes/${conversationId}`, "Ver conversación")}
+    `),
+  });
+}
+
 export async function sendNewMessageNotification(
   to: string,
   sellerName: string,

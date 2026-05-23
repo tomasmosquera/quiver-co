@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { filterMessage } from "@/lib/messageFilter";
+import { sendGhostReplyAdmin } from "@/lib/email";
 
 // GET — mensajes de una conversación
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -41,7 +42,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (!content?.trim()) return NextResponse.json({ error: "Mensaje vacío" }, { status: 400 });
 
-  const conversation = await prisma.conversation.findUnique({ where: { id } });
+  const conversation = await prisma.conversation.findUnique({
+    where: { id },
+    include: {
+      buyer:   { select: { id: true, name: true, email: true } },
+      seller:  { select: { id: true, name: true } },
+      listing: { select: { title: true } },
+    },
+  });
   if (!conversation) return NextResponse.json({ error: "No encontrada" }, { status: 404 });
   if (conversation.buyerId !== session.user.id && conversation.sellerId !== session.user.id) {
     return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
@@ -56,6 +64,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   });
 
   await prisma.conversation.update({ where: { id }, data: { updatedAt: new Date() } });
+
+  // Si es conversación ghost y quien escribe es el vendedor, notificar al admin
+  const isGhostConversation = conversation.buyer.email?.startsWith("ghost+");
+  const senderIsSeller = session.user.id === conversation.sellerId;
+  if (isGhostConversation && senderIsSeller) {
+    await sendGhostReplyAdmin(
+      conversation.seller.name ?? "Vendedor",
+      conversation.buyer.name ?? "Ghost",
+      conversation.listing.title,
+      content.trim(),
+      id,
+    );
+  }
 
   return NextResponse.json({ message });
 }
