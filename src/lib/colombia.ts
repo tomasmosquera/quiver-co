@@ -29,7 +29,7 @@ export const COLOMBIA: Record<string, string[]> = {
   "Santander":         ["Bucaramanga", "Floridablanca", "Girón", "Barrancabermeja", "Piedecuesta"],
   "Sucre":             ["Sincelejo", "Corozal", "Tolú", "Coveñas", "San Marcos"],
   "Tolima":            ["Ibagué", "Espinal", "Melgar", "Honda", "Girardot"],
-  "Valle del Cauca":   ["Cali", "Buenaventura", "Palmira", "Tuluá", "Buga", "Cartago", "Jamundí", "Darien/Lago Calima"],
+  "Valle del Cauca":   ["Cali", "Darien/Lago Calima", "Buenaventura", "Palmira", "Tuluá", "Buga", "Cartago", "Jamundí"],
   "Vaupés":            ["Mitú"],
   "Vichada":           ["Puerto Carreño"],
 };
