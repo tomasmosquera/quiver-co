@@ -38,7 +38,9 @@
       "Bash(curl -s \"http://localhost:3000/equipo/cmo0vo0c000096841le6ynqwg\")",
       "Bash(curl -s \"http://localhost:3000/api/auth/providers\")",
       "Bash(npx vercel *)",
-      "Bash(node prisma/seed-peritaje.js)"
+      "Bash(node prisma/seed-peritaje.js)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)"
     ]
   }
 }

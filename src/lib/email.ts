@@ -202,6 +202,30 @@ export async function sendNewListingAdmin(adminEmails: string[], sellerName: str
   });
 }
 
+/* ─── Mensajes ─── */
+
+export async function sendNewMessageNotification(
+  to: string,
+  sellerName: string,
+  senderName: string,
+  listingTitle: string,
+  conversationId: string,
+) {
+  await sendEmail({
+    from: FROM,
+    to,
+    subject: `${senderName} está interesado en tu anuncio: ${listingTitle}`,
+    html: layout(`
+      <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 8px">Tienes un nuevo mensaje 💬</h1>
+      <p style="color:#6B7280;font-size:15px;margin:0 0 16px">
+        Hola ${sellerName}, <strong>${senderName}</strong> te escribió sobre tu anuncio
+        <strong>${listingTitle}</strong>. Respóndele para cerrar la venta.
+      </p>
+      ${btn(`${BASE_URL}/mensajes/${conversationId}`, "Ver mensaje")}
+    `),
+  });
+}
+
 export async function sendOrderUpdateAdmin(adminEmails: string[], event: string, listingTitle: string, orderId: string, buyerName: string, sellerName: string) {
   await sendEmail({
     from: FROM,
