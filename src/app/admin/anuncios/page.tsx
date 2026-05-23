@@ -8,6 +8,7 @@ import ListingStatusToggle from "./ListingStatusToggle";
 import DeleteListingButton from "./DeleteListingButton";
 import FeaturedToggle from "./FeaturedToggle";
 import EditCreatedAtButton from "./EditCreatedAtButton";
+import ContactAsClientButton from "./ContactAsClientButton";
 
 
 const STATUS_COLOR: Record<string, string> = {
@@ -125,6 +126,7 @@ export default async function AdminAnunciosPage() {
                     </Link>
                     <ListingStatusToggle listingId={listing.id} currentStatus={listing.status} />
                     <DeleteListingButton listingId={listing.id} listingTitle={listing.title} />
+                    <ContactAsClientButton listingId={listing.id} listingTitle={listing.title} />
                   </div>
                 </td>
               </tr>

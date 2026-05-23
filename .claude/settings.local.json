@@ -40,7 +40,13 @@
       "Bash(npx vercel *)",
       "Bash(node prisma/seed-peritaje.js)",
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\" -Force)",
-      "Bash(Select-Object Name, PSIsContainer)"
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\\\\src\\\\app\\\\api\\\\admin\\\\ghost-contact\\\\[id]\\\\messages\")",
+      "Bash(mkdir -p \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\\\\src\\\\app\\\\admin\\\\mensajes\\\\[id]\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Admin\\Documents\\Quiver Co. Kitesurf\\src\\app\\api\\admin\\ghost-contact\\[id]",
+      "c:\\Users\\Admin\\Documents\\Quiver Co. Kitesurf\\src\\app\\admin\\mensajes"
     ]
   }
 }

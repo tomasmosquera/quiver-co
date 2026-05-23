@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   LogOut,
+  MessageCircle,
   Package,
   ShoppingCart,
   Star,
@@ -19,6 +20,7 @@ const NAV = [
   { href: "/admin/anuncios", label: "Anuncios",  icon: Package },
   { href: "/admin/usuarios", label: "Usuarios",  icon: Users },
   { href: "/admin/resenas",  label: "Reseñas",   icon: Star },
+  { href: "/admin/mensajes", label: "Mensajes",  icon: MessageCircle },
 ];
 
 function isActive(href: string, pathname: string) {
