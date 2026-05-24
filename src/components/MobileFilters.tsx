@@ -2,53 +2,107 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Shield } from "lucide-react";
 
 interface FilterOption { value: string; label: string; }
 interface BrandOption  { name: string; slug: string; count: number; }
+interface CountOption  { name: string; count: number; }
+
+type SmartLinkFilter =
+  | { kind: "subtipo"; label: string; metaKey: string; options: { value: string; label: string }[] }
+  | { kind: "toggle";  key: string;  label: string;   onLabel: string };
+
+interface SmartConfig {
+  linkFilters: SmartLinkFilter[];
+  textFilters: string[];
+}
 
 interface Props {
-  disciplines:    FilterOption[];
-  equipmentTypes: FilterOption[];
-  conditions:     FilterOption[];
-  top5Brands:    BrandOption[];
-  currentDisciplina: string;
-  currentTipo:       string;
-  currentCondicion:  string;
-  currentMarca:      string;
-  currentCiudad:     string;
-  precioMin:         string;
-  precioMax:         string;
-  activeCount:       number;
-  baseParams:        Record<string, string>; // params que no son filtros (q, orden)
+  disciplines:      FilterOption[];
+  equipmentTypes:   FilterOption[];
+  conditions:       FilterOption[];
+  top5Brands:       BrandOption[];
+  top5Cities:       CountOption[];
+  top10Years:       CountOption[];
+  top10Sizes:       CountOption[];
+  top5Referencias:  CountOption[];
+  smartConfig:      SmartConfig | undefined;
+  isKiteCometa:     boolean;
+  currentDisciplina:      string;
+  currentTipo:            string;
+  currentCondicion:       string;
+  currentMarca:           string;
+  currentCiudad:          string;
+  currentSubtipo:         string;
+  currentAnio:            string;
+  currentTamanio:         string;
+  currentReferencia:      string;
+  currentLargoLineas:     string;
+  currentIncluyeBarra:    string;
+  currentIncluyeMaleta:   string;
+  currentIncluyeLeash:    string;
+  currentSinReparaciones: string;
+  currentConPeritaje:     string;
+  precioMin:   string;
+  precioMax:   string;
+  activeCount: number;
+  baseParams:  Record<string, string>;
 }
 
 export default function MobileFilters({
   disciplines, equipmentTypes, conditions, top5Brands,
+  top5Cities, top10Years, top10Sizes, top5Referencias,
+  smartConfig, isKiteCometa,
   currentDisciplina, currentTipo, currentCondicion, currentMarca,
-  currentCiudad, precioMin, precioMax, activeCount, baseParams,
+  currentCiudad, currentSubtipo, currentAnio, currentTamanio,
+  currentReferencia, currentLargoLineas,
+  currentIncluyeBarra, currentIncluyeMaleta, currentIncluyeLeash,
+  currentSinReparaciones, currentConPeritaje,
+  precioMin, precioMax, activeCount, baseParams,
 }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  // Estado local — empieza con los filtros actuales
-  const [disc,    setDisc]    = useState(currentDisciplina);
-  const [tipo,    setTipo]    = useState(currentTipo);
-  const [cond,    setCond]    = useState(currentCondicion);
-  const [marca,   setMarca]   = useState(currentMarca);
-  const [ciudad,  setCiudad]  = useState(currentCiudad);
-  const [pMin,    setPMin]    = useState(precioMin);
-  const [pMax,    setPMax]    = useState(precioMax);
+  const [disc,            setDisc]            = useState(currentDisciplina);
+  const [tipo,            setTipo]            = useState(currentTipo);
+  const [cond,            setCond]            = useState(currentCondicion);
+  const [marca,           setMarca]           = useState(currentMarca);
+  const [ciudad,          setCiudad]          = useState(currentCiudad);
+  const [subtipo,         setSubtipo]         = useState(currentSubtipo);
+  const [anio,            setAnio]            = useState(currentAnio);
+  const [tamanio,         setTamanio]         = useState(currentTamanio);
+  const [referencia,      setReferencia]      = useState(currentReferencia);
+  const [largoLineas,     setLargoLineas]     = useState(currentLargoLineas);
+  const [incluyeBarra,    setIncluyeBarra]    = useState(currentIncluyeBarra);
+  const [incluyeMaleta,   setIncluyeMaleta]   = useState(currentIncluyeMaleta);
+  const [incluyeLeash,    setIncluyeLeash]    = useState(currentIncluyeLeash);
+  const [sinReparaciones, setSinReparaciones] = useState(currentSinReparaciones);
+  const [conPeritaje,     setConPeritaje]     = useState(currentConPeritaje);
+  const [pMin,            setPMin]            = useState(precioMin);
+  const [pMax,            setPMax]            = useState(precioMax);
 
-  const pendingCount = [disc, tipo, cond, marca, ciudad, pMin, pMax].filter(Boolean).length;
+  const pendingCount = [
+    disc, tipo, cond, marca, ciudad, subtipo, anio, tamanio, referencia,
+    largoLineas, incluyeBarra, incluyeMaleta, incluyeLeash, sinReparaciones,
+    conPeritaje, pMin, pMax,
+  ].filter(Boolean).length;
 
   function openModal() {
-    // Sincronizar con los filtros actuales al abrir
     setDisc(currentDisciplina);
     setTipo(currentTipo);
     setCond(currentCondicion);
     setMarca(currentMarca);
     setCiudad(currentCiudad);
+    setSubtipo(currentSubtipo);
+    setAnio(currentAnio);
+    setTamanio(currentTamanio);
+    setReferencia(currentReferencia);
+    setLargoLineas(currentLargoLineas);
+    setIncluyeBarra(currentIncluyeBarra);
+    setIncluyeMaleta(currentIncluyeMaleta);
+    setIncluyeLeash(currentIncluyeLeash);
+    setSinReparaciones(currentSinReparaciones);
+    setConPeritaje(currentConPeritaje);
     setPMin(precioMin);
     setPMax(precioMax);
     setOpen(true);
@@ -56,24 +110,68 @@ export default function MobileFilters({
 
   function applyFilters() {
     const params = new URLSearchParams(baseParams);
-    if (disc)   params.set("seccion", disc);
-    if (tipo)   params.set("tipo", tipo);
-    if (cond)   params.set("condicion", cond);
-    if (marca)  params.set("marca", marca);
-    if (ciudad) params.set("ciudad", ciudad);
-    if (pMin)   params.set("precioMin", pMin);
-    if (pMax)   params.set("precioMax", pMax);
+    if (disc)            params.set("seccion",         disc);
+    if (tipo)            params.set("tipo",            tipo);
+    if (cond)            params.set("condicion",       cond);
+    if (marca)           params.set("marca",           marca);
+    if (ciudad)          params.set("ciudad",          ciudad);
+    if (subtipo)         params.set("subtipo",         subtipo);
+    if (anio)            params.set("anio",            anio);
+    if (tamanio)         params.set("tamanio",         tamanio);
+    if (referencia)      params.set("referencia",      referencia);
+    if (largoLineas)     params.set("largoLineas",     largoLineas);
+    if (incluyeBarra)    params.set("incluyeBarra",    incluyeBarra);
+    if (incluyeMaleta)   params.set("incluyeMaleta",   incluyeMaleta);
+    if (incluyeLeash)    params.set("incluyeLeash",    incluyeLeash);
+    if (sinReparaciones) params.set("sinReparaciones", sinReparaciones);
+    if (conPeritaje)     params.set("conPeritaje",     conPeritaje);
+    if (pMin)            params.set("precioMin",       pMin);
+    if (pMax)            params.set("precioMax",       pMax);
     router.push(`/equipos?${params.toString()}`);
     setOpen(false);
   }
 
   function clearFilters() {
-    setDisc(""); setTipo(""); setCond(""); setMarca(""); setCiudad(""); setPMin(""); setPMax("");
+    setDisc(""); setTipo(""); setCond(""); setMarca(""); setCiudad("");
+    setSubtipo(""); setAnio(""); setTamanio(""); setReferencia(""); setLargoLineas("");
+    setIncluyeBarra(""); setIncluyeMaleta(""); setIncluyeLeash("");
+    setSinReparaciones(""); setConPeritaje("");
+    setPMin(""); setPMax("");
   }
 
   function toggle(current: string, value: string, setter: (v: string) => void) {
     setter(current === value ? "" : value);
   }
+
+  function getToggleState(key: string): string {
+    if (key === "incluyeBarra")    return incluyeBarra;
+    if (key === "incluyeMaleta")   return incluyeMaleta;
+    if (key === "incluyeLeash")    return incluyeLeash;
+    if (key === "sinReparaciones") return sinReparaciones;
+    return "";
+  }
+
+  function setToggleState(key: string, value: string) {
+    if (key === "incluyeBarra")         setIncluyeBarra(value);
+    else if (key === "incluyeMaleta")   setIncluyeMaleta(value);
+    else if (key === "incluyeLeash")    setIncluyeLeash(value);
+    else if (key === "sinReparaciones") setSinReparaciones(value);
+  }
+
+  function getOffLabel(key: string) {
+    if (key === "sinReparaciones") return "Con reparaciones";
+    if (key === "incluyeBarra")    return "Sin barra";
+    if (key === "incluyeMaleta")   return "Sin maleta";
+    if (key === "incluyeLeash")    return "Sin leash";
+    return "No";
+  }
+
+  const subtipoFilter = smartConfig?.linkFilters.find(f => f.kind === "subtipo") as
+    | { kind: "subtipo"; label: string; options: { value: string; label: string }[] }
+    | undefined;
+  const toggleFilters = (smartConfig?.linkFilters.filter(f => f.kind === "toggle") ?? []) as
+    { kind: "toggle"; key: string; label: string; onLabel: string }[];
+  const hasLargoLineas = smartConfig?.textFilters.includes("largoLineas") ?? false;
 
   const chipBase = "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors";
   const chipActive = "bg-[#111827] text-white border-[#111827]";
@@ -143,6 +241,24 @@ export default function MobileFilters({
                 </div>
               </div>
 
+              {/* Subtipo (filtro inteligente) */}
+              {subtipoFilter && (
+                <div>
+                  <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">{subtipoFilter.label}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {subtipoFilter.options.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => toggle(subtipo, opt.value, setSubtipo)}
+                        className={`${chipBase} ${subtipo === opt.value ? chipBlueActive : chipInactive}`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Marca */}
               {top5Brands.length > 0 && (
                 <div>
@@ -177,14 +293,140 @@ export default function MobileFilters({
                 </div>
               </div>
 
+              {/* Peritaje */}
+              {isKiteCometa && (
+                <div>
+                  <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5 text-[#3B82F6]" /> Peritaje
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {(["", "si", "no"] as const).map((val) => (
+                      <button
+                        key={val}
+                        onClick={() => setConPeritaje(val)}
+                        className={`${chipBase} ${conPeritaje === val ? chipBlueActive : chipInactive}`}
+                      >
+                        {val === "" ? "Todas" : val === "si" ? "Con peritaje" : "Sin peritaje"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Toggles inteligentes (barra, maleta, leash, reparaciones) */}
+              {toggleFilters.map((f) => {
+                const val = getToggleState(f.key);
+                return (
+                  <div key={f.key}>
+                    <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">{f.label}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { value: "",    label: "Todas" },
+                        { value: "si",  label: f.onLabel },
+                        { value: "no",  label: getOffLabel(f.key) },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setToggleState(f.key, opt.value)}
+                          className={`${chipBase} ${val === opt.value ? chipBlueActive : chipInactive}`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Año */}
+              {top10Years.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">Año</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {top10Years.map((y) => (
+                      <button
+                        key={y.name}
+                        onClick={() => toggle(anio, y.name, setAnio)}
+                        className={`${chipBase} ${anio === y.name ? chipBlueActive : chipInactive}`}
+                      >
+                        {y.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tamaño */}
+              {top10Sizes.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">Tamaño</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {top10Sizes.map((s) => (
+                      <button
+                        key={s.name}
+                        onClick={() => toggle(tamanio, s.name, setTamanio)}
+                        className={`${chipBase} ${tamanio === s.name ? chipBlueActive : chipInactive}`}
+                      >
+                        {s.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Referencia */}
+              {top5Referencias.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">Referencia</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {top5Referencias.map((r) => (
+                      <button
+                        key={r.name}
+                        onClick={() => toggle(referencia, r.name, setReferencia)}
+                        className={`${chipBase} ${referencia === r.name ? chipBlueActive : chipInactive}`}
+                      >
+                        {r.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Largo de líneas */}
+              {hasLargoLineas && (
+                <div>
+                  <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">Largo de líneas (m)</h3>
+                  <input
+                    type="number"
+                    value={largoLineas}
+                    onChange={(e) => setLargoLineas(e.target.value)}
+                    placeholder="Ej: 24"
+                    className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
+                  />
+                </div>
+              )}
+
               {/* Ciudad */}
               <div>
                 <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-3">Ciudad</h3>
+                {top5Cities.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {top5Cities.map((c) => (
+                      <button
+                        key={c.name}
+                        onClick={() => toggle(ciudad, c.name, setCiudad)}
+                        className={`${chipBase} ${ciudad === c.name ? chipActive : chipInactive}`}
+                      >
+                        {c.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <input
                   type="text"
                   value={ciudad}
-                  onChange={e => setCiudad(e.target.value)}
-                  placeholder="Ej: Cartagena, Santa Marta..."
+                  onChange={(e) => setCiudad(e.target.value)}
+                  placeholder="Otra ciudad..."
                   className="w-full px-3 py-2 border border-[#D1D5DB] rounded-lg text-sm focus:outline-none focus:border-[#3B82F6]"
                 />
               </div>
@@ -209,6 +451,7 @@ export default function MobileFilters({
                   />
                 </div>
               </div>
+
             </div>
 
             {/* Footer */}

@@ -1073,11 +1073,27 @@ export default async function EquiposPage({
                   equipmentTypes={visibleTypes.map(t => ({ value: t.value, label: getTypeLabel(t.value) }))}
                   conditions={CONDITIONS.map(c => ({ value: c.value, label: c.label }))}
                   top5Brands={top5Brands.map(b => ({ name: b.name, slug: b.slug, count: b.count }))}
+                  top5Cities={top5Cities}
+                  top10Years={top10Years}
+                  top10Sizes={top10Sizes}
+                  top5Referencias={top5Referencias}
+                  smartConfig={smartConfig}
+                  isKiteCometa={isKiteCometa}
                   currentDisciplina={seccion}
                   currentTipo={tipo}
                   currentCondicion={condicion}
                   currentMarca={marca}
                   currentCiudad={ciudad}
+                  currentSubtipo={subtipo}
+                  currentAnio={anio}
+                  currentTamanio={tamanio}
+                  currentReferencia={referencia}
+                  currentLargoLineas={largoLineas}
+                  currentIncluyeBarra={incluyeBarra}
+                  currentIncluyeMaleta={incluyeMaleta}
+                  currentIncluyeLeash={incluyeLeash}
+                  currentSinReparaciones={sinReparaciones}
+                  currentConPeritaje={conPeritaje}
                   precioMin={precioMin}
                   precioMax={precioMax}
                   activeCount={activeFilterCount}
