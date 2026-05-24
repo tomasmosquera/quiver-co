@@ -20,7 +20,7 @@ export async function GET() {
     data: { status: "DELIVERED", deliveredAt: new Date() },
   });
 
-  const [unreadMessages, pendingOrdersAsSeller, pendingOrdersAsBuyer, paidOrdersAsSeller, paidOrdersAsBuyer, shippedOrdersAsBuyer, deliveredOrdersAsSeller] = await Promise.all([
+  const [unreadMessages, pendingOrdersAsSeller, pendingOrdersAsBuyer, paidOrdersAsSeller, paidOrdersAsBuyer, shippedOrdersAsBuyer, deliveredOrdersAsSeller, pendingAvailabilityAsSeller, confirmedAvailabilityAsBuyer] = await Promise.all([
     // Mensajes sin leer enviados por otra persona
     prisma.message.findMany({
       where: {
@@ -86,6 +86,20 @@ export async function GET() {
       },
       include: { listing: { select: { id: true, title: true } } },
       orderBy: { deliveredAt: "desc" },
+    }),
+
+    // Solicitudes de disponibilidad pendientes donde soy vendedor
+    prisma.availabilityRequest.findMany({
+      where: { sellerId: userId, status: "PENDING" },
+      include: { listing: { select: { id: true, title: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+
+    // Solicitudes de disponibilidad confirmadas donde soy comprador y el anuncio sigue activo
+    prisma.availabilityRequest.findMany({
+      where: { buyerId: userId, status: "CONFIRMED", listing: { status: "ACTIVE" } },
+      include: { listing: { select: { id: true, title: true } } },
+      orderBy: { updatedAt: "desc" },
     }),
   ]);
 
@@ -208,6 +222,30 @@ export async function GET() {
       body: `El comprador confirmó la recepción de "${order.listing.title}". Recibirás $${amount} COP (menos comisión del 5%) en las próximas horas.`,
       href: "/cuenta/ventas",
       createdAt: order.deliveredAt ?? order.updatedAt,
+    });
+  }
+
+  // Notificaciones de disponibilidad — vendedor
+  for (const req of pendingAvailabilityAsSeller) {
+    notifications.push({
+      id: `avail-seller-${req.id}`,
+      type: "sale",
+      title: "Solicitud de disponibilidad",
+      body: `Alguien quiere comprar "${req.listing.title}". Confirma si sigue disponible.`,
+      href: "/cuenta/ventas",
+      createdAt: req.createdAt,
+    });
+  }
+
+  // Notificaciones de disponibilidad — comprador
+  for (const req of confirmedAvailabilityAsBuyer) {
+    notifications.push({
+      id: `avail-buyer-${req.id}`,
+      type: "purchase",
+      title: "¡Equipo disponible!",
+      body: `El vendedor confirmó que "${req.listing.title}" sigue disponible. Ya puedes comprarlo.`,
+      href: `/equipo/${req.listing.id}`,
+      createdAt: req.updatedAt,
     });
   }
 

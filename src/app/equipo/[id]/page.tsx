@@ -13,6 +13,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import ContactButton from "@/components/ContactButton";
 import ShareButton from "@/components/ShareButton";
 import ListingMetaTracker from "@/components/ListingMetaTracker";
+import AvailabilityButton from "./AvailabilityButton";
 
 const DISCIPLINE_LABELS: Record<string, string> = {
   KITESURF: "Kitesurf", KITEFOIL: "Kitefoil", WINGFOIL: "Wingfoil",
@@ -197,6 +198,23 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
     where: { subjectId: listing.sellerId },
     select: { rating: true },
   });
+
+  // Confirmación global vigente (flag del anuncio)
+  const now = new Date();
+  const isGloballyConfirmed =
+    listing.status === "ACTIVE" &&
+    listing.availabilityConfirmedUntil != null &&
+    listing.availabilityConfirmedUntil > now;
+
+  // Estado de solicitud de disponibilidad del comprador actual
+  const availabilityRequest = session?.user?.id && session.user.id !== listing.sellerId
+    ? await prisma.availabilityRequest.findUnique({
+        where: { listingId_buyerId: { listingId: id, buyerId: session.user.id } },
+        select: { status: true },
+      })
+    : null;
+
+  const buyerStatus = (availabilityRequest?.status ?? "NONE") as "NONE" | "PENDING" | "CONFIRMED" | "REJECTED";
   const sellerRating = sellerReviews.length > 0
     ? sellerReviews.reduce((sum, r) => sum + r.rating, 0) / sellerReviews.length
     : null;
@@ -524,12 +542,13 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
                 </div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  <Link
-                    href={`/checkout/${listing.id}`}
-                    className="w-full flex items-center justify-center py-3.5 bg-[#111827] hover:bg-[#374151] text-white font-bold rounded-xl transition-colors text-sm"
-                  >
-                    Comprar
-                  </Link>
+                  <AvailabilityButton
+                    listingId={listing.id}
+                    isGloballyConfirmed={isGloballyConfirmed}
+                    confirmedUntil={listing.availabilityConfirmedUntil?.toISOString() ?? null}
+                    buyerStatus={buyerStatus}
+                    isLoggedIn={!!session?.user?.id}
+                  />
                   <ContactButton listingId={listing.id} isLoggedIn={!!session?.user?.id} />
                   <div className="flex gap-2">
                     <FavoriteButton

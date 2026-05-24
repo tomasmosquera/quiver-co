@@ -2,13 +2,21 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { ShoppingBag, ChevronRight } from "lucide-react";
+import { ShoppingBag, ChevronRight, Clock, CheckCircle, XCircle } from "lucide-react";
 import OrderTimeline from "@/components/OrderTimeline";
 import OrderActions from "@/components/OrderActions";
 
 export default async function ComprasPage() {
   const session = await auth();
   if (!session?.user?.id) return redirect("/login");
+
+  const availabilityRequests = await prisma.availabilityRequest.findMany({
+    where: { buyerId: session.user.id },
+    include: {
+      listing: { select: { id: true, title: true, images: { take: 1, orderBy: { order: "asc" } } } },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
 
   const orders = await prisma.order.findMany({
     where: { buyerId: session.user.id },
@@ -35,12 +43,57 @@ export default async function ComprasPage() {
     CANCELLED: "bg-red-50 text-red-500",
   };
 
+  const availStatusConfig = {
+    PENDING:   { label: "Esperando al vendedor", color: "bg-amber-50 text-amber-700 border-amber-200",     Icon: Clock },
+    CONFIRMED: { label: "Disponible — puedes comprar", color: "bg-emerald-50 text-emerald-700 border-emerald-200", Icon: CheckCircle },
+    REJECTED:  { label: "No disponible",          color: "bg-red-50 text-red-600 border-red-200",          Icon: XCircle },
+  } as const;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-[#111827]">Mis compras</h1>
         <p className="text-sm text-[#6B7280] mt-1">Historial de equipos que has comprado en Quiver.</p>
       </div>
+
+      {/* Solicitudes de disponibilidad */}
+      {availabilityRequests.length > 0 && (
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#F3F4F6]">
+            <h2 className="text-sm font-bold text-[#111827]">Solicitudes de disponibilidad</h2>
+            <p className="text-xs text-[#6B7280] mt-0.5">Equipos que consultaste antes de comprar.</p>
+          </div>
+          <div className="divide-y divide-[#F3F4F6]">
+            {availabilityRequests.map((req) => {
+              const thumb = req.listing.images[0]?.url;
+              const cfg = availStatusConfig[req.status];
+              const Icon = cfg.Icon;
+              return (
+                <div key={req.id} className="flex items-center gap-4 px-5 py-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#F3F4F6] overflow-hidden shrink-0">
+                    {thumb ? <img src={thumb} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#111827] truncate">{req.listing.title}</p>
+                    <span className={`inline-flex items-center gap-1 mt-1 text-xs font-medium px-2 py-0.5 rounded-full border ${cfg.color}`}>
+                      <Icon className="w-3 h-3" />
+                      {cfg.label}
+                    </span>
+                  </div>
+                  {req.status === "CONFIRMED" && (
+                    <Link
+                      href={`/equipo/${req.listing.id}`}
+                      className="shrink-0 flex items-center gap-1 px-3 py-2 bg-[#111827] hover:bg-[#374151] text-white text-xs font-semibold rounded-xl transition-colors"
+                    >
+                      Comprar <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {orders.length > 0 ? (
         <div className="space-y-4">

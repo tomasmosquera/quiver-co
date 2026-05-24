@@ -55,6 +55,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const globallyConfirmed =
+      listing.availabilityConfirmedUntil != null && listing.availabilityConfirmedUntil > new Date();
+
+    if (!globallyConfirmed) {
+      const availabilityRequest = await prisma.availabilityRequest.findUnique({
+        where: { listingId_buyerId: { listingId, buyerId: session.user.id } },
+        select: { status: true },
+      });
+      if (availabilityRequest?.status !== "CONFIRMED") {
+        return NextResponse.json(
+          { error: "Debes confirmar la disponibilidad del artículo antes de comprar." },
+          { status: 403 },
+        );
+      }
+    }
+
     const existingOrder = await prisma.order.findFirst({
       where: { listingId, status: { not: "CANCELLED" } },
     });

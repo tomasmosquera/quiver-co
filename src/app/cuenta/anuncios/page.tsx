@@ -62,6 +62,18 @@ export default async function MisAnunciosPage({
     include: { images: { orderBy: { order: "asc" }, take: 1 } },
   });
 
+  // Solicitudes de disponibilidad pendientes por anuncio
+  const pendingRequests = await prisma.availabilityRequest.groupBy({
+    by: ["listingId"],
+    where: {
+      sellerId: session.user.id,
+      status: "PENDING",
+      listingId: { in: listings.map(l => l.id) },
+    },
+    _count: { _all: true },
+  });
+  const pendingByListing = Object.fromEntries(pendingRequests.map(r => [r.listingId, r._count._all]));
+
   const counts = await prisma.listing.groupBy({
     by: ["status"],
     where: { sellerId: session.user.id, status: { not: "REMOVED" } },
@@ -138,6 +150,7 @@ export default async function MisAnunciosPage({
               const img = listing.images[0]?.url;
               const status = STATUS_CONFIG[listing.status] ?? STATUS_CONFIG.DRAFT;
               const StatusIcon = status.icon;
+              const pendingCount = pendingByListing[listing.id] ?? 0;
 
               return (
                 <div
@@ -170,6 +183,15 @@ export default async function MisAnunciosPage({
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${CONDITION_COLORS[listing.condition] ?? ""}`}>
                             {CONDITION_LABELS[listing.condition] ?? listing.condition}
                           </span>
+                          {pendingCount > 0 && (
+                            <Link
+                              href="/cuenta/ventas"
+                              className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 animate-pulse"
+                            >
+                              <Clock className="w-3 h-3" />
+                              {pendingCount} solicitud{pendingCount !== 1 ? "es" : ""} pendiente{pendingCount !== 1 ? "s" : ""}
+                            </Link>
+                          )}
                         </div>
                         <h3 className="font-semibold text-[#111827] text-sm leading-snug line-clamp-2">
                           {listing.title}

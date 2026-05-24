@@ -66,6 +66,12 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum AvailabilityStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
 // ─── User ────────────────────────────────────────────────
 
 model User {
@@ -106,6 +112,8 @@ model User {
   messagesSent          Message[]      @relation("MessagesSent")
   ordersAsBuyer         Order[]        @relation("OrdersBuyer")
   ordersAsSeller        Order[]        @relation("OrdersSeller")
+  availabilityAsBuyer   AvailabilityRequest[] @relation("AvailabilityAsBuyer")
+  availabilityAsSeller  AvailabilityRequest[] @relation("AvailabilityAsSeller")
 
   @@map("users")
 }
@@ -167,19 +175,21 @@ model Listing {
   city          String
   metadata      Json?         // Campos extra según disciplina/tipo
   currency      String        @default("COP") // "COP" | "USD"
-  status        ListingStatus @default(ACTIVE)
-  featured      Boolean       @default(false)
-  views         Int           @default(0)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  status                    ListingStatus @default(ACTIVE)
+  featured                  Boolean       @default(false)
+  views                     Int           @default(0)
+  availabilityConfirmedUntil DateTime?    // Confirmación global de disponibilidad (expira 7 días)
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
 
   sellerId      String
   seller        User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 
-  images        ListingImage[]
-  favoritedBy   Favorite[]
-  conversations Conversation[]
-  orders        Order[]
+  images                ListingImage[]
+  favoritedBy           Favorite[]
+  conversations         Conversation[]
+  orders                Order[]
+  availabilityRequests  AvailabilityRequest[]
 
   @@index([discipline])
   @@index([equipmentType])
@@ -320,6 +330,27 @@ model Order {
   metaClientIpAddress     String?
 
   @@map("orders")
+}
+
+// ─── Availability ────────────────────────────────────────
+
+model AvailabilityRequest {
+  id        String             @id @default(cuid())
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  status    AvailabilityStatus @default(PENDING)
+
+  listingId String
+  listing   Listing            @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  buyerId   String
+  buyer     User               @relation("AvailabilityAsBuyer",  fields: [buyerId],  references: [id], onDelete: Cascade)
+
+  sellerId  String
+  seller    User               @relation("AvailabilityAsSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, buyerId])
+  @@map("availability_requests")
 }
 
 // ─── Password Reset ───────────────────────────────────────

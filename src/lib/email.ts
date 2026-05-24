@@ -202,6 +202,71 @@ export async function sendNewListingAdmin(adminEmails: string[], sellerName: str
   });
 }
 
+/* ─── Disponibilidad ─── */
+
+export async function sendAvailabilityRequestSeller(
+  to: string,
+  sellerName: string,
+  listingTitle: string,
+  listingId: string,
+) {
+  await sendEmail({
+    from: FROM,
+    to,
+    subject: `Alguien quiere comprar tu equipo: ${listingTitle}`,
+    html: layout(`
+      <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 8px">¡Tienes un posible comprador! 🏄</h1>
+      <p style="color:#6B7280;font-size:15px;margin:0 0 16px">
+        Hola ${sellerName}, alguien está interesado en comprar <strong>${listingTitle}</strong>
+        y quiere confirmar que todavía está disponible.<br/><br/>
+        Confírmalo lo antes posible para no perder la venta.
+      </p>
+      ${btn(`${BASE_URL}/cuenta/ventas`, "Confirmar disponibilidad")}
+    `),
+  });
+}
+
+export async function sendAvailabilityConfirmedBuyer(
+  to: string,
+  buyerName: string,
+  listingTitle: string,
+  listingId: string,
+) {
+  await sendEmail({
+    from: FROM,
+    to,
+    subject: `¡${listingTitle} sigue disponible!`,
+    html: layout(`
+      <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 8px">El equipo está disponible ✅</h1>
+      <p style="color:#6B7280;font-size:15px;margin:0 0 16px">
+        Hola ${buyerName}, el vendedor confirmó que <strong>${listingTitle}</strong> sigue disponible.
+        Ya puedes proceder con la compra.
+      </p>
+      ${btn(`${BASE_URL}/equipo/${listingId}`, "Comprar ahora")}
+    `),
+  });
+}
+
+export async function sendAvailabilityRejectedBuyer(
+  to: string,
+  buyerName: string,
+  listingTitle: string,
+) {
+  await sendEmail({
+    from: FROM,
+    to,
+    subject: `${listingTitle} ya no está disponible`,
+    html: layout(`
+      <h1 style="font-size:22px;font-weight:700;color:#111827;margin:0 0 8px">Equipo no disponible</h1>
+      <p style="color:#6B7280;font-size:15px;margin:0 0 16px">
+        Hola ${buyerName}, lamentablemente el vendedor indicó que <strong>${listingTitle}</strong>
+        ya no está disponible para la venta. Puede que lo haya vendido por otro canal.
+      </p>
+      ${btn(`${BASE_URL}/equipos`, "Ver otros equipos")}
+    `),
+  });
+}
+
 /* ─── Mensajes ─── */
 
 export async function sendGhostReplyAdmin(

@@ -2,14 +2,23 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Package, MapPin, Phone, ChevronRight } from "lucide-react";
+import { Package, MapPin, Phone, ChevronRight, CheckCircle, XCircle } from "lucide-react";
 import OrderTimeline from "@/components/OrderTimeline";
 import OrderActions from "@/components/OrderActions";
 import SellerBankForm from "@/components/SellerBankForm";
+import AvailabilityActions from "./AvailabilityActions";
 
 export default async function VentasPage() {
   const session = await auth();
   if (!session?.user?.id) return redirect("/login");
+
+  const pendingAvailability = await prisma.availabilityRequest.findMany({
+    where: { sellerId: session.user.id, status: "PENDING" },
+    include: {
+      listing: { select: { id: true, title: true, images: { take: 1, orderBy: { order: "asc" } } } },
+    },
+    orderBy: { createdAt: "asc" },
+  });
 
   const orders = await prisma.order.findMany({
     where: { sellerId: session.user.id },
@@ -41,6 +50,42 @@ export default async function VentasPage() {
         <h1 className="text-xl font-bold text-[#111827]">Mis ventas</h1>
         <p className="text-sm text-[#6B7280] mt-1">Órdenes de compra y seguimiento de despachos.</p>
       </div>
+
+      {/* Solicitudes de disponibilidad pendientes */}
+      {pendingAvailability.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-amber-100">
+            <h2 className="text-sm font-bold text-amber-900">
+              Solicitudes de disponibilidad pendientes ({pendingAvailability.length})
+            </h2>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Alguien quiere comprar estos equipos. Confirma si siguen disponibles.
+            </p>
+          </div>
+          <div className="divide-y divide-amber-100">
+            {pendingAvailability.map((req) => {
+              const thumb = req.listing.images[0]?.url;
+              return (
+                <div key={req.id} className="flex items-center gap-4 px-5 py-4">
+                  <div className="w-12 h-12 rounded-xl bg-amber-100 overflow-hidden shrink-0">
+                    {thumb
+                      ? <img src={thumb} alt="" className="w-full h-full object-cover" />
+                      : <div className="w-full h-full" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#111827] truncate">{req.listing.title}</p>
+                    <p className="text-xs text-amber-700 mt-0.5">
+                      Solicitud recibida el {new Date(req.createdAt).toLocaleDateString("es-CO", { day: "numeric", month: "short" })}
+                    </p>
+                  </div>
+                  <AvailabilityActions requestId={req.id} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {orders.length > 0 ? (
         <div className="space-y-4">

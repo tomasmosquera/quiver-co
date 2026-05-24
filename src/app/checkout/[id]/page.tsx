@@ -37,6 +37,21 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
     notFound();
   }
 
+  // Guard: confirmación global vigente O solicitud propia confirmada
+  const now = new Date();
+  const globallyConfirmed =
+    listing.availabilityConfirmedUntil != null && listing.availabilityConfirmedUntil > now;
+
+  if (!globallyConfirmed) {
+    const availabilityRequest = await prisma.availabilityRequest.findUnique({
+      where: { listingId_buyerId: { listingId: id, buyerId: session.user.id } },
+      select: { status: true },
+    });
+    if (availabilityRequest?.status !== "CONFIRMED") {
+      redirect(`/equipo/${id}`);
+    }
+  }
+
   const { getTRM, toCOP } = await import("@/lib/trm");
   const { rate: trm } = await getTRM();
 
