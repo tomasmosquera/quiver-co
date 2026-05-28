@@ -44,7 +44,8 @@
       "Bash(mkdir -p \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\\\\src\\\\app\\\\api\\\\admin\\\\ghost-contact\\\\[id]\\\\messages\")",
       "Bash(mkdir -p \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\\\\src\\\\app\\\\admin\\\\mensajes\\\\[id]\")",
       "Bash(mkdir -p \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\\\\src\\\\app\\\\api\\\\availability\\\\[id]\\\\confirm\")",
-      "Bash(mkdir -p \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\\\\src\\\\app\\\\api\\\\availability\\\\[id]\\\\reject\")"
+      "Bash(mkdir -p \"c:\\\\Users\\\\Admin\\\\Documents\\\\Quiver Co. Kitesurf\\\\src\\\\app\\\\api\\\\availability\\\\[id]\\\\reject\")",
+      "Bash(npx next *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Admin\\Documents\\Quiver Co. Kitesurf\\src\\app\\api\\admin\\ghost-contact\\[id]",

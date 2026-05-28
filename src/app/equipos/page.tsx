@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getCachedRawFilters } from "./filter-cache";
 import Link from "next/link";
 import { ClipboardCheck, MapPin, Search, Shield, SlidersHorizontal, Star, Wind } from "lucide-react";
 import BrandFilterClient from "@/components/BrandFilterClient";
@@ -412,83 +413,35 @@ export default async function EquiposPage({
   const typeCountMap = new Map(typeGroups.map(g => [g.equipmentType as string, g._count.equipmentType]));
   const conditionCountMap = new Map(conditionGroups.map(g => [g.condition as string, g._count.condition]));
 
-  /* ─── Años (raw query sobre metadata JSON) ─── */
+  /* ─── Años, referencias, toggles y peritaje — cacheados 5 min por (seccion, tipo) ─── */
 
-  // Construimos un WHERE simple compatible con la consulta raw
-  const disciplineFilter = seccion && VALID_DISCIPLINES.includes(seccion)
-    ? `AND discipline = '${SECCION_TO_DB[seccion] ?? seccion}'` : "";
-  const tipoFilter = tipo ? `AND "equipmentType" = '${tipo}'` : "";
+  const isKiteCometa = tipo === "COMETA" && ["KITESURF", "KITEFOIL"].includes(seccion);
 
-  const yearRows = await prisma.$queryRawUnsafe<{ year: string; cnt: bigint }[]>(`
-    SELECT metadata->>'year' AS year, COUNT(*) AS cnt
-    FROM listings
-    WHERE status = 'ACTIVE'
-      AND metadata->>'year' IS NOT NULL
-      AND metadata->>'year' != ''
-      ${disciplineFilter}
-      ${tipoFilter}
-    GROUP BY metadata->>'year'
-  `);
-
-  /* ─── Referencias (primera palabra del campo reference en metadata) ─── */
-
-  const referenciaRows = await prisma.$queryRawUnsafe<{ ref: string; cnt: bigint }[]>(`
-    SELECT split_part(metadata->>'reference', ' ', 1) AS ref, COUNT(*) AS cnt
-    FROM listings
-    WHERE status = 'ACTIVE'
-      AND metadata->>'reference' IS NOT NULL
-      AND metadata->>'reference' != ''
-      ${disciplineFilter}
-      ${tipoFilter}
-    GROUP BY split_part(metadata->>'reference', ' ', 1)
-    ORDER BY cnt DESC
-  `);
+  const {
+    yearRows,
+    referenciaRows,
+    barraRows, maletaRows, leashRows, repRows,
+    peritajeRows,
+  } = await getCachedRawFilters(seccion, tipo);
 
   const allReferenciasList = referenciaRows
     .filter(r => r.ref && r.ref.trim() !== "")
-    .map(r => ({ name: r.ref.trim(), count: Number(r.cnt) }));
+    .map(r => ({ name: r.ref.trim(), count: r.cnt }));
 
-  const top5Referencias = allReferenciasList.slice(0, 5);
-
+  const top5Referencias    = allReferenciasList.slice(0, 5);
   const allReferenciasAlpha = [...allReferenciasList].sort((a, b) =>
     a.name.localeCompare(b.name)
   );
 
-  /* ─── Conteos de toggles (barra, maleta, leash, reparaciones) ─── */
-  // Solo aplica cuando hay seccion+tipo seleccionados
-  type ToggleCount = { val: string; cnt: bigint };
-  const baseToggleWhere = `status = 'ACTIVE' ${disciplineFilter} ${tipoFilter}`;
-
-  const [barraRows, maletaRows, leashRows, repRows] = seccion && tipo
-    ? await Promise.all([
-        prisma.$queryRawUnsafe<ToggleCount[]>(`SELECT (metadata->>'includesBar') AS val, COUNT(*) AS cnt FROM listings WHERE ${baseToggleWhere} AND metadata->>'includesBar' IS NOT NULL GROUP BY val`),
-        prisma.$queryRawUnsafe<ToggleCount[]>(`SELECT (metadata->>'includesBag') AS val, COUNT(*) AS cnt FROM listings WHERE ${baseToggleWhere} AND metadata->>'includesBag' IS NOT NULL GROUP BY val`),
-        prisma.$queryRawUnsafe<ToggleCount[]>(`SELECT (metadata->>'includesLeash') AS val, COUNT(*) AS cnt FROM listings WHERE ${baseToggleWhere} AND metadata->>'includesLeash' IS NOT NULL GROUP BY val`),
-        prisma.$queryRawUnsafe<ToggleCount[]>(`SELECT (metadata->>'hasRepairs') AS val, COUNT(*) AS cnt FROM listings WHERE ${baseToggleWhere} AND metadata->>'hasRepairs' IS NOT NULL GROUP BY val`),
-      ])
-    : [[], [], [], []];
-
-  // Conteos de peritaje — solo cuando tipo === COMETA en sección kite
-  const isKiteCometa = tipo === "COMETA" && ["KITESURF", "KITEFOIL"].includes(seccion);
-  const peritajeRows = isKiteCometa
-    ? await prisma.$queryRawUnsafe<{ has_peritaje: boolean; cnt: bigint }[]>(`
-        SELECT
-          (metadata->'standardInspection' IS NOT NULL AND metadata->>'standardInspection' != 'null') AS has_peritaje,
-          COUNT(*) AS cnt
-        FROM listings
-        WHERE ${baseToggleWhere}
-        GROUP BY has_peritaje
-      `)
-    : [];
-
   const peritajeCounts = {
-    si: Number(peritajeRows.find(r => r.has_peritaje)?.cnt ?? 0),
-    no: Number(peritajeRows.find(r => !r.has_peritaje)?.cnt ?? 0),
+    si: peritajeRows.find(r =>  r.has_peritaje)?.cnt ?? 0,
+    no: peritajeRows.find(r => !r.has_peritaje)?.cnt ?? 0,
   };
 
   // Mapas: true/false string → count
+  type ToggleCount = { val: string; cnt: number };
   const toToggleMap = (rows: ToggleCount[]) =>
-    new Map(rows.map(r => [r.val, Number(r.cnt)]));
+    new Map(rows.map(r => [r.val, r.cnt]));
 
   const barraMap  = toToggleMap(barraRows);
   const maletaMap = toToggleMap(maletaRows);
