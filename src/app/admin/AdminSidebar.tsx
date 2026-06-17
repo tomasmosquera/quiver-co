@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ClipboardCheck,
   LayoutDashboard,
   LogOut,
   MessageCircle,
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/admin/anuncios", label: "Anuncios",  icon: Package },
   { href: "/admin/usuarios", label: "Usuarios",  icon: Users },
   { href: "/admin/resenas",  label: "Reseñas",   icon: Star },
+  { href: "/admin/disponibilidad",   label: "Disponibilidad",  icon: ClipboardCheck },
   { href: "/admin/mensajes",        label: "Mensajes",        icon: MessageCircle },
   { href: "/admin/conversaciones",  label: "Conversaciones",  icon: MessagesSquare },
 ];
