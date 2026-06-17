@@ -15,12 +15,12 @@ import { formatSellerRatingLabel, formatSellerRatingTitle, getSellerRatingStatsM
 const COMING_SOON_DISCIPLINES = ["windsurf", "wakeboard", "paddle"];
 
 const DISCIPLINE_META = [
-  { name: "Kitesurf",  slug: "kitesurf",  desc: "Cometas, barras, tablas y arneses",            color: "bg-sky-50 border-sky-100 hover:border-sky-300",          badge: "text-sky-700"    },
-  { name: "Kitefoil",  slug: "kitefoil",  desc: "Equipos específicos para foil con cometa",      color: "bg-rose-50 border-rose-100 hover:border-rose-300",         badge: "text-rose-700"   },
-  { name: "Wingfoil",  slug: "wingfoil",  desc: "Wings, foils y tablas de wingfoil",             color: "bg-violet-50 border-violet-100 hover:border-violet-300",  badge: "text-violet-700" },
-  { name: "Windsurf",  slug: "windsurf",  desc: "Velas, tablas y mástiles",                      color: "bg-emerald-50 border-emerald-100 hover:border-emerald-300", badge: "text-emerald-700" },
-  { name: "Wakeboard", slug: "wakeboard", desc: "Tablas, bindings y accesorios wake",             color: "bg-orange-50 border-orange-100 hover:border-orange-300",  badge: "text-orange-700" },
-  { name: "Paddle",    slug: "paddle",    desc: "Tablas de paddle y remos",                       color: "bg-teal-50 border-teal-100 hover:border-teal-300",         badge: "text-teal-700"   },
+  { name: "Kitesurf",  slug: "kitesurf",  desc: "Cometas, barras, tablas y arneses",            color: "bg-sky-100 border-sky-200 hover:border-sky-400",          badge: "text-sky-800"    },
+  { name: "Kitefoil",  slug: "kitefoil",  desc: "Equipos específicos para foil con cometa",      color: "bg-rose-100 border-rose-200 hover:border-rose-400",        badge: "text-rose-800"   },
+  { name: "Wingfoil",  slug: "wingfoil",  desc: "Wings, foils y tablas de wingfoil",             color: "bg-violet-100 border-violet-200 hover:border-violet-400", badge: "text-violet-800" },
+  { name: "Windsurf",  slug: "windsurf",  desc: "Velas, tablas y mástiles",                      color: "bg-emerald-100 border-emerald-200 hover:border-emerald-400", badge: "text-emerald-800" },
+  { name: "Wakeboard", slug: "wakeboard", desc: "Tablas, bindings y accesorios wake",             color: "bg-orange-100 border-orange-200 hover:border-orange-400", badge: "text-orange-800" },
+  { name: "Paddle",    slug: "paddle",    desc: "Tablas de paddle y remos",                       color: "bg-teal-100 border-teal-200 hover:border-teal-400",        badge: "text-teal-800"   },
 ];
 
 const EQUIPMENT_TYPES = [
