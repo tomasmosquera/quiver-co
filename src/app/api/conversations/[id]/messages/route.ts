@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { filterMessage } from "@/lib/messageFilter";
-import { sendGhostReplyAdmin } from "@/lib/email";
+import { sendGhostReplyAdmin, sendNewMessageNotification } from "@/lib/email";
 
 // GET — mensajes de una conversación
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     where: { id },
     include: {
       buyer:   { select: { id: true, name: true, email: true } },
-      seller:  { select: { id: true, name: true } },
+      seller:  { select: { id: true, name: true, email: true } },
       listing: { select: { title: true } },
     },
   });
@@ -65,9 +65,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   await prisma.conversation.update({ where: { id }, data: { updatedAt: new Date() } });
 
-  // Si es conversación ghost y quien escribe es el vendedor, notificar al admin
   const isGhostConversation = conversation.buyer.email?.startsWith("ghost+");
   const senderIsSeller = session.user.id === conversation.sellerId;
+
+  // Si es conversación ghost y quien escribe es el vendedor, notificar al admin
   if (isGhostConversation && senderIsSeller) {
     await sendGhostReplyAdmin(
       conversation.seller.name ?? "Vendedor",
@@ -76,6 +77,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       content.trim(),
       id,
     );
+  }
+
+  // Notificar al destinatario por email, solo si no tiene mensajes sin leer previos
+  // (evita spam cuando alguien manda varios mensajes seguidos)
+  if (!isGhostConversation) {
+    const recipient = senderIsSeller ? conversation.buyer : conversation.seller;
+    const sender    = senderIsSeller ? conversation.seller : conversation.buyer;
+
+    const previousUnread = await prisma.message.count({
+      where: {
+        conversationId: id,
+        senderId: session.user.id,
+        readAt: null,
+        id: { not: message.id },
+      },
+    });
+
+    if (previousUnread === 0 && recipient.email) {
+      await sendNewMessageNotification(
+        recipient.email,
+        recipient.name ?? "Usuario",
+        sender.name ?? "Alguien",
+        conversation.listing.title,
+        id,
+      );
+    }
   }
 
   return NextResponse.json({ message });

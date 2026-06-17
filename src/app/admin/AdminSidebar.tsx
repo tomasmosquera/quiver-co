@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
+  MessagesSquare,
   Package,
   ShoppingCart,
   Star,
@@ -20,7 +21,8 @@ const NAV = [
   { href: "/admin/anuncios", label: "Anuncios",  icon: Package },
   { href: "/admin/usuarios", label: "Usuarios",  icon: Users },
   { href: "/admin/resenas",  label: "Reseñas",   icon: Star },
-  { href: "/admin/mensajes", label: "Mensajes",  icon: MessageCircle },
+  { href: "/admin/mensajes",        label: "Mensajes",        icon: MessageCircle },
+  { href: "/admin/conversaciones",  label: "Conversaciones",  icon: MessagesSquare },
 ];
 
 function isActive(href: string, pathname: string) {
