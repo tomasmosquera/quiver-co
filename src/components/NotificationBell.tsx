@@ -57,7 +57,7 @@ export default function NotificationBell() {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 8_000);
+    const interval = setInterval(fetchNotifications, 60_000);
     const onVisible = () => { if (document.visibilityState === "visible") fetchNotifications(); };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
