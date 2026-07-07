@@ -45,7 +45,7 @@ export default function AdminConversationThread({ conversationId, ghostUserId, i
     setHidden(getHidden());
   }, []);
 
-  // Polling cada 5 segundos para ver respuestas del vendedor
+  // Polling cada 30 segundos para ver respuestas del vendedor
   useEffect(() => {
     const interval = setInterval(async () => {
       const res = await fetch(`/api/admin/ghost-contact/${conversationId}/messages`);
@@ -53,7 +53,7 @@ export default function AdminConversationThread({ conversationId, ghostUserId, i
         const data = await res.json();
         setMessages(data.messages);
       }
-    }, 5000);
+    }, 30_000);
     return () => clearInterval(interval);
   }, [conversationId]);
 

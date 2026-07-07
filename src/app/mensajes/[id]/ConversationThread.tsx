@@ -25,7 +25,7 @@ export default function ConversationThread({ conversationId, currentUserId, init
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Polling cada 5 segundos
+  // Polling cada 30 segundos
   useEffect(() => {
     const interval = setInterval(async () => {
       const res = await fetch(`/api/conversations/${conversationId}/messages`);
@@ -36,7 +36,7 @@ export default function ConversationThread({ conversationId, currentUserId, init
           createdAt: m.createdAt,
         })));
       }
-    }, 5000);
+    }, 30_000);
     return () => clearInterval(interval);
   }, [conversationId]);
 
