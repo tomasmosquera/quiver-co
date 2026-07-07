@@ -56,14 +56,26 @@ export default function NotificationBell() {
   }
 
   useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    function start() {
+      if (interval) return;
+      interval = setInterval(fetchNotifications, 60_000);
+    }
+
+    function stop() {
+      if (interval) { clearInterval(interval); interval = null; }
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === "visible") { fetchNotifications(); start(); }
+      else stop();
+    }
+
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60_000);
-    const onVisible = () => { if (document.visibilityState === "visible") fetchNotifications(); };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
   }, []);
 
   useEffect(() => {

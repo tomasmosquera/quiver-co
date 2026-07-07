@@ -25,19 +25,35 @@ export default function ConversationThread({ conversationId, currentUserId, init
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Polling cada 30 segundos
+  // Polling cada 30 segundos — se pausa cuando la pestaña no es visible
   useEffect(() => {
-    const interval = setInterval(async () => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    async function poll() {
       const res = await fetch(`/api/conversations/${conversationId}/messages`);
       if (res.ok) {
         const data = await res.json();
-        setMessages(data.messages.map((m: any) => ({
-          ...m,
-          createdAt: m.createdAt,
-        })));
+        setMessages(data.messages.map((m: any) => ({ ...m, createdAt: m.createdAt })));
       }
-    }, 30_000);
-    return () => clearInterval(interval);
+    }
+
+    function start() {
+      if (interval) return;
+      interval = setInterval(poll, 30_000);
+    }
+
+    function stop() {
+      if (interval) { clearInterval(interval); interval = null; }
+    }
+
+    function onVisibility() {
+      if (document.visibilityState === "visible") { poll(); start(); }
+      else stop();
+    }
+
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
   }, [conversationId]);
 
   async function send() {
