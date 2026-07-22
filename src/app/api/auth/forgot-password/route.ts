@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     data: { email: user.email, token, expiresAt },
   });
 
-  const resetUrl = `${process.env.NEXT_PUBLIC_URL ?? "https://quiverkite.com"}/reset-password?token=${token}`;
+  const resetUrl = `${process.env.NEXT_PUBLIC_URL ?? "https://www.quiverkite.com"}/reset-password?token=${token}`;
 
   await sendPasswordResetEmail(user.email, user.name ?? "Kitesurfista", resetUrl);
 

@@ -15,11 +15,11 @@ const sections = [
   },
   {
     title: "4. Proceso de compra y Escrow",
-    body: `Al realizar una compra, el comprador transfiere el dinero a Quiver Co. (no al vendedor). Retenemos los fondos de forma segura hasta que el comprador confirme la recepción del equipo en las condiciones descritas.\n\nEl vendedor recibe el pago (menos la comisión del 5%) dentro de las 24 horas hábiles siguientes a la confirmación de entrega. Si el comprador no confirma dentro de los 15 días desde el aviso de envío, la entrega se confirma automáticamente.`,
+    body: `Al realizar una compra, el comprador transfiere el dinero a Quiver Co. (no al vendedor). Retenemos los fondos de forma segura hasta que el comprador confirme la recepción del equipo en las condiciones descritas.\n\nEl vendedor recibe el pago (menos la comisión del 10%) dentro de las 24 horas hábiles siguientes a la confirmación de entrega. Si el comprador no confirma dentro de los 15 días desde el aviso de envío, la entrega se confirma automáticamente.`,
   },
   {
     title: "5. Comisiones y tarifas",
-    body: `Publicar anuncios en Quiver Co. es completamente gratuito. Cobramos una comisión del 5% sobre el precio de venta, descontada del pago al vendedor al completarse la transacción.\n\nEl costo del envío no está incluido en el precio del anuncio y es responsabilidad del comprador, acordado directamente con el vendedor.`,
+    body: `Publicar anuncios en Quiver Co. es completamente gratuito. Cobramos una comisión del 10% sobre el precio de venta, descontada del pago al vendedor al completarse la transacción.\n\nEl costo del envío no está incluido en el precio del anuncio y es responsabilidad del comprador, acordado directamente con el vendedor.`,
   },
   {
     title: "6. Cancelaciones y devoluciones",

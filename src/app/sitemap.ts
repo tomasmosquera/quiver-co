@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const BASE = "https://quiverkite.com";
+const BASE = "https://www.quiverkite.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const listings = await prisma.listing.findMany({

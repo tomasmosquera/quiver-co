@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Percent, CheckCircle, XCircle, Calculator } from "lucide-react";
+import { COMMISSION_RATE, sellerNetAmount } from "@/lib/commission";
 
 export const metadata = { title: "Tarifas y comisiones | Quiver Co." };
 
@@ -18,11 +19,11 @@ const notIncluded = [
 ];
 
 const examples = [
-  { price: 500_000,   net: Math.round(500_000 * 0.95) },
-  { price: 1_500_000, net: Math.round(1_500_000 * 0.95) },
-  { price: 3_000_000, net: Math.round(3_000_000 * 0.95) },
-  { price: 5_000_000, net: Math.round(5_000_000 * 0.95) },
-  { price: 8_000_000, net: Math.round(8_000_000 * 0.95) },
+  { price: 500_000,   net: sellerNetAmount(500_000) },
+  { price: 1_500_000, net: sellerNetAmount(1_500_000) },
+  { price: 3_000_000, net: sellerNetAmount(3_000_000) },
+  { price: 5_000_000, net: sellerNetAmount(5_000_000) },
+  { price: 8_000_000, net: sellerNetAmount(8_000_000) },
 ];
 
 function fmt(n: number) {
@@ -53,7 +54,7 @@ export default function TarifasPage() {
         {/* Main commission card */}
         <div className="bg-white border border-[#E5E7EB] rounded-3xl p-8 md:p-12 text-center">
           <p className="text-sm font-semibold text-[#6B7280] mb-2 uppercase tracking-wider">Comisión por venta</p>
-          <div className="text-7xl font-black text-[#111827] mb-2">5<span className="text-[#3B82F6]">%</span></div>
+          <div className="text-7xl font-black text-[#111827] mb-2">{COMMISSION_RATE * 100}<span className="text-[#3B82F6]">%</span></div>
           <p className="text-[#6B7280] max-w-sm mx-auto leading-relaxed">
             Solo cobramos cuando tu venta se completa con éxito. Publicar es gratis. Hablar con compradores es gratis.
           </p>
@@ -99,7 +100,7 @@ export default function TarifasPage() {
           <div className="divide-y divide-[#F3F4F6]">
             <div className="grid grid-cols-3 px-6 py-3 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">
               <span>Precio de venta</span>
-              <span className="text-center">Comisión (5%)</span>
+              <span className="text-center">Comisión ({COMMISSION_RATE * 100}%)</span>
               <span className="text-right">Tú recibes</span>
             </div>
             {examples.map(({ price, net }) => (

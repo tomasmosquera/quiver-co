@@ -42,11 +42,11 @@ const sections = [
       },
       {
         q: "¿Cuánto cobra Quiver por venta?",
-        a: "Cobramos una comisión del 5% sobre el precio de venta, descontada al momento de transferirte el dinero. Si no vendes, no pagas nada.",
+        a: "Cobramos una comisión del 10% sobre el precio de venta, descontada al momento de transferirte el dinero. Si no vendes, no pagas nada.",
       },
       {
         q: "¿Cuándo recibo el dinero?",
-        a: "Una vez que el comprador confirma la recepción del equipo, te transferimos el dinero (menos el 5% de comisión) dentro de las siguientes 24 horas hábiles.",
+        a: "Una vez que el comprador confirma la recepción del equipo, te transferimos el dinero (menos el 10% de comisión) dentro de las siguientes 24 horas hábiles.",
       },
       {
         q: "¿Qué pasa si el comprador no confirma la entrega?",

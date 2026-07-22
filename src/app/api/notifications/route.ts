@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
+import { COMMISSION_RATE, sellerNetAmount } from "@/lib/commission";
 
 
 export async function GET() {
@@ -214,12 +215,12 @@ export async function GET() {
 
   // Notificaciones de entrega confirmada (vendedor)
   for (const order of deliveredOrdersAsSeller) {
-    const amount = Math.round(order.amount * 0.95).toLocaleString("es-CO");
+    const amount = sellerNetAmount(order.amount).toLocaleString("es-CO");
     notifications.push({
       id: `delivered-seller-${order.id}`,
       type: "sale",
       title: "¡Tu venta fue entregada!",
-      body: `El comprador confirmó la recepción de "${order.listing.title}". Recibirás $${amount} COP (menos comisión del 5%) en las próximas horas.`,
+      body: `El comprador confirmó la recepción de "${order.listing.title}". Recibirás $${amount} COP (menos comisión del ${COMMISSION_RATE * 100}%) en las próximas horas.`,
       href: "/cuenta/ventas",
       createdAt: order.deliveredAt ?? order.updatedAt,
     });
@@ -252,7 +253,7 @@ export async function GET() {
   // Notificaciones para el admin: una por cada orden según su estado
   for (const order of adminOrders) {
     const amount = order.amount.toLocaleString("es-CO");
-    const net    = Math.round(order.amount * 0.95).toLocaleString("es-CO");
+    const net    = sellerNetAmount(order.amount).toLocaleString("es-CO");
     const title  =
       order.status === "PENDING"   ? "Pago por confirmar" :
       order.status === "PAID"      ? "Pago confirmado — en espera de envío" :
@@ -262,7 +263,7 @@ export async function GET() {
       order.status === "PENDING"   ? `${order.buyer.name} compró "${order.listing.title}" ($${amount} COP). Confirma el pago.` :
       order.status === "PAID"      ? `Pago de "${order.listing.title}" confirmado. El vendedor ${order.seller.name} debe enviar.` :
       order.status === "SHIPPED"   ? `"${order.listing.title}" fue enviado. Esperando confirmación del comprador.` :
-                                     `Transferir $${net} COP (−5%) a ${order.seller.name} por "${order.listing.title}".`;
+                                     `Transferir $${net} COP (−${COMMISSION_RATE * 100}%) a ${order.seller.name} por "${order.listing.title}".`;
     notifications.push({
       id: `admin-${order.id}-${order.status}`,
       type: "admin" as const,

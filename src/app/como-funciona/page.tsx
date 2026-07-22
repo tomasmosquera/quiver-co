@@ -33,7 +33,7 @@ const steps = [
     step: "04",
     title: "Confirma y califica",
     description:
-      "Cuando el equipo llega en perfectas condiciones, confirmas la entrega y dejamos ir el dinero al vendedor (menos la comisión del 5%). Luego puedes calificar al vendedor para ayudar a la comunidad.",
+      "Cuando el equipo llega en perfectas condiciones, confirmas la entrega y dejamos ir el dinero al vendedor (menos la comisión del 10%). Luego puedes calificar al vendedor para ayudar a la comunidad.",
     color: "bg-purple-50 text-purple-600",
   },
 ];
@@ -53,7 +53,7 @@ const faqs = [
   },
   {
     q: "¿Cuánto tarda en llegar mi dinero como vendedor?",
-    a: "Una vez que el comprador confirma la recepción, transferimos el pago (menos el 5% de comisión) dentro de las siguientes 24 horas hábiles.",
+    a: "Una vez que el comprador confirma la recepción, transferimos el pago (menos el 10% de comisión) dentro de las siguientes 24 horas hábiles.",
   },
   {
     q: "¿Puedo cancelar una compra?",

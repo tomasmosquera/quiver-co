@@ -319,9 +319,9 @@ model Order {
   sellerBankAccountHolder String?
   sellerBankIdDoc         String?
 
-  paymentMethod           String  @default("manual") // "manual" | "wompi"
-  wompiReference          String? @unique
-  wompiTransactionId      String?
+  paymentMethod           String  @default("manual") // "manual" | "mercadopago"
+  paymentReference        String? @unique @map("wompiReference")
+  paymentTransactionId    String? @map("wompiTransactionId")
   metaConsentGranted      Boolean @default(false)
   metaEventSourceUrl      String?
   metaFbp                 String?

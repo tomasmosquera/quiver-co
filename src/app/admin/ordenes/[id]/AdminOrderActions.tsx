@@ -56,7 +56,7 @@ export default function AdminOrderActions({
     const notify: { label: string; href: string }[] = [];
     if (newStatus === "PAID") {
       if (buyerPhone) notify.push({ label: "Notificar comprador", href: waLink(buyerPhone, `Hola ${buyerName}! 👋 Confirmamos tu pago por "${listingTitle}". El vendedor ya sabe que debe preparar el envío. — Quiver Co.`) });
-      if (sellerPhone) notify.push({ label: "Notificar vendedor", href: waLink(sellerPhone, `Hola ${sellerName}! 👋 El pago de "${listingTitle}" fue confirmado. Prepara el envío y márcalo como enviado en quiverkite.com/cuenta/ventas — Quiver Co.`) });
+      if (sellerPhone) notify.push({ label: "Notificar vendedor", href: waLink(sellerPhone, `Hola ${sellerName}! 👋 El pago de "${listingTitle}" fue confirmado. Prepara el envío y márcalo como enviado en www.quiverkite.com/cuenta/ventas — Quiver Co.`) });
     }
     if (newStatus === "CANCELLED") {
       if (buyerPhone) notify.push({ label: "Notificar comprador", href: waLink(buyerPhone, `Hola ${buyerName}, tu orden de "${listingTitle}" fue cancelada. Si tienes dudas contáctanos. — Quiver Co.`) });

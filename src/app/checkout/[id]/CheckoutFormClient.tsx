@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { CheckCircle, CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { COLOMBIA, DEPARTMENTS } from "@/lib/colombia";
-import WompiWidget from "@/components/WompiWidget";
 import {
   generateMetaEventId,
   getCurrentMetaSourceUrl,
@@ -20,30 +19,22 @@ interface Buyer {
   address?: string | null;
 }
 
-interface WompiData {
-  reference: string;
-  signature: string;
-  amountInCents: number;
-}
-
 export default function CheckoutFormClient({
   listingId,
   listingTitle,
   subtotal,
   sellerId,
   buyer,
-  wompiPublicKey,
 }: {
   listingId: string;
   listingTitle: string;
   subtotal: number;
   sellerId: string;
   buyer: Buyer | null;
-  wompiPublicKey: string;
 }) {
   const [loading, setLoading] = useState(false);
-  const [wompiData, setWompiData] = useState<WompiData | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"wompi" | "manual" | null>(null);
+  const [initPoint, setInitPoint] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"mercadopago" | "manual" | null>(null);
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -127,7 +118,7 @@ export default function CheckoutFormClient({
     }
   }
 
-  async function handleWompi() {
+  async function handleMercadoPago() {
     const data = getFormData();
     if (!data) return;
 
@@ -135,7 +126,7 @@ export default function CheckoutFormClient({
     const metaEventId = generateMetaEventId("initiate-checkout");
 
     try {
-      const res = await fetch("/api/wompi/prepare", {
+      const res = await fetch("/api/mercadopago/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -151,7 +142,7 @@ export default function CheckoutFormClient({
         eventId: metaEventId,
       });
 
-      setWompiData(result);
+      setInitPoint(result.initPoint);
     } catch (error: unknown) {
       alert(error instanceof Error ? error.message : "Error al preparar el pago.");
     } finally {
@@ -162,25 +153,25 @@ export default function CheckoutFormClient({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (paymentMethod === "manual") await handleManual();
-    else if (paymentMethod === "wompi") await handleWompi();
+    else if (paymentMethod === "mercadopago") await handleMercadoPago();
   }
 
-  if (wompiData) {
+  if (initPoint) {
     return (
       <div className="space-y-4 px-6 pb-6 md:px-8 md:pb-8 bg-[#F9FAFB] pt-4">
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-800">
           <p className="font-semibold mb-1">Tu orden está lista</p>
           <p className="text-xs text-blue-600">
-            Completa el pago con Wompi. Puedes usar tarjeta, PSE o Nequi.
+            Completa el pago con Mercado Pago. Puedes usar tarjeta, PSE o Efecty.
           </p>
         </div>
-        <WompiWidget
-          publicKey={wompiPublicKey}
-          reference={wompiData.reference}
-          amountInCents={wompiData.amountInCents}
-          signature={wompiData.signature}
-          redirectUrl="https://quiverkite.com/cuenta/compras"
-        />
+        <a
+          href={initPoint}
+          className="w-full flex items-center justify-center gap-2 py-3 bg-[#111827] hover:bg-[#374151] text-white font-bold rounded-xl transition-colors shadow-sm"
+        >
+          <CreditCard className="w-5 h-5" />
+          Ir a pagar con Mercado Pago
+        </a>
       </div>
     );
   }
@@ -327,23 +318,23 @@ export default function CheckoutFormClient({
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-[#E5E7EB]" />
-          <span className="text-xs text-[#9CA3AF]">o paga en linea con Wompi</span>
+          <span className="text-xs text-[#9CA3AF]">o paga en linea con Mercado Pago</span>
           <div className="flex-1 h-px bg-[#E5E7EB]" />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          onClick={() => setPaymentMethod("wompi")}
+          onClick={() => setPaymentMethod("mercadopago")}
           className="w-full flex items-center justify-center gap-2 py-3 bg-[#111827] hover:bg-[#374151] disabled:opacity-50 text-white font-bold rounded-xl transition-colors shadow-sm"
         >
           <CreditCard className="w-5 h-5" />
-          {loading && paymentMethod === "wompi"
+          {loading && paymentMethod === "mercadopago"
             ? "Preparando pago..."
-            : "Pagar con tarjeta / PSE / Nequi"}
+            : "Pagar con tarjeta / PSE / Efecty"}
         </button>
         <p className="text-center text-xs text-[#9CA3AF]">
-          Procesado de forma segura por Wompi.
+          Procesado de forma segura por Mercado Pago.
         </p>
       </div>
     </form>
