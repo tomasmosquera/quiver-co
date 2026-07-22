@@ -206,7 +206,6 @@ export default async function CheckoutPage({ params }: { params: Promise<{ id: s
                 listingTitle={listing.title}
                 subtotal={subtotal}
                 sellerId={listing.sellerId}
-                wompiPublicKey={process.env.NEXT_PUBLIC_WOMPI_PUBLIC_KEY!}
                 buyer={buyer ? {
                   name:       buyer.name,
                   phone:      buyer.phone,

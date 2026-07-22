@@ -14,7 +14,7 @@ export default function Footer() {
   const footerSpacing = flushFooterRoutes.has(pathname) || pathname.startsWith("/admin") ? "" : " mt-20";
 
   function copyUrl() {
-    navigator.clipboard.writeText("https://quiverkite.com");
+    navigator.clipboard.writeText("https://www.quiverkite.com");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }

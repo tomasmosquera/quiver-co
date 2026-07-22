@@ -13,6 +13,7 @@ import KiteFields, { KiteMetadata } from "@/components/KiteFields";
 import BoardFields, { BoardMetadata, BOARD_TYPES } from "@/components/BoardFields";
 import BarraFields, { BarraMetadata } from "@/components/BarraFields";
 import ArnesFields, { ArnesMetadata, ARNES_TYPES } from "@/components/ArnesFields";
+import { COMMISSION_RATE, sellerNetAmount } from "@/lib/commission";
 import CityPicker from "@/components/CityPicker";
 import { uploadFiles } from "@/lib/clientUpload";
 import {
@@ -778,11 +779,11 @@ export default function VenderPage() {
                     Recibirás aproximadamente{" "}
                     <span className="font-semibold text-emerald-600">
                       {form.currency === "COP"
-                        ? `$${Math.round(Number(form.price) * 0.95).toLocaleString("es-CO")} COP`
-                        : `USD $${Math.round(Number(form.price) * 0.95).toLocaleString("en-US")}`
+                        ? `$${sellerNetAmount(Number(form.price)).toLocaleString("es-CO")} COP`
+                        : `USD $${sellerNetAmount(Number(form.price)).toLocaleString("en-US")}`
                       }
                     </span>{" "}
-                    — precio menos la comisión del 5% de Quiver.
+                    — precio menos la comisión del {COMMISSION_RATE * 100}% de Quiver.
                   </p>
                 )}
               </div>

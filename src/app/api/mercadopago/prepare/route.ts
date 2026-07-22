@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
+import { createPreference } from "@/lib/mercadopago";
 import {
   captureMetaTrackingSnapshot,
   sendMetaServerEvent,
@@ -62,11 +62,7 @@ export async function POST(req: NextRequest) {
   });
 
   const reference = `QVR-${listingId.slice(0, 8)}-${Date.now()}`;
-  const amountInCents = amount * 100;
-  const currency = "COP";
-  const integrityKey = process.env.WOMPI_INTEGRITY_KEY!;
-  const signatureString = `${reference}${amountInCents}${currency}${integrityKey}`;
-  const signature = crypto.createHash("sha256").update(signatureString).digest("hex");
+  const siteUrl = process.env.SITE_URL!;
   const metaSnapshot = captureMetaTrackingSnapshot(req, metaSourceUrl);
 
   await prisma.order.create({
@@ -76,8 +72,8 @@ export async function POST(req: NextRequest) {
       sellerId,
       amount,
       status: "PENDING",
-      paymentMethod: "wompi",
-      wompiReference: reference,
+      paymentMethod: "mercadopago",
+      paymentReference: reference,
       buyerName,
       buyerIdDoc,
       buyerPhone,
@@ -90,6 +86,13 @@ export async function POST(req: NextRequest) {
       metaClientUserAgent: metaSnapshot.clientUserAgent ?? null,
       metaClientIpAddress: metaSnapshot.clientIpAddress ?? null,
     },
+  });
+
+  const initPoint = await createPreference({
+    reference,
+    title: listing.title,
+    amount,
+    siteUrl,
   });
 
   const { firstName, lastName } = splitFullName(buyerName);
@@ -120,5 +123,5 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return NextResponse.json({ reference, signature, amountInCents, currency });
+  return NextResponse.json({ initPoint });
 }
